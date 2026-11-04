@@ -67,3 +67,8 @@ test('the Pages site and the demo: no link needed, the sample plan is the defaul
   assert.match(main, /samplePlan\(\)/);
   assert.match(html, /id="demoBanner"/);
 });
+
+test('the slogan and the description of the page', () => {
+  assert.match(html, /<span id="typed">Budget\? Nudge it\. Judge it\.<\/span>/);
+  assert.match(html, /<meta name="description" content="Rehearse your budget before you commit\.">/);
+});

@@ -81,7 +81,7 @@ const contrastScan = () => {
   const ctx2 = await open({ url: URL });
   await ctx2.p.emulateMedia({ reducedMotion: 'reduce' }); await ctx2.p.reload(); await ctx2.p.waitForTimeout(500);
   const typedText = await ctx2.p.textContent('#typed'); const anim = await ctx2.p.evaluate(() => getComputedStyle(document.querySelector('.caret')).animationName);
-  check('reduced motion: headline is complete at once and the caret does not blink', typedText === 'Plan what fits, then see what does not.' && anim === 'none', typedText.slice(0, 20) + ' / ' + anim);
+  check('reduced motion: headline is complete at once and the caret does not blink', typedText === 'Budget? Nudge it. Judge it.' && anim === 'none', typedText.slice(0, 20) + ' / ' + anim);
   await ctx2.b.close();
   check('no errors', errs.length === 0, errs.join(' | '));
   await b.close(); done();
