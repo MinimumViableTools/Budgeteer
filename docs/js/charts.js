@@ -99,6 +99,7 @@
       var k = slot[mk.index] || 0; slot[mk.index] = k + 1;
       var cx = padL + col * mk.index + col / 2 + k * 24, cy = 16, tip = esc(mk.name + ': ' + (mk.reached ? 'reached' : 'not reached') + ', due ' + mk.due);
       s += '<g class="mk" data-ms="' + mk.id + '" data-reached="' + (mk.reached ? 1 : 0) + '" tabindex="0" role="button" aria-label="Milestone ' + esc(mk.name) + ', ' + (mk.reached ? 'reached' : 'not reached') + ', due ' + esc(mk.due) + '. Edit">';
+      s += '<circle class="mkring" cx="' + r1(cx) + '" cy="' + cy + '" r="15"/>';
       s += mk.reached
         ? '<circle cx="' + r1(cx) + '" cy="' + cy + '" r="10" fill="var(--status-ok)"/><path d="M' + r1(cx - 4.5) + ' ' + (cy + 0.5) + 'l3 3L' + r1(cx + 4.5) + ' ' + (cy - 3.5) + '" fill="none" stroke="var(--surface-raised)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
         : '<rect x="' + r1(cx - 8) + '" y="' + (cy - 8) + '" width="16" height="16" fill="var(--status-over)" transform="rotate(45 ' + r1(cx) + ' ' + cy + ')"/><path d="M' + r1(cx - 3.5) + ' ' + (cy - 3.5) + 'l7 7M' + r1(cx + 3.5) + ' ' + (cy - 3.5) + 'l-7 7" fill="none" stroke="var(--surface-raised)" stroke-width="2.2" stroke-linecap="round"/>';
