@@ -17,7 +17,7 @@ A product manager can describe the resources of a plan, see immediately how the 
 
 - Resources are set up as cards, not a table. A row of template chips adds a resource with defaults: internal staff, freelancer, subscription, infrastructure, one-time cost.
 - Each card shows the line total for the plan, its share of the scenario total, and sliders with a number field beside each for exact input. A collapsed "More settings" section holds resource type, cost mode, start period and end period.
-- Cost modes: rate times days, fixed per period, one time.
+- Cost modes: FTE (cost per FTE and month times a share of one FTE), rate times days, fixed per period, one time. A new internal staff resource starts as FTE at 100 percent, the other types start as before.
 - A total timeframe of at most one year, stored in months. The planning unit is a view: months (1 to 12) or quarters (1 to 4, available only when the plan length is a multiple of 3 months). Weeks are not a planning unit.
 - Two scenarios, max and stretch. One shared resource list, with a different combination of on/off switches per resource in each scenario. The budgets are one per scenario.
 - A switch on each card includes or excludes the resource in the scenario currently viewed, labelled "In max" or "In stretch". A resource that is switched off is dimmed and shows "Not in max" (or stretch) instead of its share.
@@ -68,6 +68,7 @@ flowchart LR
 
 For each resource and period p from 1 to n, with `from` defaulting to 1 and an empty `to` meaning n:
 
+- FTE: cost per FTE and month times the share (1 is 100 percent) if from <= p <= to, else 0. The share is 0 to 1,000 percent.
 - Rate times days: rate times days if from <= p <= to, else 0.
 - Fixed per period: the amount if from <= p <= to, else 0.
 - One time: the amount if p equals the due period, else 0.
@@ -85,11 +86,12 @@ If a milestone is not reached, its reason is either "budget passed in period p" 
 
 Status: total <= max is "Within max budget" (green). Total above max and <= stretch is "In stretch zone" (amber). Total above stretch is "Over stretch budget" (red).
 
-Template defaults (can be tuned): internal team 1,000 per day for 10 days; freelancer 650 per day for 5 days; subscription 200 per period; infrastructure 300 per period; one-time cost 5,000 due in the middle period.
+Template defaults (can be tuned): internal team as FTE at 100 percent with 8,000 per FTE and month; freelancer 650 per day for 5 days; subscription 200 per period; infrastructure 300 per period; one-time cost 5,000 due in the middle period.
 
 ## Acceptance criteria
 
 - AC1: Given a plan of 6 months and a fixed line of 500 euro per month, when the line is on, then every month shows 500 and the total is 3,000.
+- AC2a: Given an FTE line with a cost per FTE and month of 6,000 and a share of 100 percent, when the line is on, then each month shows 6,000; with a share of 50 percent each month shows 3,000, and with 250 percent 15,000. A share above 1,000 percent is not accepted.
 - AC2: Given a rate times days line with a day rate of 600 and 8 days per period, when the line is on, then each period shows 4,800.
 - AC3: Given a one-time line of 2,000 due in period 3, when the line is on, then only period 3 shows 2,000.
 - AC4: Given a line with start period 3 and end period 6 in a 6-month plan, when the line is on, then it costs nothing in periods 1 and 2; and given an empty end period, then it runs to the last period.
@@ -126,11 +128,11 @@ Template defaults (can be tuned): internal team 1,000 per day for 10 days; freel
 - AC35: Given the narrative summary is shown, when the scenario has milestones, then the summary says how many goals are not reached (or that all are reached) and lists every milestone as a bullet with a stamp: a green "Reached" stamp or a red "Not reached" stamp. Goals that are not reached come first, must-have before nice-to-have, each with its due unit, its value description and its reason; reached goals follow with their due unit and value description.
 - AC36: Given a linked resource is removed, when the milestone is shown, then the link to it is gone and the milestone remains. Given a resource is switched on or off, a budget changes, or a due unit changes, then milestone status, markers, list and summary update without a page reload.
 - AC37: Given the milestone dialog, when it is used with the keyboard only, then every field can be reached and operated, Escape closes it, focus returns to the button that opened it, and a screen reader announces its title and any input error.
-- AC38: Given the quarter view and a fixed line of 450 per month, when the card is shown, then it shows 1,350 per quarter; and when the user types 1,500, then the stored monthly value becomes 500 and the month view shows 500.
+- AC38: Given the quarter view and a fixed line of 450 per month, when the card is shown, then it shows 1,350 per quarter; and when the user types 1,500, then the stored monthly value becomes 500 and the month view shows 500. The cost per FTE is handled the same way (6,000 per month shows 18,000 per quarter), and the share of an FTE shows the same percentage in both views.
 - AC39: Given a resource that starts in month 2, when the quarter view is shown, then its start reads "Q1 (M2)" and nothing changes; and when the user edits the start there and chooses Q2, then the stored start becomes month 4, and the end of a resource edited the same way becomes the last month of the chosen quarter.
 - AC40: Given a one-time cost due in month 5 and a milestone due in month 5, when the quarter view is shown, then both show Q2 with their month and keep their exact month; and when either is edited in the quarter view to Q2, then the one-time cost moves to month 4 and the milestone to month 6.
 - AC41: Given a new plan, when it is created in the quarter view with a length of 2 quarters, then it is stored as 6 months and the month view shows it as 6 months.
-- AC42: Given a link made by an earlier release (an older plan format version), when it is opened in a later release, then the plan is upgraded and restored completely. Given a link with a newer version than the tool knows, when it is opened, then the tool shows a clear message that the link comes from a newer release and changes nothing.
+- AC42: Given a link or a JSON file with a newer format version than the tool knows, when it is opened, then the tool shows a clear message that it comes from a newer release and changes nothing. Given one with an older version (before version 2), then the tool shows a clear message that it was made with an older version that this page no longer reads and changes nothing.
 - AC43: Given a plan whose link is longer than 2,000 characters including the address of the page, when the person shares it, then the tool still gives the link but shows a short note that some apps may cut it off, and offers the JSON export as the safe way.
 - AC44: Given the page is opened from a file on disk, when the person shares the plan, then the tool says the link only works on this computer and points to the hosted page or the JSON export.
 - AC45: Given a link made in a browser that can compress, when it is opened in a browser that cannot, then the tool shows a clear message that the link needs a newer browser and changes nothing.
@@ -141,7 +143,7 @@ The sample plan, 6 months, max budget 95,000 and stretch budget 125,000. Use it 
 
 | Resource | Type | Mode | Inputs | Max | Stretch |
 | --- | --- | --- | --- | --- | --- |
-| Core team | Internal staff | Rate times days | 1,200 x 10 days | on | on |
+| Core team | Internal staff | FTE | 2 FTE (200 percent) x 6,000 per FTE and month | on | on |
 | Freelance designer | Freelancer | Rate times days | 650 x 4 days | on | on |
 | Analytics tool | Subscription | Fixed | 450 | on | on |
 | Hosting | Infrastructure | Fixed | 300 | on | on |
@@ -195,7 +197,9 @@ Milestones for the test case:
 - Milestones are value based: each describes the goal achieved when it is reached. A milestone is linked to a planning unit, because resources may run longer than the milestone and only contribute to it up to its unit. It is reached in a scenario if the scenario's own budget has not been passed by that unit and all linked resources are on.
 - Milestone fields: name, value description (up to 140 characters), due unit, linked resources, importance with two levels (must-have, nice-to-have). Up to 8 milestones. The name is limited to 40 characters. A milestone may link a resource that starts after its due unit, with a short warning in the dialog, because that resource would contribute nothing to it.
 - Milestones are defined in a dialog opened from an "Add milestone" button. They show up in the summary, as markers on the cost chart, and in a status list that compares both scenarios.
-- GitHub Pages is the hosted version: a demo with sample data at first, the actual hosted tool later. Everything stays in the browser, so the hosted tool stores nothing about its users, and the shared plan lives in the URL fragment, which is never sent to a server. The address and the link format must therefore stay stable, and every plan link carries a format version.
+- GitHub Pages is the hosted version: a demo with sample data at first, the actual hosted tool later. Everything stays in the browser, so the hosted tool stores nothing about its users, and the shared plan lives in the URL fragment, which is never sent to a server. Every plan link and JSON file carries a format version. The format is version 2. Links and files of version 1, made before the FTE mode, are not read any more: no links were in circulation while the page was a demo, so there is no migration.
+- FTE mode: the person enters the cost per FTE and month (not per year, so no conversion is needed and the quarter view just shows three times the value) and a share of one FTE with a slider from 0 to 300 percent, where a larger typed value up to 1,000 percent is accepted, so a team of two can be 200 percent. The mode is a cost mode like the others, so it is selectable for every resource type. Only a new internal staff resource starts with it, at 100 percent and 8,000 per FTE and month (an invented default).
+- The type that was called internal dev is called internal staff, in the interface, in the data and in the design token `data-internal-staff` (Pocketknife design version 2).
 - Name: Budgeteer.
 
 ## Open questions

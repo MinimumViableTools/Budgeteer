@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- New cost mode FTE: cost per FTE and month times a share of one FTE (slider 0 to 300 percent, up to 1,000 percent by typing). A new internal staff resource starts as FTE at 100 percent.
+- The type "Internal dev" is now "Internal staff".
+- A new resource is always on in stretch, and on in max when it was added while viewing max, so a plan built in max is complete in stretch.
+- Link and file format version 2. Links and JSON files made with 0.1.x are no longer read.
+
 ## 0.1.1
 
 - The summary lists every milestone with a green "Reached" or red "Not reached" stamp as its bullet, not reached goals first.

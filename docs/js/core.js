@@ -7,11 +7,11 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var LIMITS = { months: 12, quarters: 4, resources: 20, milestones: 8, milestoneName: 40, milestoneValue: 140 };
+  var LIMITS = { months: 12, quarters: 4, resources: 20, milestones: 8, milestoneName: 40, milestoneValue: 140, maxShare: 10 };
   var TYPE_ORDER = ['internalStaff', 'freelancer', 'subscription', 'infrastructure', 'oneTime'];
   var TYPE_LABELS = { internalStaff: 'Internal staff', freelancer: 'Freelancer', subscription: 'Subscription', infrastructure: 'Infrastructure', oneTime: 'One time' };
   var TEMPLATES = {
-    internalStaff: { name: 'Internal team', type: 'internalStaff', mode: 'rateDays', rate: 1000, days: 10 },
+    internalStaff: { name: 'Internal team', type: 'internalStaff', mode: 'fte', fteCost: 8000, share: 1 },
     freelancer: { name: 'Freelancer', type: 'freelancer', mode: 'rateDays', rate: 650, days: 5 },
     subscription: { name: 'Subscription', type: 'subscription', mode: 'fixed', amount: 200 },
     infrastructure: { name: 'Infrastructure', type: 'infrastructure', mode: 'fixed', amount: 300 },
@@ -96,7 +96,9 @@
     var from = r.from || 1, to = r.to || length;
     if (r.mode === 'oneTime') return month === r.due ? r.amount : 0;
     if (month < from || month > to) return 0;
-    return r.mode === 'rateDays' ? r.rate * r.days : r.amount;
+    if (r.mode === 'rateDays') return r.rate * r.days;
+    if (r.mode === 'fte') return r.fteCost * r.share;
+    return r.amount;
   }
   function emptyByType() { var o = {}; TYPE_ORDER.forEach(function (t) { o[t] = 0; }); return o; }
   function sumByType(b) { var s = 0; TYPE_ORDER.forEach(function (t) { s += b[t]; }); return s; }
@@ -187,7 +189,7 @@
   function addResource(plan, templateKey) {
     if (plan.resources.length >= LIMITS.resources) return { plan: plan, error: 'A plan can have at most ' + LIMITS.resources + ' resources. Remove one first.' };
     var t = TEMPLATES[templateKey], r = { id: nextId(plan.resources), name: t.name, type: t.type, mode: t.mode, from: 1, to: null, on: { max: false, stretch: false } };
-    if (t.mode === 'rateDays') { r.rate = t.rate; r.days = t.days; } else r.amount = t.amount;
+    if (t.mode === 'rateDays') { r.rate = t.rate; r.days = t.days; } else if (t.mode === 'fte') { r.fteCost = t.fteCost; r.share = t.share; } else r.amount = t.amount;
     if (t.mode === 'oneTime') r.due = Math.ceil(plan.length / 2);
     /* Stretch always holds everything. Max holds the resources that were added while viewing max. */
     r.on.stretch = true; r.on.max = plan.scenario === 'max';

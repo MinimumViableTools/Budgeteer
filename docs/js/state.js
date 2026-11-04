@@ -52,7 +52,8 @@
       /* patch holds stored (monthly) values: rate, days, amount, due, from, to, type, mode */
       updateResource: function (id, patch, kind) {
         var p = Object.assign({}, patch);
-        ['rate', 'days', 'amount'].forEach(function (k) { if (k in p) p[k] = num(p[k], 0); });
+        ['rate', 'days', 'amount', 'fteCost'].forEach(function (k) { if (k in p) p[k] = num(p[k], 0); });
+        if ('share' in p) p.share = num(p.share, 0, core.LIMITS.maxShare);
         ['due', 'from'].forEach(function (k) { if (k in p) p[k] = Math.round(num(p[k], 1, core.LIMITS.months)); });
         if ('to' in p && p.to !== null) p.to = Math.round(num(p.to, 1, core.LIMITS.months));
         commit(Object.assign({}, plan, { resources: mapResource(id, function (r) { return Object.assign({}, r, p); }) }), kind || 'value');
@@ -61,6 +62,7 @@
         commit(Object.assign({}, plan, { resources: mapResource(id, function (r) {
           var o = Object.assign({}, r, { mode: mode });
           if (mode === 'rateDays') { o.rate = o.rate || 600; o.days = o.days || 5; }
+          if (mode === 'fte') { o.fteCost = o.fteCost || 8000; o.share = o.share === undefined ? 1 : o.share; }
           if (mode === 'fixed') o.amount = o.amount || 300;
           if (mode === 'oneTime') { o.amount = o.amount || 5000; o.due = o.due || Math.ceil(plan.length / 2); }
           return o;

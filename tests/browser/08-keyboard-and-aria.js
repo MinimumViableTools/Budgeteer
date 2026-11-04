@@ -3,11 +3,11 @@ const URL = process.env.BASE_URL || 'http://localhost:8765/index.html';
 (async () => {
   const { b, p, errs } = await open({ url: URL });
   /* sliders by keyboard */
-  const before = await p.textContent('[data-tot="1"]');
-  await p.focus('#cards [data-id="1"][data-k="rate"][type=range]'); await p.keyboard.press('ArrowRight'); await p.keyboard.press('ArrowRight');
-  check('AC24 a slider moves with the arrow keys and the total follows', (await p.textContent('[data-tot="1"]')) !== before && (await p.inputValue('#f1rate')) === '1,300', await p.inputValue('#f1rate'));
-  await p.keyboard.press('Home'); check('Home goes to the minimum', (await p.inputValue('#f1rate')) === '0');
-  await p.keyboard.press('End'); check('End goes to the maximum', (await p.inputValue('#f1rate')) === '2,000');
+  const before = await p.textContent('[data-tot="2"]');
+  await p.focus('#cards [data-id="2"][data-k="rate"][type=range]'); await p.keyboard.press('ArrowRight'); await p.keyboard.press('ArrowRight');
+  check('AC24 a slider moves with the arrow keys and the total follows', (await p.textContent('[data-tot="2"]')) !== before && (await p.inputValue('#f2rate')) === '750', await p.inputValue('#f2rate'));
+  await p.keyboard.press('Home'); check('Home goes to the minimum', (await p.inputValue('#f2rate')) === '0');
+  await p.keyboard.press('End'); check('End goes to the maximum', (await p.inputValue('#f2rate')) === '2,000');
   /* switch by keyboard */
   await p.focus('[data-sw="2"]'); await p.keyboard.press('Space');
   check('a switch toggles with Space', (await p.evaluate(() => Budgeteer.ui.getStore().getPlan().resources[1].on.stretch)) === false);

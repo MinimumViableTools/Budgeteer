@@ -9,7 +9,7 @@
     return {
       version: 1, view: 'month', length: 6, scenario: 'stretch', budgets: { max: 95000, stretch: 125000 },
       resources: [
-        { id: 1, name: 'Core team', type: 'internalStaff', mode: 'rateDays', rate: 1200, days: 10, from: 1, to: null, on: { max: true, stretch: true } },
+        { id: 1, name: 'Core team', type: 'internalStaff', mode: 'fte', fteCost: 6000, share: 2, from: 1, to: null, on: { max: true, stretch: true } },
         { id: 2, name: 'Freelance designer', type: 'freelancer', mode: 'rateDays', rate: 650, days: 4, from: 1, to: null, on: { max: true, stretch: true } },
         { id: 3, name: 'Analytics tool', type: 'subscription', mode: 'fixed', amount: 450, from: 1, to: null, on: { max: true, stretch: true } },
         { id: 4, name: 'Hosting', type: 'infrastructure', mode: 'fixed', amount: 300, from: 1, to: null, on: { max: true, stretch: true } },

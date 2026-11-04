@@ -47,9 +47,9 @@ test('AC5 and AC7 a resource that is off is excluded from that scenario only', (
 
 test('AC6 a value change on the shared list applies in both scenarios', () => {
   const p = samplePlan();
-  p.resources[0].days = 12;
-  assert.equal(core.scenarioTotals(p, 'max').total, 92100 + 2 * 1200 * 6);
-  assert.equal(core.scenarioTotals(p, 'stretch').total, 119300 + 2 * 1200 * 6);
+  p.resources[1].days = 6;
+  assert.equal(core.scenarioTotals(p, 'max').total, 92100 + 2 * 650 * 6);
+  assert.equal(core.scenarioTotals(p, 'stretch').total, 119300 + 2 * 650 * 6);
 });
 
 test('AC8 a new resource starts with template defaults, on in stretch always and in max when added while viewing max', () => {
@@ -353,4 +353,32 @@ test('AC35 the summary lists every milestone, the ones not reached first, with t
   const q = core.summary(Object.assign(samplePlan(), { view: 'quarter' }), 'max').milestones.items;
   assert.deepEqual(q.map(x => x.due), ['Q2', 'Q2 (M5)', 'Q1 (M2)']);
   assert.deepEqual(core.summary(core.newPlan('month', 6), 'max').milestones.items, [], 'no milestones, no list');
+});
+
+test('FTE: cost per FTE and month times the share, within the start and end', () => {
+  const r = { id: 1, name: 'Team', type: 'internalStaff', mode: 'fte', fteCost: 6000, share: 1, from: 1, to: null, on };
+  assert.deepEqual(core.scenarioTotals(plan({}, [r]), 'max').monthly.map(core.sumByType), [6000, 6000, 6000, 6000, 6000, 6000]);
+  assert.equal(core.scenarioTotals(plan({}, [Object.assign({}, r, { share: 0.5 })]), 'max').total, 18000);
+  assert.equal(core.scenarioTotals(plan({}, [Object.assign({}, r, { share: 2.5 })]), 'max').total, 90000);
+  assert.deepEqual(core.scenarioTotals(plan({}, [Object.assign({}, r, { from: 3, to: 4 })]), 'max').monthly.map(core.sumByType), [0, 0, 6000, 6000, 0, 0]);
+  assert.equal(core.lineTotal(r, 6), 36000);
+});
+
+test('FTE: a new internal staff resource starts as FTE at 100 percent, the other types keep their modes', () => {
+  const t = core.addResource(core.newPlan('month', 6), 'internalStaff').resource;
+  assert.equal(t.mode, 'fte'); assert.equal(t.share, 1); assert.equal(t.fteCost, 8000); assert.equal(t.name, 'Internal team');
+  assert.equal(core.addResource(core.newPlan('month', 6), 'freelancer').resource.mode, 'rateDays');
+  assert.equal(core.addResource(core.newPlan('month', 6), 'subscription').resource.mode, 'fixed');
+  assert.equal(core.TYPE_LABELS.internalStaff, 'Internal staff');
+  const p = core.addResource(core.newPlan('month', 6), 'internalStaff').plan;
+  assert.equal(core.scenarioTotals(p, 'max').total, 48000);
+});
+
+test('FTE: the sample plan keeps its totals, with the core team as 2 FTE at 6,000', () => {
+  const r = samplePlan().resources[0];
+  assert.equal(r.mode, 'fte'); assert.equal(r.share, 2); assert.equal(r.fteCost, 6000);
+});
+
+test('AC38 the cost per FTE shows three times in the quarter view, the share does not', () => {
+  assert.equal(core.shownValue(6000, 'quarter'), 18000); assert.equal(core.storedValue(18000, 'quarter'), 6000);
 });

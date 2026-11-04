@@ -9,7 +9,7 @@ const norm = codec.normalizePlan;
 let seed = 5; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
 const noise = (n) => { const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:!?-()'; let s = ''; for (let i = 0; i < n; i++) s += c[Math.floor(rnd() * c.length)]; return s; };
 function biggest() {
-  const resources = []; for (let i = 1; i <= 20; i++) { const mode = ['rateDays', 'fixed', 'oneTime'][i % 3], r = { id: i, name: noise(40), type: core.TYPE_ORDER[i % 5], mode, from: 1 + (i % 4), to: 6 + (i % 7), on: { max: i % 2 === 0, stretch: true } }; if (mode === 'rateDays') { r.rate = 400 + i * 37; r.days = 3.5 + (i % 9); } else r.amount = 1000 + i * 730; if (mode === 'oneTime') r.due = 1 + (i % 12); resources.push(r); }
+  const resources = []; for (let i = 1; i <= 20; i++) { const mode = ['rateDays', 'fixed', 'oneTime', 'fte'][i % 4], r = { id: i, name: noise(40), type: core.TYPE_ORDER[i % 5], mode, from: 1 + (i % 4), to: 6 + (i % 7), on: { max: i % 2 === 0, stretch: true } }; if (mode === 'rateDays') { r.rate = 400 + i * 37; r.days = 3.5 + (i % 9); } else if (mode === 'fte') { r.fteCost = 5000 + i * 111; r.share = 0.25 + (i % 7) / 4; } else r.amount = 1000 + i * 730; if (mode === 'oneTime') r.due = 1 + (i % 12); resources.push(r); }
   const milestones = []; for (let i = 1; i <= 8; i++) milestones.push({ id: i, name: noise(40), value: noise(140), due: 1 + i, linked: [i, i + 8, i + 12], importance: i % 2 ? 'must' : 'nice' });
   return { version: 1, view: 'month', length: 12, scenario: 'stretch', budgets: { max: 295000, stretch: 355000 }, resources, milestones };
 }
@@ -23,7 +23,7 @@ function biggest() {
   await s.b.close();
 
   /* AC17 restore from a link */
-  const p1 = samplePlan(); p1.scenario = 'max'; p1.view = 'quarter'; p1.resources[0].days = 8.5; p1.milestones[0].name = 'Prototyp für Kunden';
+  const p1 = samplePlan(); p1.scenario = 'max'; p1.view = 'quarter'; p1.resources[1].days = 8.5; p1.milestones[0].name = 'Prototyp für Kunden';
   const frag = await codec.encodePlanShort(p1);
   s = await open({ url: HTTP + '#' + frag });
   const got = await plan(s.p);
@@ -32,7 +32,7 @@ function biggest() {
   check('quarter view and max scenario are active', (await s.p.getAttribute('#vQuarter', 'aria-pressed')) === 'true' && (await s.p.getAttribute('#sMax', 'aria-pressed')) === 'true');
   /* share */
   await s.p.click('#shareBtn');
-  check('share panel opens with the link', (await s.p.locator('#sharePanel').isVisible()) && (await s.p.getAttribute('#shareBtn', 'aria-expanded')) === 'true' && (await s.p.inputValue('#shareLink')).startsWith(HTTP + '#v1'));
+  check('share panel opens with the link', (await s.p.locator('#sharePanel').isVisible()) && (await s.p.getAttribute('#shareBtn', 'aria-expanded')) === 'true' && (await s.p.inputValue('#shareLink')).startsWith(HTTP + '#v2'));
   await s.p.waitForTimeout(200);
   check('note explains nothing is stored on a server and shows the length', /nothing is stored on a server/.test(await s.p.textContent('#shareNote')) && /characters long/.test(await s.p.textContent('#shareNote')));
   await s.p.click('#copyLink'); await s.p.waitForTimeout(300);
@@ -56,13 +56,13 @@ function biggest() {
   await s.b.close();
 
   /* AC18, AC42, AC45 */
-  for (const [name, hash, re] of [['invalid', 'v1.AAAA', /not valid or was cut off/], ['garbage', 'hello', /not valid or was cut off/], ['cut off', frag.slice(0, 40), /not valid or was cut off/], ['newer', 'v2.' + frag.slice(3), /newer release/]]) {
+  for (const [name, hash, re] of [['invalid', 'v2.AAAA', /not valid or was cut off/], ['garbage', 'hello', /not valid or was cut off/], ['cut off', frag.slice(0, 40), /not valid or was cut off/], ['newer', 'v3.' + frag.slice(3), /newer release/], ['old', 'v1.' + frag.slice(3), /older version of Budgeteer/]]) {
     const x = await open({ url: HTTP + '#' + hash });
     check('AC18/AC42 ' + name + ' link: message, empty plan, no crash', re.test(await x.p.textContent('#notice')) && (await x.p.locator('#cards .rcard').count()) === 0 && x.errs.length === 0, x.errs.join('|'));
     await x.b.close();
   }
   const bigFrag = await codec.encodePlanShort(biggest());
-  check('the largest plan produces a deflated link', bigFrag.startsWith('v1z.'));
+  check('the largest plan produces a deflated link', bigFrag.startsWith('v2z.'));
   s = await open({ url: HTTP + '#' + bigFrag });
   check('AC26 the largest plan is restored from its link', JSON.stringify(await plan(s.p)) === JSON.stringify(norm(biggest())) || true);
   const restored = await plan(s.p); const want = norm((seed = 5, biggest()));
@@ -81,20 +81,23 @@ function biggest() {
   await f.p.click('#shareBtn'); await f.p.waitForTimeout(300);
   check('AC44 file page: the link only works on this computer', /only works on this computer/.test(await f.p.textContent('#shareNote')) && /JSON/.test(await f.p.textContent('#shareNote')));
   /* AC28 JSON export and import */
-  await f.p.click('#sMax'); await f.p.fill('#f1rate', '1111'); 
+  await f.p.click('#sMax'); await f.p.fill('#f2rate', '1111'); 
   const [dl] = await Promise.all([f.p.waitForEvent('download'), f.p.click('#exportBtn')]);
   check('download is named budgeteer-plan.json', dl.suggestedFilename() === 'budgeteer-plan.json');
   const exportPath = OUT + '/exported.json'; await dl.saveAs(exportPath);
   const exported = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
-  check('exported file has the app marker', exported.app === 'Budgeteer' && exported.format === 1 && exported.plan.resources[0].rate === 1111);
+  check('exported file has the app marker', exported.app === 'Budgeteer' && exported.format === 2 && exported.plan.resources[1].rate === 1111);
   const live = await plan(f.p);
   const g = await open({ url: HTTP });
   await g.p.click('#shareBtn'); await g.p.setInputFiles('#importFile', exportPath); await g.p.waitForTimeout(400);
   check('AC28 import gives the identical plan', JSON.stringify(await plan(g.p)) === JSON.stringify(norm(live)) && /Opened the plan from exported\.json/.test(await g.p.textContent('#notice')) && !(await g.p.locator('#demoBanner').isVisible()));
-  const bad = OUT + '/bad.json'; fs.writeFileSync(bad, '{"app":"Budgeteer","format":1,"plan":{"length":99}}');
+  const bad = OUT + '/bad.json'; fs.writeFileSync(bad, '{"app":"Budgeteer","format":2,"plan":{"length":99}}');
   const beforeBad = JSON.stringify(await plan(g.p));
   await g.p.setInputFiles('#importFile', bad); await g.p.waitForTimeout(300);
   check('AC28 an invalid file changes nothing and says so', JSON.stringify(await plan(g.p)) === beforeBad && /not a valid Budgeteer plan/.test(await g.p.textContent('#notice')));
+  const oldFile = OUT + '/old.json'; fs.writeFileSync(oldFile, '{"app":"Budgeteer","format":1,"plan":{}}');
+  await g.p.setInputFiles('#importFile', oldFile); await g.p.waitForTimeout(300);
+  check('a file of the older format is refused with a clear message', JSON.stringify(await plan(g.p)) === beforeBad && /older version of Budgeteer/.test(await g.p.textContent('#notice')));
   const txt = OUT + '/note.txt'; fs.writeFileSync(txt, 'hello');
   await g.p.setInputFiles('#importFile', txt); await g.p.waitForTimeout(300);
   check('a text file is refused too', /not a valid Budgeteer plan/.test(await g.p.textContent('#notice')));

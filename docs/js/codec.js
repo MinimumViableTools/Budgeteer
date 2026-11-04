@@ -1,6 +1,6 @@
 /* Budgeteer codec: turns a plan into a link fragment and back, and validates what comes in.
-   Link format: "v1." followed by base64url of the UTF-8 bytes of a compact JSON array, or "v1z." with the bytes deflated first
-   (the shorter of the two is used). The format version is part of every link, so later releases keep reading older links. */
+   Link format: "v2." followed by base64url of the UTF-8 bytes of a compact JSON array, or "v2z." with the bytes deflated first
+   (the shorter of the two is used). The format version is part of every link, and a page refuses links of another version with a clear message. */
 (function (root, factory) {
   var api = factory(typeof require === 'function' && typeof module !== 'undefined' ? require('./core.js') : root.Budgeteer.core);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
@@ -8,9 +8,9 @@
 })(typeof self !== 'undefined' ? self : this, function (core) {
   'use strict';
 
-  var FORMAT_VERSION = 1;
+  var FORMAT_VERSION = 2;
   var L = core.LIMITS;
-  var TYPES = core.TYPE_ORDER, MODES = ['rateDays', 'fixed', 'oneTime'], IMPORTANCE = ['must', 'nice'];
+  var TYPES = core.TYPE_ORDER, MODES = ['rateDays', 'fixed', 'oneTime', 'fte'], IMPORTANCE = ['must', 'nice'];
 
   /* a plan in one shape, so that a round trip compares equal */
   function normalizePlan(plan) {
@@ -19,7 +19,7 @@
       budgets: { max: plan.budgets.max, stretch: plan.budgets.stretch },
       resources: plan.resources.map(function (r) {
         var o = { id: r.id, name: r.name, type: r.type, mode: r.mode };
-        if (r.mode === 'rateDays') { o.rate = r.rate; o.days = r.days; } else o.amount = r.amount;
+        if (r.mode === 'rateDays') { o.rate = r.rate; o.days = r.days; } else if (r.mode === 'fte') { o.fteCost = r.fteCost; o.share = r.share; } else o.amount = r.amount;
         if (r.mode === 'oneTime') o.due = r.due;
         o.from = r.from || 1; o.to = r.to || null; o.on = { max: !!r.on.max, stretch: !!r.on.stretch };
         return o;
@@ -33,7 +33,7 @@
     return [FORMAT_VERSION, p.view === 'quarter' ? 1 : 0, p.length, p.budgets.max, p.budgets.stretch, p.scenario === 'stretch' ? 1 : 0,
       p.resources.map(function (r) {
         var mode = MODES.indexOf(r.mode), a, b;
-        if (mode === 0) { a = r.rate; b = r.days; } else if (mode === 1) { a = r.amount; b = 0; } else { a = r.amount; b = r.due; }
+        if (mode === 0) { a = r.rate; b = r.days; } else if (mode === 1) { a = r.amount; b = 0; } else if (mode === 3) { a = r.fteCost; b = r.share; } else { a = r.amount; b = r.due; }
         return [r.id, r.name, TYPES.indexOf(r.type), mode, a, b, r.from, r.to === null ? 0 : r.to, (r.on.max ? 1 : 0) + (r.on.stretch ? 2 : 0)];
       }),
       p.milestones.map(function (m) { return [m.id, m.name, m.value, m.due, m.linked, IMPORTANCE.indexOf(m.importance)]; })];
@@ -102,6 +102,7 @@
   var INVALID = 'This link is not valid or was cut off, so the plan could not be restored. You are seeing an empty plan.';
 
   var NEWER = 'This link comes from a newer release of Budgeteer than this page. Nothing was changed.';
+  var OLD = 'This link was made with an older version of Budgeteer that this page no longer reads. Nothing was changed.';
   var NO_ZIP = 'This link needs a newer browser to be opened. Nothing was changed.';
   function parseFragment(fragment) {
     var frag = String(fragment || '').replace(/^#/, '');
@@ -110,14 +111,14 @@
     if (!m) return bad('invalid', INVALID);
     var version = parseInt(m[1], 10);
     if (version > FORMAT_VERSION) return bad('newer', NEWER);
-    if (version < 1) return bad('invalid', INVALID);
+    if (version < FORMAT_VERSION) return bad('old', OLD);
     return { ok: true, zipped: m[2] === 'z', payload: m[3] };
   }
   function planFromJson(text) {
     var a; try { a = JSON.parse(text); } catch (e) { return bad('invalid', INVALID); }
-    return fromCompactV1(a);
+    return fromCompact(a);
   }
-  /* decodePlan(fragment): { ok: true, plan } or { ok: false, code: 'empty' | 'invalid' | 'newer' | 'compressed', message }. Plain links only. */
+  /* decodePlan(fragment): { ok: true, plan } or { ok: false, code: 'empty' | 'invalid' | 'newer' | 'old' | 'compressed', message }. Plain links only. */
   function decodePlan(fragment) {
     var f = parseFragment(fragment); if (!f.ok) return f;
     if (f.zipped) return bad('compressed', NO_ZIP);
@@ -135,8 +136,8 @@
     }, function () { return bad('invalid', INVALID); });
   }
 
-  function fromCompactV1(a) {
-    if (!Array.isArray(a) || a.length !== 8 || a[0] !== 1) return bad('invalid', INVALID);
+  function fromCompact(a) {
+    if (!Array.isArray(a) || a.length !== 8 || a[0] !== FORMAT_VERSION) return bad('invalid', INVALID);
     var view = a[1] === 1 ? 'quarter' : a[1] === 0 ? 'month' : null, length = a[2];
     if (!view || !isInt(length, 1, L.months) || !isNum(a[3], 0, 1e12) || !isNum(a[4], 0, 1e12) || (a[5] !== 0 && a[5] !== 1)) return bad('invalid', INVALID);
     if (view === 'quarter' && length % 3 !== 0) return bad('invalid', INVALID);
@@ -144,11 +145,11 @@
     var resources = [], milestones = [], i, r, x, ids = {};
     for (i = 0; i < a[6].length; i++) {
       r = a[6][i];
-      if (!Array.isArray(r) || r.length !== 9 || !isInt(r[0], 1, 1e9) || ids[r[0]] || !isStr(r[1], 200) || !isInt(r[2], 0, TYPES.length - 1) || !isInt(r[3], 0, 2)) return bad('invalid', INVALID);
+      if (!Array.isArray(r) || r.length !== 9 || !isInt(r[0], 1, 1e9) || ids[r[0]] || !isStr(r[1], 200) || !isInt(r[2], 0, TYPES.length - 1) || !isInt(r[3], 0, MODES.length - 1)) return bad('invalid', INVALID);
       if (!isNum(r[4], 0, 1e12) || !isNum(r[5], 0, 1e12) || !isInt(r[6], 1, L.months) || !isInt(r[7], 0, L.months) || !isInt(r[8], 0, 3)) return bad('invalid', INVALID);
       ids[r[0]] = true;
       x = { id: r[0], name: r[1], type: TYPES[r[2]], mode: MODES[r[3]] };
-      if (r[3] === 0) { x.rate = r[4]; x.days = r[5]; } else x.amount = r[4];
+      if (r[3] === 0) { x.rate = r[4]; x.days = r[5]; } else if (r[3] === 3) { if (!isNum(r[5], 0, L.maxShare)) return bad('invalid', INVALID); x.fteCost = r[4]; x.share = r[5]; } else x.amount = r[4];
       if (r[3] === 2) { if (!isInt(r[5], 1, L.months)) return bad('invalid', INVALID); x.due = r[5]; }
       x.from = r[6]; x.to = r[7] === 0 ? null : r[7]; x.on = { max: (r[8] & 1) === 1, stretch: (r[8] & 2) === 2 };
       resources.push(x);
@@ -164,7 +165,7 @@
     return { ok: true, plan: { version: 1, view: view, length: length, scenario: a[5] === 1 ? 'stretch' : 'max', budgets: { max: a[3], stretch: a[4] }, resources: resources, milestones: milestones } };
   }
 
-  /* JSON file: { "app": "Budgeteer", "format": 1, "plan": { ... } }, checked with the same rules as a link */
+  /* JSON file: { "app": "Budgeteer", "format": 2, "plan": { ... } }, checked with the same rules as a link */
   var MAX_FILE_BYTES = 262144;
   var NOT_A_PLAN = 'This file is not a valid Budgeteer plan, so nothing was changed.';
   function exportJson(plan) { return JSON.stringify({ app: 'Budgeteer', format: FORMAT_VERSION, plan: normalizePlan(plan) }, null, 2) + '\n'; }
@@ -173,9 +174,9 @@
     var doc; try { doc = JSON.parse(text); } catch (e) { return bad('invalid', NOT_A_PLAN); }
     if (!doc || typeof doc !== 'object' || doc.app !== 'Budgeteer' || typeof doc.format !== 'number' || !doc.plan || typeof doc.plan !== 'object') return bad('invalid', NOT_A_PLAN);
     if (doc.format > FORMAT_VERSION) return bad('newer', 'This file comes from a newer release of Budgeteer than this page. Nothing was changed.');
-    if (doc.format < 1) return bad('invalid', NOT_A_PLAN);
+    if (doc.format < FORMAT_VERSION) return bad('old', 'This file was made with an older version of Budgeteer that this page no longer reads. Nothing was changed.');
     var compact; try { compact = toCompact(doc.plan); } catch (e) { return bad('invalid', NOT_A_PLAN); }
-    var r = fromCompactV1(JSON.parse(JSON.stringify(compact)));
+    var r = fromCompact(JSON.parse(JSON.stringify(compact)));
     return r.ok ? r : bad('invalid', NOT_A_PLAN);
   }
 

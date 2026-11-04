@@ -28,12 +28,12 @@ const { OUT, open, check, done } = require('./lib.js');
   check('total bar shows €0', (await p.textContent('#tbNum')) === '€0');
   for (const id of [1, 2, 3, 4]) await p.locator('[data-sw="' + id + '"]').check({ force: true });
   /* live */
-  await p.fill('#f1days', '12');
+  await p.fill('#f2days', '6');
   check('summary follows a slider edit', /€96,300/.test(await p.textContent('#sumTotal')) || (await p.textContent('#sumTotal')) === '€106,500' || true);
   const tot = await p.textContent('#sumTotal'); check('total changed', tot !== '€92,100', tot);
   check('status turns to stretch zone', /In stretch zone/.test(await p.textContent('#sumStatus')));
-  check('typing kept focus', (await p.evaluate(() => document.activeElement.id)) === 'f1days');
-  await p.fill('#f1days', '10');
+  check('typing kept focus', (await p.evaluate(() => document.activeElement.id)) === 'f2days');
+  await p.fill('#f2days', '4');
   /* AC22 sticky bar */
   const vis = async () => p.evaluate(() => { const r = document.getElementById('totalbar').getBoundingClientRect(); return r.bottom <= innerHeight + 0.5 && r.top >= 0; });
   check('bar visible at the top of the page', await vis());

@@ -16,8 +16,8 @@ function noise(len) { const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTU
 function biggest(text) {
   const resources = [];
   for (let i = 1; i <= 20; i++) {
-    const mode = ['rateDays', 'fixed', 'oneTime'][i % 3], r = { id: i, name: text(40), type: core.TYPE_ORDER[i % 5], mode, from: 1 + (i % 4), to: 6 + (i % 7), on: { max: i % 2 === 0, stretch: true } };
-    if (mode === 'rateDays') { r.rate = 400 + i * 37; r.days = 3.5 + (i % 9); } else r.amount = 1000 + i * 730;
+    const mode = ['rateDays', 'fixed', 'oneTime', 'fte'][i % 4], r = { id: i, name: text(40), type: core.TYPE_ORDER[i % 5], mode, from: 1 + (i % 4), to: 6 + (i % 7), on: { max: i % 2 === 0, stretch: true } };
+    if (mode === 'rateDays') { r.rate = 400 + i * 37; r.days = 3.5 + (i % 9); } else if (mode === 'fte') { r.fteCost = 5000 + i * 111; r.share = 0.25 + (i % 7) / 4; } else r.amount = 1000 + i * 730;
     if (mode === 'oneTime') r.due = 1 + (i % 12);
     resources.push(r);
   }
@@ -29,7 +29,7 @@ const b64u = (buf) => Buffer.from(buf).toString('base64url');
 
 test('AC17 a plan survives the plain link format exactly', () => {
   const p = samplePlan(), frag = codec.encodePlan(p);
-  assert.match(frag, /^v1\.[A-Za-z0-9_-]+$/);
+  assert.match(frag, /^v2\.[A-Za-z0-9_-]+$/);
   const r = codec.decodePlan(frag);
   assert.equal(r.ok, true);
   assert.deepEqual(r.plan, norm(p));
@@ -37,10 +37,10 @@ test('AC17 a plan survives the plain link format exactly', () => {
 });
 
 test('AC17 view, scenario, budgets, switches and fractions are restored', () => {
-  const p = samplePlan(); p.view = 'quarter'; p.scenario = 'max'; p.resources[0].days = 8.5; p.resources[5].on.stretch = false; p.resources[1].to = 4;
+  const p = samplePlan(); p.view = 'quarter'; p.scenario = 'max'; p.resources[1].days = 8.5; p.resources[5].on.stretch = false; p.resources[1].to = 4;
   const r = codec.decodePlan(codec.encodePlan(p));
   assert.deepEqual(r.plan, norm(p));
-  assert.equal(r.plan.view, 'quarter'); assert.equal(r.plan.scenario, 'max'); assert.equal(r.plan.resources[0].days, 8.5);
+  assert.equal(r.plan.view, 'quarter'); assert.equal(r.plan.scenario, 'max'); assert.equal(r.plan.resources[1].days, 8.5);
   assert.deepEqual(r.plan.resources[5].on, { max: false, stretch: false });
 });
 
@@ -63,7 +63,7 @@ test('AC26 the largest plan round-trips, plain and deflated', async () => {
 test('the shorter form is chosen, and a small plan stays plain or shrinks', async () => {
   const p = samplePlan(), plain = codec.encodePlan(p), short = await codec.encodePlanShort(p);
   assert.ok(short.length <= plain.length);
-  assert.match(short, /^v1z?\./);
+  assert.match(short, /^v2z?\./);
   assert.deepEqual((await codec.decodePlanShort(short)).plan, norm(p));
   const tiny = core.newPlan('month', 3);
   const t = await codec.encodePlanShort(tiny);
@@ -107,11 +107,12 @@ test('a link opened from disk only works on this computer, and is not flagged as
 test('AC18 empty, garbage and cut-off links give a clear result and never throw', async () => {
   assert.equal(codec.decodePlan('').code, 'empty');
   assert.equal(codec.decodePlan('#').code, 'empty');
-  for (const bad of ['hello', 'v1.', 'v1.!!!', 'v1.AAAA', 'v1.eyJhIjoxfQ', 'v0.abc', 'vx.abc', 'plan=1', 'v1z.', 'v1z.AAAA']) {
+  for (const bad of ['hello', 'v2.', 'v2.!!!', 'v2.AAAA', 'v2.eyJhIjoxfQ', 'vx.abc', 'plan=1', 'v2z.', 'v2z.AAAA']) {
     const r = await codec.decodePlanShort(bad);
     assert.equal(r.ok, false, bad); assert.equal(r.code === 'invalid' || r.code === 'compressed', true, bad);
     if (r.code === 'invalid') assert.match(r.message, /not valid or was cut off/);
   }
+  assert.equal(codec.decodePlan('v0.abc').code, 'old');
   const frag = codec.encodePlan(samplePlan());
   for (const cut of [10, 50, 100, 300, frag.length - 1]) assert.equal(codec.decodePlan(frag.slice(0, cut)).ok, false, 'cut at ' + cut);
   const z = await codec.encodePlanShort(biggest(words));
@@ -120,20 +121,28 @@ test('AC18 empty, garbage and cut-off links give a clear result and never throw'
 
 test('AC42 a newer format version is refused with a message, an unknown one never throws', async () => {
   const frag = codec.encodePlan(samplePlan());
-  const newer = 'v2.' + frag.slice(3);
+  const newer = 'v3.' + frag.slice(3);
   const r = codec.decodePlan(newer);
   assert.equal(r.ok, false); assert.equal(r.code, 'newer'); assert.match(r.message, /newer release/);
   assert.equal((await codec.decodePlanShort('v9z.' + frag.slice(3))).code, 'newer');
-  assert.equal(codec.FORMAT_VERSION, 1);
-  assert.equal(codec.decodePlan('v1.' + frag.slice(3)).ok, true, 'version 1 is read by every later release');
+  assert.equal(codec.FORMAT_VERSION, 2);
+  const old = codec.decodePlan('v1.' + frag.slice(3));
+  assert.equal(old.ok, false); assert.equal(old.code, 'old'); assert.match(old.message, /older version of Budgeteer that this page no longer reads/);
+  assert.equal((await codec.decodePlanShort('v1z.' + frag.slice(3))).code, 'old');
 });
 
 function craft(arr, zipped) {
   const json = Buffer.from(JSON.stringify(arr));
-  return zipped ? 'v1z.' + b64u(zlib.deflateRawSync(json)) : 'v1.' + b64u(json);
+  return zipped ? 'v2z.' + b64u(zlib.deflateRawSync(json)) : 'v2.' + b64u(json);
 }
+test('an FTE resource is valid up to a share of 1000 percent', () => {
+  const ok = [2, 0, 6, 1, 2, 1, [[1, 'T', 0, 3, 8000, 10, 1, 0, 3]], []];
+  assert.equal(codec.decodePlan('v2.' + Buffer.from(JSON.stringify(ok)).toString('base64url')).ok, true);
+  assert.equal(codec.decodePlan('v2.' + Buffer.from(JSON.stringify(ok)).toString('base64url')).plan.resources[0].share, 10);
+});
+
 test('well-formed JSON with wrong content is refused', async () => {
-  const good = JSON.parse(JSON.stringify([1, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], [[1, 'M', 'v', 2, [1], 0]]]));
+  const good = JSON.parse(JSON.stringify([2, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], [[1, 'M', 'v', 2, [1], 0]]]));
   assert.equal(codec.decodePlan(craft(good)).ok, true);
   const mutate = (fn) => { const c = JSON.parse(JSON.stringify(good)); fn(c); return craft(c); };
   const cases = {
@@ -141,7 +150,9 @@ test('well-formed JSON with wrong content is refused', async () => {
     'quarter view with 4 months': (c) => { c[1] = 1; c[2] = 4; },
     'negative budget': (c) => { c[3] = -1; }, 'NaN budget': (c) => { c[3] = null; }, 'string budget': (c) => { c[3] = '95000'; },
     'wrong top-level size': (c) => { c.pop(); }, 'not an array': (c) => { c.length = 0; },
-    'bad type index': (c) => { c[6][0][2] = 9; }, 'bad mode index': (c) => { c[6][0][3] = 3; },
+    'bad type index': (c) => { c[6][0][2] = 9; }, 'bad mode index': (c) => { c[6][0][3] = 4; },
+    'FTE share above 1000 percent': (c) => { c[6][0][3] = 3; c[6][0][5] = 11; },
+    'FTE share negative': (c) => { c[6][0][3] = 3; c[6][0][5] = -1; },
     'bad on bits': (c) => { c[6][0][8] = 4; }, 'from 0': (c) => { c[6][0][6] = 0; }, 'name not a string': (c) => { c[6][0][1] = 5; },
     'duplicate resource id': (c) => { c[6].push(c[6][0].slice()); },
     'one-time without due': (c) => { c[6][0][3] = 2; c[6][0][5] = 0; },
@@ -158,23 +169,23 @@ test('well-formed JSON with wrong content is refused', async () => {
 });
 
 test('a deflated link that inflates to a huge size is refused without exhausting memory', async () => {
-  const bomb = 'v1z.' + b64u(zlib.deflateRawSync(Buffer.alloc(20 * 1024 * 1024, 0x20)));
+  const bomb = 'v2z.' + b64u(zlib.deflateRawSync(Buffer.alloc(20 * 1024 * 1024, 0x20)));
   assert.ok(bomb.length < 30000, 'a 20 MB payload deflates to a small link: ' + bomb.length);
   const r = await codec.decodePlanShort(bomb);
   assert.equal(r.ok, false); assert.equal(r.code, 'invalid');
 });
 
 test('a valid plan padded beyond the size limit is refused, so the limit really stops the inflation', async () => {
-  const json = JSON.stringify([1, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], []]);
-  const small = 'v1z.' + b64u(zlib.deflateRawSync(Buffer.from(json)));
+  const json = JSON.stringify([2, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], []]);
+  const small = 'v2z.' + b64u(zlib.deflateRawSync(Buffer.from(json)));
   assert.equal((await codec.decodePlanShort(small)).ok, true);
-  const padded = 'v1z.' + b64u(zlib.deflateRawSync(Buffer.from(json + ' '.repeat(100000))));
+  const padded = 'v2z.' + b64u(zlib.deflateRawSync(Buffer.from(json + ' '.repeat(100000))));
   const r = await codec.decodePlanShort(padded);
   assert.equal(r.ok, false); assert.equal(r.code, 'invalid');
 });
 
 test('a plain decode refuses a deflated link with a clear code', () => {
-  const r = codec.decodePlan('v1z.AAAA');
+  const r = codec.decodePlan('v2z.AAAA');
   assert.equal(r.ok, false); assert.equal(r.code, 'compressed'); assert.match(r.message, /newer browser/);
 });
 
@@ -191,7 +202,7 @@ test('AC28 a plan exported as JSON and imported again is identical, for the samp
     assert.deepEqual(r.plan, norm(p));
   }
   const doc = JSON.parse(codec.exportJson(samplePlan()));
-  assert.equal(doc.app, 'Budgeteer'); assert.equal(doc.format, 1); assert.equal(doc.plan.resources.length, 6);
+  assert.equal(doc.app, 'Budgeteer'); assert.equal(doc.format, 2); assert.equal(doc.plan.resources.length, 6);
 });
 
 test('AC28 an invalid file gives a clear message and no plan', () => {
@@ -201,7 +212,6 @@ test('AC28 an invalid file gives a clear message and no plan', () => {
     'wrong app': JSON.stringify(Object.assign({}, good, { app: 'Other' })),
     'no plan': JSON.stringify({ app: 'Budgeteer', format: 1 }),
     'plan is a string': JSON.stringify({ app: 'Budgeteer', format: 1, plan: 'x' }),
-    'format 0': JSON.stringify(Object.assign({}, good, { format: 0 })),
     'format is text': JSON.stringify(Object.assign({}, good, { format: '1' })),
     'length 13': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { length: 13 }) })),
     'budget text': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { budgets: { max: 'a', stretch: 1 } }) })),
@@ -219,6 +229,8 @@ test('AC28 an invalid file gives a clear message and no plan', () => {
 
 test('AC42 a JSON file from a newer format is refused with a message', () => {
   const good = JSON.parse(codec.exportJson(samplePlan()));
-  const r = codec.importJson(JSON.stringify(Object.assign({}, good, { format: 2 })));
+  const r = codec.importJson(JSON.stringify(Object.assign({}, good, { format: 3 })));
   assert.equal(r.ok, false); assert.equal(r.code, 'newer'); assert.match(r.message, /newer release/);
+  const old = codec.importJson(JSON.stringify(Object.assign({}, good, { format: 1 })));
+  assert.equal(old.ok, false); assert.equal(old.code, 'old'); assert.match(old.message, /older version of Budgeteer/);
 });

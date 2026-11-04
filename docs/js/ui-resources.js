@@ -3,7 +3,7 @@
   'use strict';
   var core = Budgeteer.core, ui = Budgeteer.ui, $ = ui.$, esc = ui.esc;
   var COLORS = { internalStaff: 'var(--data-internal-staff)', freelancer: 'var(--data-freelancer)', subscription: 'var(--data-subscription)', infrastructure: 'var(--data-infrastructure)', oneTime: 'var(--data-one-time)' };
-  var RANGES = { rate: [0, 2000, 50], days: [0, 22, 0.5], amount: [0, 2000, 10], amount1: [0, 30000, 250] };
+  var RANGES = { rate: [0, 2000, 50], days: [0, 22, 0.5], amount: [0, 2000, 10], amount1: [0, 30000, 250], share: [0, 300, 5], fteCost: [0, 20000, 250] };
   var store, openMore = {};
 
   function fmt(n) { return ui.fmtInput(n); }
@@ -32,7 +32,10 @@
     h += '<button class="xbtn" type="button" data-rm="' + r.id + '" aria-label="Remove ' + esc(r.name) + '">×</button></div>';
     h += '<div class="pk-num" data-tot="' + r.id + '"></div><div class="pk-bar"><i data-bar="' + r.id + '"></i></div><div class="pk-muted" data-share="' + r.id + '"></div>';
     h += '<div class="warn" data-outside="' + r.id + '" hidden>This resource starts after the plan ends, so it adds nothing.</div>';
-    if (r.mode === 'rateDays') {
+    if (r.mode === 'fte') {
+      h += field(r.id, 'Share of one FTE', '%', Math.round(r.share * 10000) / 100, RANGES.share, 'share');
+      h += field(r.id, 'Cost per FTE and ' + unit, '€', core.shownValue(r.fteCost, plan.view), [RANGES.fteCost[0], RANGES.fteCost[1] * m, RANGES.fteCost[2]], 'fteCost');
+    } else if (r.mode === 'rateDays') {
       h += field(r.id, 'Day rate', '€', r.rate, RANGES.rate, 'rate');
       h += field(r.id, 'Days per ' + unit, 'days', core.shownValue(r.days, plan.view), [RANGES.days[0], RANGES.days[1] * m, RANGES.days[2] * m], 'days');
     } else if (r.mode === 'fixed') {
@@ -43,7 +46,7 @@
     }
     h += '<details class="more" data-more="' + r.id + '"' + (openMore[r.id] ? ' open' : '') + '><summary>More settings</summary><div class="more-grid">';
     h += '<div><label class="pk-label" for="t' + r.id + '">Type</label><select class="sel" id="t' + r.id + '" data-pk="type" data-id="' + r.id + '">' + core.TYPE_ORDER.map(function (t) { return '<option value="' + t + '"' + (r.type === t ? ' selected' : '') + '>' + core.TYPE_LABELS[t] + '</option>'; }).join('') + '</select></div>';
-    h += '<div><label class="pk-label" for="m' + r.id + '">Cost mode</label><select class="sel" id="m' + r.id + '" data-pk="mode" data-id="' + r.id + '"><option value="rateDays"' + (r.mode === 'rateDays' ? ' selected' : '') + '>Rate × days</option><option value="fixed"' + (r.mode === 'fixed' ? ' selected' : '') + '>Fixed per ' + unit + '</option><option value="oneTime"' + (r.mode === 'oneTime' ? ' selected' : '') + '>One time</option></select></div>';
+    h += '<div><label class="pk-label" for="m' + r.id + '">Cost mode</label><select class="sel" id="m' + r.id + '" data-pk="mode" data-id="' + r.id + '"><option value="fte"' + (r.mode === 'fte' ? ' selected' : '') + '>FTE</option><option value="rateDays"' + (r.mode === 'rateDays' ? ' selected' : '') + '>Rate × days</option><option value="fixed"' + (r.mode === 'fixed' ? ' selected' : '') + '>Fixed per ' + unit + '</option><option value="oneTime"' + (r.mode === 'oneTime' ? ' selected' : '') + '>One time</option></select></div>';
     if (r.mode !== 'oneTime') {
       h += '<div><label class="pk-label" for="s' + r.id + '">Starts in</label><select class="sel" id="s' + r.id + '" data-pk="from" data-id="' + r.id + '">' + periodOptions(plan, 'from', r.from || 1) + '</select></div>';
       h += '<div><label class="pk-label" for="e' + r.id + '">Ends in</label><select class="sel" id="e' + r.id + '" data-pk="to" data-id="' + r.id + '">' + periodOptions(plan, 'to', r.to) + '</select></div>';
@@ -84,6 +87,8 @@
     else if (key === 'days') patch.days = core.storedValue(shown, plan.view);
     else if (key === 'amount') patch.amount = core.storedValue(shown, plan.view);
     else if (key === 'amount1') patch.amount = shown;
+    else if (key === 'share') patch.share = shown / 100;
+    else if (key === 'fteCost') patch.fteCost = core.storedValue(shown, plan.view);
     store.updateResource(id, patch, 'value');
   }
 

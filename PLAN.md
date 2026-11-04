@@ -52,7 +52,8 @@ plan:
   scenario: "max" | "stretch"      (the one being viewed)
   resources: up to 20 of
     id, name, type, mode            type: internalStaff | freelancer | subscription | infrastructure | oneTime
-                                    mode: rateDays | fixed | oneTime
+                                    mode: fte | rateDays | fixed | oneTime
+    fteCost, share                  for fte: cost per FTE and month, share of one FTE (1 is 100 percent)
     rate, days                      for rateDays
     amount                          for fixed and oneTime
     due                             period, for oneTime
@@ -137,7 +138,7 @@ Order logic: the calculation and the link size are the main risks, so they come 
 The decision records (ADRs) are kept outside this repo, in the private planning repo. In short:
 
 - No build step, classic scripts, no libraries, charts in HTML and SVG
-- Plan state in the URL fragment as a compact JSON array, base64url, deflated when that is shorter, with a format version in every link and JSON export as fallback
+- Plan state in the URL fragment as a compact JSON array, base64url, deflated when that is shorter, with a format version (2) in every link and JSON export as fallback. Older versions are not read.
 - Numbers are kept unrounded, rounding only for display
 - The tool is dark only
 - Months are the only stored unit, quarters are a view
@@ -148,5 +149,5 @@ The decision records (ADRs) are kept outside this repo, in the private planning 
 - Label collisions next to the headroom bar and axis scaling are fiddly without a library. Mitigated by building them as small, tested pure functions where possible.
 - Milestones add text to the link and a new dialog. Mitigated by the length limits, the spike in step 3, and a quick mockup before step 9.
 - Quarter view editing: the rules for editing precise months in the quarter view are proposed in the spec and need your confirmation before step 5 builds the cards.
-- Pages becomes the hosted tool: links people share must keep working. Mitigated by the plan format version in every link and AC42.
+- Pages becomes the hosted tool: from now on links people share must keep working across releases, which needs a migration for the next format change. Mitigated by the plan format version in every link and AC42. Version 1 links are not read, because none were in circulation.
 - Floating point: converting months to quarters and back must keep totals unchanged. Mitigated by keeping numbers unrounded and testing with a small tolerance.

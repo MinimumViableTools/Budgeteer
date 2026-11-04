@@ -62,8 +62,12 @@ test('AC27 the 21st resource is refused with a notice', () => {
 
 test('resource edits are clamped to sensible values', () => {
   const s = createStore(samplePlan());
-  s.updateResource(1, { rate: -5, days: 'abc' });
-  assert.equal(s.getPlan().resources[0].rate, 0); assert.equal(s.getPlan().resources[0].days, 0);
+  s.updateResource(2, { rate: -5, days: 'abc' });
+  assert.equal(s.getPlan().resources[1].rate, 0); assert.equal(s.getPlan().resources[1].days, 0);
+  s.updateResource(1, { share: 99, fteCost: -1 });
+  assert.equal(s.getPlan().resources[0].share, 10); assert.equal(s.getPlan().resources[0].fteCost, 0);
+  s.updateResource(1, { share: 1.5, fteCost: 7000 });
+  assert.equal(s.getPlan().resources[0].share, 1.5); assert.equal(s.getPlan().resources[0].fteCost, 7000);
   s.updateResource(5, { due: 99 }); assert.equal(s.getPlan().resources[4].due, 12);
   s.updateResource(6, { to: null }); assert.equal(s.getPlan().resources[5].to, null);
   s.updateResource(6, { from: 0 }); assert.equal(s.getPlan().resources[5].from, 1);
@@ -104,4 +108,13 @@ test('loadPlan replaces the plan and carries a message', () => {
   s.subscribe(c => { kind = c.kind; });
   s.loadPlan(core.newPlan('month', 6), 'Started an empty plan.');
   assert.equal(kind, 'structure'); assert.equal(s.getPlan().resources.length, 0); assert.equal(s.getNotice(), 'Started an empty plan.');
+});
+
+test('changing a resource to FTE gives sensible defaults and keeps an existing share', () => {
+  const s = createStore(samplePlan());
+  s.changeResourceMode(2, 'fte');
+  const r = s.getPlan().resources[1];
+  assert.equal(r.mode, 'fte'); assert.equal(r.fteCost, 8000); assert.equal(r.share, 1);
+  s.changeResourceMode(1, 'rateDays'); s.changeResourceMode(1, 'fte');
+  assert.equal(s.getPlan().resources[0].share, 2, 'the share of the core team is kept');
 });
