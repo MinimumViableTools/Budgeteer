@@ -188,6 +188,8 @@
     var c = clampLength(shownLength, view);
     return { version: 1, name: cleanName(name) || 'New plan', view: view, length: c.months, scenario: 'max', budgets: { max: 0, stretch: 0 }, resources: [], milestones: [] };
   }
+  /* the empty plan a person starts with */
+  function startPlan(name) { var p = newPlan('month', 6, name || 'New plan'); p.budgets = { max: 100000, stretch: 125000 }; return p; }
   function addResource(plan, templateKey) {
     if (plan.resources.length >= LIMITS.resources) return { plan: plan, error: 'A plan can have at most ' + LIMITS.resources + ' resources. Remove one first.' };
     var t = TEMPLATES[templateKey], r = { id: nextId(plan.resources), name: t.name, type: t.type, mode: t.mode, from: 1, to: null, on: { max: false, stretch: false } };
@@ -253,7 +255,7 @@
   return {
     LIMITS: LIMITS, TYPE_ORDER: TYPE_ORDER, TYPE_LABELS: TYPE_LABELS, TEMPLATES: TEMPLATES, SCENARIOS: SCENARIOS, STATUS_TEXT: STATUS_TEXT,
     formatEuro: formatEuro, parseAmount: parseAmount,
-    cleanName: cleanName, quarterOf: quarterOf, periodCount: periodCount, unitName: unitName, periodLabel: periodLabel, monthShort: monthShort, monthLabel: monthLabel,
+    cleanName: cleanName, startPlan: startPlan, quarterOf: quarterOf, periodCount: periodCount, unitName: unitName, periodLabel: periodLabel, monthShort: monthShort, monthLabel: monthLabel,
     canUseQuarterView: canUseQuarterView, clampLength: clampLength, shownValue: shownValue, storedValue: storedValue,
     periodChoices: periodChoices, monthFromChoice: monthFromChoice, snapStart: snapStart, snapEnd: snapEnd, snapOneTimeDue: snapOneTimeDue, snapMilestoneDue: snapMilestoneDue, isAligned: isAligned,
     costAt: costAt, monthlyByType: monthlyByType, sumByType: sumByType, runningTotals: runningTotals, groupForView: groupForView, lineTotal: lineTotal,

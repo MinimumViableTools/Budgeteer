@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Plans have a name. The tray under the headline holds up to 10 open plans as index cards: start a new plan with one click, copy the open plan, open, rename and close plans (with undo), and fold the tray. Imports and links open as new cards. The plans are kept in the tab, so a reload does not lose them.
+- Fixed: the "More settings" of a card could close when a select was changed right after opening it.
 - New cost mode FTE: cost per FTE and month times a share of one FTE (slider 0 to 300 percent, up to 1,000 percent by typing). A new internal staff resource starts as FTE at 100 percent.
 - The type "Internal dev" is now "Internal staff".
 - A new resource is always on in stretch, and on in max when it was added while viewing max, so a plan built in max is complete in stretch.

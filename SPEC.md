@@ -30,6 +30,9 @@ A product manager can describe the resources of a plan, see immediately how the 
 - Fixed euro currency, English UI, one fixed number format that does not depend on the browser, for example €92,100.
 - The tool is dark only.
 - Shareable link that restores the plan, in a static page with no server. The plan is encoded in the URL fragment. A plan holds at most 20 resources. JSON export and import is the fallback if a link cannot carry a plan.
+- Plans have a name of up to 40 characters, shown on the plan's card and carried in links and files.
+- The plans of a session sit in a tray under the headline: one index card per plan, up to 10. A new empty plan starts with one click from the tray, wherever the person came from. A copy of the open plan becomes a new card named "Copy of ...". A plan that is imported from a file or opened from a link becomes a new card and replaces nothing. A card can be opened, renamed (on the open card) and closed, and closing can be undone for a few seconds. The tray can be folded, and then shows the name of the open plan. The sample plan is the first card of a first visit and can be added again from the tray.
+- The open plans are kept in the tab, so they survive a reload and are gone when the tab is closed. They never leave the browser.
 
 ## Non-goals
 
@@ -49,6 +52,9 @@ flowchart LR
     PM -->|sets unit, units and budgets| Editor
     PM -->|edits values and switches resources| Editor
     PM -->|defines milestones with value and linked resources| Editor
+    PM -->|starts, copies, opens and closes plans| Tray[Plan tray, up to 10 plans]
+    Tray <--> Editor
+    Tray <-->|kept for the session| Tab[(Tab storage)]
     Editor --> List[(Resources with on/off per scenario, and milestones)]
     List --> Calc[Cost per period and running total per scenario]
     Calc --> Chart[Cost chart by resource type]
@@ -107,8 +113,8 @@ Template defaults (can be tuned): internal team as FTE at 100 percent with 8,000
 - AC14: Given a slider with a number field beside it, when a larger value than the slider range is typed, then the value is accepted and the slider range grows.
 - AC15: Given a timeframe longer than one year, when it is entered, then the tool sets it to the maximum and shows "A plan can have at most 12 months." or "A plan can have at most 4 quarters.", according to the unit.
 - AC16: Given a scenario with no active resources, when the overview is shown, then the summary shows a short hint to switch one on or add one.
-- AC17: Given a plan, when the shareable link is opened in a new browser, then the same unit, units, budgets, resources and the on/off state per scenario are restored.
-- AC18: Given a link that is invalid or cut off, when it is opened, then the tool shows an empty plan with a clear message and does not crash.
+- AC17: Given a plan, when the shareable link is opened in a new browser, then the same name, unit, units, budgets, resources, milestones and the on/off state per scenario are restored.
+- AC18: Given a link that is invalid or cut off, when it is opened, then the tool shows a clear message, keeps the plans that are open (a first visit shows the sample plan) and does not crash.
 - AC19: Given a plan of 6 months, when the unit is switched to quarters, then the cost chart, the headroom bar and the cards show 2 quarters (Q1 is M1 to M3), every scenario total and milestone status is unchanged, and no stored value has changed. Switching back to months shows the original values exactly, including starts, ends, due months and milestone due months. Given a plan whose length is not a multiple of 3 months, when the quarter view is chosen, then it is unavailable with a short hint.
 - AC20: Given the tool files are opened from disk, when `docs/index.html` is loaded, then everything works without a server or network.
 - AC21: Given a phone width of 390 px, when the overview is shown, then everything stacks into one column and long resource names are not cut off by the switch and label.
@@ -133,6 +139,14 @@ Template defaults (can be tuned): internal team as FTE at 100 percent with 8,000
 - AC40: Given a one-time cost due in month 5 and a milestone due in month 5, when the quarter view is shown, then both show Q2 with their month and keep their exact month; and when either is edited in the quarter view to Q2, then the one-time cost moves to month 4 and the milestone to month 6.
 - AC41: Given a new plan, when it is created in the quarter view with a length of 2 quarters, then it is stored as 6 months and the month view shows it as 6 months.
 - AC42: Given a link or a JSON file with a newer format version than the tool knows, when it is opened, then the tool shows a clear message that it comes from a newer release and changes nothing. Given one with an older version (before version 2), then the tool shows a clear message that it was made with an older version that this page no longer reads and changes nothing.
+- AC46: Given a plan, when the person renames it on the open card, then the name is saved as typed (at most 40 characters, extra spaces squeezed), shown on the card and in the folded bar, and carried in the link and the JSON file. An empty name is not accepted and the old name comes back.
+- AC47: Given any state of the page (after an import, after opening a link, with the sample plan, with the tray folded), when the person clicks "New plan" in the tray, then a new empty plan opens as a new card with one click, the other plans stay unchanged, and the focus goes to the name of the new plan.
+- AC48: Given an open plan, when the person clicks "Copy", then a new card named "Copy of <name>" (cut to 40 characters) opens right after the original, with the same budgets, resources, milestones and settings, and editing the copy never changes the original.
+- AC49: Given plans in the tray, when a card is opened, then that plan shows exactly as it was left and the others stay unchanged. Given a plan is imported from a file or a link is opened, then it becomes a new card and replaces nothing.
+- AC50: Given 10 plans in the tray, when the person tries to start, copy, import or open another, then the tool refuses with the message "The tray holds at most 10 plans. Close one first." and changes nothing.
+- AC51: Given a card, when the person closes it, then it disappears, the neighbouring plan opens if it was the open one, and a note "Closed ..." with an Undo button stays for 8 seconds; Undo brings the plan back at its place and opens it. Closing the last plan leaves a new empty plan.
+- AC52: Given plans in the tray, when the page is reloaded in the same tab, then the plans, their order, the open plan, their edits and the folded state are back. Given a new tab, or a tab storage that is blocked or holds broken data, then the tool starts with the sample plan and works without error.
+- AC53: Given the tray, when the person folds it, then only a tab "Plans (n)" and the name of the open plan stay visible, and unfolding shows the cards again. On a phone the cards scroll sideways inside the tray and the page does not scroll sideways.
 - AC43: Given a plan whose link is longer than 2,000 characters including the address of the page, when the person shares it, then the tool still gives the link but shows a short note that some apps may cut it off, and offers the JSON export as the safe way.
 - AC44: Given the page is opened from a file on disk, when the person shares the plan, then the tool says the link only works on this computer and points to the hosted page or the JSON export.
 - AC45: Given a link made in a browser that can compress, when it is opened in a browser that cannot, then the tool shows a clear message that the link needs a newer browser and changes nothing.
@@ -197,9 +211,10 @@ Milestones for the test case:
 - Milestones are value based: each describes the goal achieved when it is reached. A milestone is linked to a planning unit, because resources may run longer than the milestone and only contribute to it up to its unit. It is reached in a scenario if the scenario's own budget has not been passed by that unit and all linked resources are on.
 - Milestone fields: name, value description (up to 140 characters), due unit, linked resources, importance with two levels (must-have, nice-to-have). Up to 8 milestones. The name is limited to 40 characters. A milestone may link a resource that starts after its due unit, with a short warning in the dialog, because that resource would contribute nothing to it.
 - Milestones are defined in a dialog opened from an "Add milestone" button. They show up in the summary, as markers on the cost chart, and in a status list that compares both scenarios.
-- GitHub Pages is the hosted version: a demo with sample data at first, the actual hosted tool later. Everything stays in the browser, so the hosted tool stores nothing about its users, and the shared plan lives in the URL fragment, which is never sent to a server. Every plan link and JSON file carries a format version. The format is version 2. Links and files of version 1, made before the FTE mode, are not read any more: no links were in circulation while the page was a demo, so there is no migration.
+- GitHub Pages is the hosted version: a demo with sample data at first, the actual hosted tool later. Everything stays in the browser (the open plans only in the tab), so the hosted tool stores nothing about its users, and the shared plan lives in the URL fragment, which is never sent to a server. Every plan link and JSON file carries a format version. The format is version 2. Links and files of version 1, made before the FTE mode, are not read any more: no links were in circulation while the page was a demo, so there is no migration.
 - FTE mode: the person enters the cost per FTE and month (not per year, so no conversion is needed and the quarter view just shows three times the value) and a share of one FTE with a slider from 0 to 300 percent, where a larger typed value up to 1,000 percent is accepted, so a team of two can be 200 percent. The mode is a cost mode like the others, so it is selectable for every resource type. Only a new internal staff resource starts with it, at 100 percent and 8,000 per FTE and month (an invented default).
 - The type that was called internal dev is called internal staff, in the interface, in the data and in the design token `data-internal-staff` (Pocketknife design version 2).
+- Plans have names and live in a tray of up to 10 cards, kept in the tab storage (sessionStorage). The plan name is part of the plan and of the link and file format version 2. A new plan, a copy, an import and a link each open a new card, so nothing is replaced and nothing is lost without an undo. The tray looks like index cards on a work table, with the stamps and hard shadows of the design language.
 - Name: Budgeteer.
 
 ## Open questions

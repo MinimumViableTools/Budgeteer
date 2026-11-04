@@ -58,6 +58,8 @@
 
   var part = {
     structure: function (plan) {
+      /* read the real state before rebuilding: the toggle event of a details element arrives a moment late */
+      Array.prototype.forEach.call(document.querySelectorAll('#cards details[data-more]'), function (d) { openMore[d.getAttribute('data-more')] = d.open; });
       $('cards').innerHTML = plan.resources.map(function (r) { return cardHtml(plan, r); }).join('') || '<p class="empty">No resources yet. Add one from a template above.</p>';
       Array.prototype.forEach.call(document.querySelectorAll('#cards .pk-range'), setFill);
       $('resHint').innerHTML = 'Viewing the <b>' + plan.scenario + '</b> scenario. Use the switches to include or exclude resources in this scenario only.';

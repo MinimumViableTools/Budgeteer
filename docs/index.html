@@ -29,14 +29,21 @@
     </div>
     <div class="stamp-row" id="headActions"><button class="pk-btn pk-btn--primary" id="shareBtn" type="button" aria-expanded="false" aria-controls="sharePanel">Share plan</button></div>
   </header>
+  <section class="tray" id="tray" aria-labelledby="trayTitle">
+    <div class="tray-bar">
+      <button type="button" class="tray-tab" id="trayToggle" aria-expanded="true" aria-controls="trayBody"><span id="trayTitle">Plans</span><span class="tray-count" id="trayCount"></span><span class="tray-chev" aria-hidden="true"></span></button>
+      <span class="tray-now" id="trayNow"></span>
+    </div>
+    <div class="tray-undo" id="trayUndo" role="status" aria-live="polite" hidden><span id="undoText"></span><button type="button" class="pk-btn pk-btn--ghost" id="undoBtn">Undo</button></div>
+    <div class="tray-body" id="trayBody"><ul class="tray-cards" id="trayCards"></ul></div>
+  </section>
   <p class="notice" id="notice" role="status" aria-live="polite"></p>
-  <div class="demo-banner" id="demoBanner" hidden><span>This is a sample plan with invented data. Change anything you like.</span><button type="button" class="pk-btn pk-btn--ghost" id="bannerNew">Start an empty plan</button></div>
+  <div class="demo-banner" id="demoBanner" hidden>This is a sample plan with invented data. Change anything you like, or start your own with “New plan” in the tray above.</div>
   <section class="panel" id="sharePanel" aria-labelledby="h-share" hidden>
     <div class="panel-head"><h2 id="h-share">Share this plan</h2><button type="button" class="pk-btn pk-btn--ghost" id="closeShare">Close</button></div>
     <div class="share-row"><label class="pk-label" for="shareLink">Link</label><input class="txt" id="shareLink" readonly autocomplete="off"><button type="button" class="pk-btn pk-btn--primary" id="copyLink">Copy link</button></div>
     <p class="hint" id="shareNote" role="status"></p>
     <div class="share-row"><button type="button" class="pk-btn" id="exportBtn">Download as JSON</button><button type="button" class="pk-btn" id="importBtn">Open a JSON file</button><input type="file" id="importFile" accept=".json,application/json" hidden></div>
-    <div class="share-row"><button type="button" class="pk-btn pk-btn--ghost" id="newPlan">Start an empty plan</button><button type="button" class="pk-btn pk-btn--ghost" id="samplePlan">Load the sample plan</button></div>
   </section>
   <main id="main" class="stack">
     <section class="panel" aria-labelledby="h-settings">
@@ -117,6 +124,7 @@
 <script src="js/codec.js"></script>
 <script src="js/sample.js"></script>
 <script src="js/state.js"></script>
+<script src="js/stack.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/ui-resources.js"></script>
@@ -124,6 +132,7 @@
 <script src="js/ui-summary.js"></script>
 <script src="js/ui-milestones.js"></script>
 <script src="js/ui-share.js"></script>
+<script src="js/ui-plans.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

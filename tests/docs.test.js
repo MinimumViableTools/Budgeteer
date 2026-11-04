@@ -25,7 +25,7 @@ test('the page loads nothing from the network, only a link to the source is exte
 test('scripts are classic scripts in a working order, with no modules and no runtime fetching', () => {
   const scripts = refs(/<script src="([^"]+)"/g);
   assert.ok(!/type="module"/.test(html));
-  const order = ['js/core.js', 'js/codec.js', 'js/sample.js', 'js/state.js', 'js/charts.js', 'js/ui.js', 'js/main.js'];
+  const order = ['js/core.js', 'js/codec.js', 'js/sample.js', 'js/state.js', 'js/stack.js', 'js/charts.js', 'js/ui.js', 'js/ui-plans.js', 'js/main.js'];
   const idx = order.map((f) => scripts.indexOf(f)); assert.ok(idx.every((i) => i >= 0), 'all core scripts are loaded');
   assert.deepEqual([...idx].sort((a, b) => a - b), idx, 'dependencies come first');
   assert.equal(scripts[scripts.length - 1], 'js/main.js');
@@ -33,13 +33,14 @@ test('scripts are classic scripts in a working order, with no modules and no run
     const code = fs.readFileSync(path.join(DOCS, f), 'utf8');
     assert.ok(!/^\s*(import|export)\s/m.test(code), f + ' uses module syntax');
     assert.ok(!/\bfetch\s*\(|XMLHttpRequest|importScripts/.test(code), f + ' fetches at run time');
-    assert.ok(!/localStorage|sessionStorage|document\.cookie/.test(code), f + ' stores data in the browser');
+    assert.ok(!/localStorage|document\.cookie|indexedDB/.test(code), f + ' stores data beyond the tab');
+    if (f !== 'js/ui-plans.js') assert.ok(!/sessionStorage/.test(code), f + ' uses the tab storage, only the tray may');
     assert.ok(!/\beval\s*\(|new Function\s*\(/.test(code), f + ' uses eval');
   }
 });
 
 test('the pure files never touch the page', () => {
-  for (const f of ['core.js', 'codec.js', 'sample.js', 'state.js', 'charts.js']) {
+  for (const f of ['core.js', 'codec.js', 'sample.js', 'state.js', 'stack.js', 'charts.js']) {
     const code = fs.readFileSync(path.join(DOCS, 'js', f), 'utf8');
     assert.ok(!/\bdocument\b|\bwindow\b|\blocation\b|\bnavigator\b/.test(code.replace(/\/\*[\s\S]*?\*\//g, '')), f + ' reaches into the page');
   }
@@ -92,4 +93,10 @@ test('the logo: files, token colours, and its place before the name', () => {
   assert.match(html, /<link rel="icon" href="logo\/budgeteer-logo\.svg" type="image\/svg\+xml">/);
   assert.match(html, /<link rel="apple-touch-icon" href="logo\/apple-touch-icon\.png">/);
   for (const f of refs(/<link rel="(?:icon|apple-touch-icon)" href="([^"]+)"/g)) assert.ok(fs.existsSync(path.join(DOCS, f)), 'missing ' + f);
+});
+
+test('only the tray stores plans, and only in the tab', () => {
+  const plans = fs.readFileSync(path.join(DOCS, 'js', 'ui-plans.js'), 'utf8');
+  assert.match(plans, /sessionStorage/); assert.ok(!/localStorage/.test(plans));
+  assert.match(plans, /try \{ return window\.sessionStorage; \} catch/, 'blocked storage must not break the page');
 });

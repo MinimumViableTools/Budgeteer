@@ -19,7 +19,7 @@
     entries.forEach(function (e) { if (e.id >= nextId) nextId = e.id + 1; });
     function emit(what) { listeners.slice().forEach(function (fn) { fn(what); }); }
     function indexOf(id) { for (var i = 0; i < entries.length; i++) if (entries[i].id === id) return i; return -1; }
-    function emptyPlan() { return core.newPlan('month', 6, 'New plan'); }
+    function emptyPlan() { return core.startPlan('New plan'); }
     if (!entries.length) entries.push({ id: nextId++, plan: emptyPlan(), sample: false });
     if (indexOf(activeId) < 0) activeId = entries[0].id;
 

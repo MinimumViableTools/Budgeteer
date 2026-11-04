@@ -4,7 +4,7 @@
   var core = Budgeteer.core, codec = Budgeteer.codec, ui = Budgeteer.ui, $ = ui.$;
   var store, seq = 0, openPanel = false;
 
-  function emptyPlan() { var p = core.newPlan('month', 6); p.budgets = { max: 100000, stretch: 125000 }; return p; }
+  function emptyPlan() { return core.startPlan('New plan'); }
 
   function note(link) {
     var a = codec.shareAdvice(link);
@@ -40,7 +40,7 @@
     var reader = file.text ? file.text() : new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = rej; r.readAsText(file); });
     reader.then(function (text) {
       var r = codec.importJson(text);
-      if (r.ok) { Budgeteer.main.hideBanner(); store.loadPlan(r.plan, 'Opened the plan from ' + file.name + '.'); } else store.say(r.message);
+      if (r.ok) Budgeteer.tray.addPlan(r.plan, 'Opened the plan from ' + file.name + ' as a new card in the tray.'); else store.say(r.message);
     }, function () { store.say(codec.NOT_A_PLAN); });
   }
 
@@ -53,9 +53,6 @@
     $('exportBtn').addEventListener('click', download);
     $('importBtn').addEventListener('click', function () { $('importFile').click(); });
     $('importFile').addEventListener('change', function () { var f = this.files && this.files[0]; if (f) readFile(f); this.value = ''; });
-    $('newPlan').addEventListener('click', function () { Budgeteer.main.hideBanner(); store.loadPlan(emptyPlan(), 'Started an empty plan.'); });
-    $('bannerNew').addEventListener('click', function () { Budgeteer.main.hideBanner(); store.loadPlan(emptyPlan(), 'Started an empty plan.'); $('shareBtn').focus(); });
-    $('samplePlan').addEventListener('click', function () { Budgeteer.main.showBanner(); store.loadPlan(Budgeteer.sample.samplePlan(), 'Loaded the sample plan.'); });
     store.subscribe(refreshLink);
   });
   Budgeteer.share = { emptyPlan: emptyPlan };

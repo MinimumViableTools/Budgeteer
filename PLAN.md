@@ -23,13 +23,15 @@ docs/
     codec.js          pure functions: plan to link fragment, plan to JSON, parsing and validation
     sample.js         invented sample plan for demo mode, embedded as data
     state.js          the plan state, actions and change notification
+    stack.js          the open plans of a session, copy, close with undo, text for the tab storage
     charts.js         cost chart and headroom bar as SVG, axis scaling, label placement, milestone markers
     ui.js             start-up of the page, settings, notice, typed headline
     ui-resources.js   resource cards
     ui-charts.js      the charts on the page
     ui-summary.js     summary and sticky total bar
     ui-milestones.js  milestone list and dialog
-    ui-share.js       link, JSON export and import, new and sample plans
+    ui-share.js       link, JSON export and import
+    ui-plans.js       the tray of open plans and the tab storage
     main.js           start-up: read the link, demo mode, first render
 tests/
   core.test.js        node --test
@@ -46,6 +48,7 @@ Scripts are classic scripts loaded in order and share one namespace object. `cor
 ```text
 plan:
   version: 1
+  name: up to 40 characters
   view: "month" | "quarter"          display only, nothing is converted
   length: 1..12 months                everything is stored in months, quarter view needs a multiple of 3
   budgets: { max, stretch }

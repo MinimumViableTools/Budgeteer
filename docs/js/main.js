@@ -1,31 +1,29 @@
-/* Budgeteer start-up: reads the link, builds the store and starts the page. */
+/* Budgeteer start-up: takes the open plans from the tab storage, reads the link, builds the store and starts the page. */
 (function () {
   'use strict';
-  var core = Budgeteer.core, codec = Budgeteer.codec, store = null;
-  function banner(show) { var b = document.getElementById('demoBanner'); if (b) b.hidden = !show; }
-  Budgeteer.main = { hideBanner: function () { banner(false); }, showBanner: function () { banner(true); } };
+  var codec = Budgeteer.codec, store = null, stack = null;
 
   function fragment() { return location.hash.replace(/^#/, ''); }
+  function decode() { var frag = fragment(); return frag ? codec.decodePlanShort(frag) : Promise.resolve({ ok: false, code: 'empty', message: '' }); }
 
-  /* what the page shows for the current address: a plan from the link, the sample plan, or an empty plan with a message */
-  function fromAddress() {
-    var frag = fragment();
-    if (!frag) return Promise.resolve({ plan: Budgeteer.sample.samplePlan(), demo: true, notice: '' });
-    return codec.decodePlanShort(frag).then(function (r) {
-      if (r.ok) return { plan: r.plan, demo: false, notice: '' };
-      return { plan: Budgeteer.share.emptyPlan(), demo: false, notice: r.message };
-    });
-  }
-
-  fromAddress().then(function (start) {
-    store = Budgeteer.state.createStore(start.plan, start.notice);
-    banner(start.demo);
+  decode().then(function (link) {
+    var restored = Budgeteer.tray.load(), notice = '';
+    stack = restored;
+    if (link.ok) {
+      /* a link opens as a new card. Someone who comes only for a link starts without the sample plan. */
+      if (!stack) stack = Budgeteer.stack.createStack({ entries: [{ id: 1, plan: link.plan, sample: false }] });
+      else { var r = stack.add(link.plan); if (!r.ok) notice = r.error; }
+    } else if (link.code !== 'empty') notice = link.message;
+    if (!stack) stack = Budgeteer.stack.createStack({ entries: [{ id: 1, plan: Budgeteer.sample.samplePlan(), sample: true }] });
+    Budgeteer.tray.start(stack);
+    store = Budgeteer.state.createStore(stack.active().plan, notice);
     Budgeteer.ui.init(store);
-    /* a person who pastes another link into this page: load that plan. The page never writes the address itself. */
+
+    /* a person who pastes another link into this page: it opens as a new card. The page never writes the address itself. */
     window.addEventListener('hashchange', function () {
-      fromAddress().then(function (next) {
-        banner(next.demo);
-        store.loadPlan(next.plan, next.notice || (next.demo ? '' : 'Opened the plan from the link.'));
+      decode().then(function (next) {
+        if (next.ok) Budgeteer.tray.addPlan(next.plan, 'Opened the plan from the link as a new card in the tray.');
+        else if (next.code !== 'empty') store.say(next.message);
       });
     });
   });

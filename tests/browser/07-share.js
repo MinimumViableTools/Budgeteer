@@ -17,7 +17,7 @@ function biggest() {
   /* demo: no link */
   let s = await open({ url: HTTP });
   check('no link: sample plan and the banner', (await s.p.locator('#cards .rcard').count()) === 6 && (await s.p.locator('#demoBanner').isVisible()));
-  await s.p.click('#bannerNew');
+  await s.p.click('[data-new]');
   check('start empty plan: no resources, banner gone, notice', (await s.p.locator('#cards .rcard').count()) === 0 && !(await s.p.locator('#demoBanner').isVisible()) && /Started an empty plan/.test(await s.p.textContent('#notice')));
   check('empty plan defaults', (await s.p.inputValue('#bMax')) === '100,000' && (await s.p.inputValue('#length')) === '6' && /€0/.test(await s.p.textContent('#sumTotal')));
   await s.b.close();
@@ -58,7 +58,7 @@ function biggest() {
   /* AC18, AC42, AC45 */
   for (const [name, hash, re] of [['invalid', 'v2.AAAA', /not valid or was cut off/], ['garbage', 'hello', /not valid or was cut off/], ['cut off', frag.slice(0, 40), /not valid or was cut off/], ['newer', 'v3.' + frag.slice(3), /newer release/], ['old', 'v1.' + frag.slice(3), /older version of Budgeteer/]]) {
     const x = await open({ url: HTTP + '#' + hash });
-    check('AC18/AC42 ' + name + ' link: message, empty plan, no crash', re.test(await x.p.textContent('#notice')) && (await x.p.locator('#cards .rcard').count()) === 0 && x.errs.length === 0, x.errs.join('|'));
+    check('AC18/AC42 ' + name + ' link: message, the open plans stay, no crash', re.test(await x.p.textContent('#notice')) && (await x.p.locator('#cards .rcard').count()) === 6 && (await x.p.locator('#trayCards .plan-card[data-plan]').count()) === 1 && x.errs.length === 0, x.errs.join('|'));
     await x.b.close();
   }
   const bigFrag = await codec.encodePlanShort(biggest());
@@ -73,7 +73,7 @@ function biggest() {
   check('AC43 long link: note says it may be cut off and points to the JSON download', /characters long/.test(n) && /cut/.test(n) && /JSON/.test(n), n);
   await s.b.close();
   const old = await open({ url: HTTP + '#' + bigFrag, init: 'delete window.DecompressionStream; delete window.CompressionStream;' });
-  check('AC45 a deflated link without browser support gives a clear message', /needs a newer browser/.test(await old.p.textContent('#notice')) && (await old.p.locator('#cards .rcard').count()) === 0);
+  check('AC45 a deflated link without browser support gives a clear message', /needs a newer browser/.test(await old.p.textContent('#notice')) && (await old.p.locator('#cards .rcard').count()) === 6);
   await old.b.close();
 
   /* AC44: opened from a file */
@@ -101,9 +101,9 @@ function biggest() {
   const txt = OUT + '/note.txt'; fs.writeFileSync(txt, 'hello');
   await g.p.setInputFiles('#importFile', txt); await g.p.waitForTimeout(300);
   check('a text file is refused too', /not a valid Budgeteer plan/.test(await g.p.textContent('#notice')));
-  /* load sample again */
-  await g.p.click('#samplePlan');
-  check('load the sample plan again', (await g.p.locator('#cards .rcard').count()) === 6 && (await g.p.locator('#demoBanner').isVisible()));
+  /* the sample plan can be added again */
+  await g.p.click('[data-sample]');
+  check('load the sample plan again as a card', (await g.p.locator('#cards .rcard').count()) === 6 && (await g.p.locator('#demoBanner').isVisible()));
   /* phone */
   await g.p.setViewportSize({ width: 390, height: 844 }); await g.p.waitForTimeout(300);
   check('no horizontal scroll with the share panel on a phone', (await g.p.evaluate(() => document.documentElement.scrollWidth)) <= 390, await g.p.evaluate(() => document.documentElement.scrollWidth));
