@@ -382,3 +382,13 @@ test('FTE: the sample plan keeps its totals, with the core team as 2 FTE at 6,00
 test('AC38 the cost per FTE shows three times in the quarter view, the share does not', () => {
   assert.equal(core.shownValue(6000, 'quarter'), 18000); assert.equal(core.storedValue(18000, 'quarter'), 6000);
 });
+
+test('plan names are trimmed, squeezed and cut at 40 characters, and a new plan has a name', () => {
+  assert.equal(core.cleanName('  Q3   budget  '), 'Q3 budget');
+  assert.equal(core.cleanName('x'.repeat(60)).length, 40);
+  assert.equal(core.cleanName('   '), ''); assert.equal(core.cleanName(undefined), ''); assert.equal(core.cleanName(null), '');
+  assert.equal(core.cleanName('ä'.repeat(41)).length, 40);
+  assert.equal(core.newPlan('month', 6).name, 'New plan');
+  assert.equal(core.newPlan('month', 6, '  Roadmap 2027 ').name, 'Roadmap 2027');
+  assert.equal(samplePlan().name, 'Sample plan');
+});

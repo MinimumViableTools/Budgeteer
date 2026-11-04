@@ -23,6 +23,10 @@
       say: say,
       loadPlan: function (next, message) { commit(next, 'structure', message); },
 
+      renamePlan: function (name) {
+        var n = core.cleanName(name); if (!n || n === plan.name) return;
+        commit(Object.assign({}, plan, { name: n }), 'value');
+      },
       setView: function (view) {
         if (view === plan.view) return;
         if (view === 'quarter' && !core.canUseQuarterView(plan.length)) { say('The quarter view needs a plan length that is a multiple of 3 months.'); return; }

@@ -136,20 +136,20 @@ function craft(arr, zipped) {
   return zipped ? 'v2z.' + b64u(zlib.deflateRawSync(json)) : 'v2.' + b64u(json);
 }
 test('an FTE resource is valid up to a share of 1000 percent', () => {
-  const ok = [2, 0, 6, 1, 2, 1, [[1, 'T', 0, 3, 8000, 10, 1, 0, 3]], []];
+  const ok = [2, 0, 6, 1, 2, 1, [[1, 'T', 0, 3, 8000, 10, 1, 0, 3]], [], 'Plan'];
   assert.equal(codec.decodePlan('v2.' + Buffer.from(JSON.stringify(ok)).toString('base64url')).ok, true);
   assert.equal(codec.decodePlan('v2.' + Buffer.from(JSON.stringify(ok)).toString('base64url')).plan.resources[0].share, 10);
 });
 
 test('well-formed JSON with wrong content is refused', async () => {
-  const good = JSON.parse(JSON.stringify([2, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], [[1, 'M', 'v', 2, [1], 0]]]));
+  const good = JSON.parse(JSON.stringify([2, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], [[1, 'M', 'v', 2, [1], 0]], 'Plan']));
   assert.equal(codec.decodePlan(craft(good)).ok, true);
   const mutate = (fn) => { const c = JSON.parse(JSON.stringify(good)); fn(c); return craft(c); };
   const cases = {
     'length 13': (c) => { c[2] = 13; }, 'length 0': (c) => { c[2] = 0; }, 'length fractional': (c) => { c[2] = 2.5; },
     'quarter view with 4 months': (c) => { c[1] = 1; c[2] = 4; },
     'negative budget': (c) => { c[3] = -1; }, 'NaN budget': (c) => { c[3] = null; }, 'string budget': (c) => { c[3] = '95000'; },
-    'wrong top-level size': (c) => { c.pop(); }, 'not an array': (c) => { c.length = 0; },
+    'wrong top-level size': (c) => { c.pop(); }, 'no plan name': (c) => { c[8] = ''; }, 'blank plan name': (c) => { c[8] = '   '; }, 'plan name too long': (c) => { c[8] = 'x'.repeat(41); }, 'plan name not text': (c) => { c[8] = 5; }, 'not an array': (c) => { c.length = 0; },
     'bad type index': (c) => { c[6][0][2] = 9; }, 'bad mode index': (c) => { c[6][0][3] = 4; },
     'FTE share above 1000 percent': (c) => { c[6][0][3] = 3; c[6][0][5] = 11; },
     'FTE share negative': (c) => { c[6][0][3] = 3; c[6][0][5] = -1; },
@@ -176,7 +176,7 @@ test('a deflated link that inflates to a huge size is refused without exhausting
 });
 
 test('a valid plan padded beyond the size limit is refused, so the limit really stops the inflation', async () => {
-  const json = JSON.stringify([2, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], []]);
+  const json = JSON.stringify([2, 0, 6, 95000, 125000, 1, [[1, 'A', 0, 0, 100, 5, 1, 0, 3]], [], 'Plan']);
   const small = 'v2z.' + b64u(zlib.deflateRawSync(Buffer.from(json)));
   assert.equal((await codec.decodePlanShort(small)).ok, true);
   const padded = 'v2z.' + b64u(zlib.deflateRawSync(Buffer.from(json + ' '.repeat(100000))));
@@ -233,4 +233,15 @@ test('AC42 a JSON file from a newer format is refused with a message', () => {
   assert.equal(r.ok, false); assert.equal(r.code, 'newer'); assert.match(r.message, /newer release/);
   const old = codec.importJson(JSON.stringify(Object.assign({}, good, { format: 1 })));
   assert.equal(old.ok, false); assert.equal(old.code, 'old'); assert.match(old.message, /older version of Budgeteer/);
+});
+
+test('the plan name survives link, deflated link and JSON, with umlauts and at the full length', async () => {
+  for (const name of ['Q3 Budget für Größe €', 'n'.repeat(40), 'X']) {
+    const p = Object.assign(samplePlan(), { name });
+    assert.equal(codec.decodePlan(codec.encodePlan(p)).plan.name, name);
+    assert.equal((await codec.decodePlanShort(await codec.encodePlanShort(p))).plan.name, name);
+    assert.equal(codec.importJson(codec.exportJson(p)).plan.name, name);
+  }
+  const noName = JSON.parse(codec.exportJson(samplePlan())); delete noName.plan.name;
+  assert.equal(codec.importJson(JSON.stringify(noName)).plan.name, 'Untitled plan', 'a file without a name gets one');
 });

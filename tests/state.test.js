@@ -118,3 +118,13 @@ test('changing a resource to FTE gives sensible defaults and keeps an existing s
   s.changeResourceMode(1, 'rateDays'); s.changeResourceMode(1, 'fte');
   assert.equal(s.getPlan().resources[0].share, 2, 'the share of the core team is kept');
 });
+
+test('a plan can be renamed, an empty name is ignored, and the name is cleaned', () => {
+  const s = createStore(samplePlan()); const kinds = [];
+  s.subscribe((c) => kinds.push(c.kind));
+  s.renamePlan('  Max   scenario v2 '); assert.equal(s.getPlan().name, 'Max scenario v2');
+  s.renamePlan('   '); assert.equal(s.getPlan().name, 'Max scenario v2');
+  s.renamePlan('Max scenario v2');
+  assert.deepEqual(kinds, ['value'], 'only a real change notifies');
+  s.renamePlan('y'.repeat(80)); assert.equal(s.getPlan().name.length, 40);
+});

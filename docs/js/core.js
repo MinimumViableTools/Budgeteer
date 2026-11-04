@@ -7,7 +7,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var LIMITS = { months: 12, quarters: 4, resources: 20, milestones: 8, milestoneName: 40, milestoneValue: 140, maxShare: 10 };
+  var LIMITS = { months: 12, quarters: 4, resources: 20, milestones: 8, milestoneName: 40, milestoneValue: 140, maxShare: 10, planName: 40, plans: 10 };
   var TYPE_ORDER = ['internalStaff', 'freelancer', 'subscription', 'infrastructure', 'oneTime'];
   var TYPE_LABELS = { internalStaff: 'Internal staff', freelancer: 'Freelancer', subscription: 'Subscription', infrastructure: 'Infrastructure', oneTime: 'One time' };
   var TEMPLATES = {
@@ -182,9 +182,11 @@
 
   /* plan changes: each returns a new plan, or an error message with the plan unchanged */
   function nextId(list) { var m = 0; list.forEach(function (x) { if (x.id > m) m = x.id; }); return m + 1; }
-  function newPlan(view, shownLength) {
+  /* a plan name: trimmed and cut to the limit; empty text gives an empty result */
+  function cleanName(text) { return String(text === undefined || text === null ? '' : text).replace(/\s+/g, ' ').trim().slice(0, LIMITS.planName).trim(); }
+  function newPlan(view, shownLength, name) {
     var c = clampLength(shownLength, view);
-    return { version: 1, view: view, length: c.months, scenario: 'max', budgets: { max: 0, stretch: 0 }, resources: [], milestones: [] };
+    return { version: 1, name: cleanName(name) || 'New plan', view: view, length: c.months, scenario: 'max', budgets: { max: 0, stretch: 0 }, resources: [], milestones: [] };
   }
   function addResource(plan, templateKey) {
     if (plan.resources.length >= LIMITS.resources) return { plan: plan, error: 'A plan can have at most ' + LIMITS.resources + ' resources. Remove one first.' };
@@ -251,7 +253,7 @@
   return {
     LIMITS: LIMITS, TYPE_ORDER: TYPE_ORDER, TYPE_LABELS: TYPE_LABELS, TEMPLATES: TEMPLATES, SCENARIOS: SCENARIOS, STATUS_TEXT: STATUS_TEXT,
     formatEuro: formatEuro, parseAmount: parseAmount,
-    quarterOf: quarterOf, periodCount: periodCount, unitName: unitName, periodLabel: periodLabel, monthShort: monthShort, monthLabel: monthLabel,
+    cleanName: cleanName, quarterOf: quarterOf, periodCount: periodCount, unitName: unitName, periodLabel: periodLabel, monthShort: monthShort, monthLabel: monthLabel,
     canUseQuarterView: canUseQuarterView, clampLength: clampLength, shownValue: shownValue, storedValue: storedValue,
     periodChoices: periodChoices, monthFromChoice: monthFromChoice, snapStart: snapStart, snapEnd: snapEnd, snapOneTimeDue: snapOneTimeDue, snapMilestoneDue: snapMilestoneDue, isAligned: isAligned,
     costAt: costAt, monthlyByType: monthlyByType, sumByType: sumByType, runningTotals: runningTotals, groupForView: groupForView, lineTotal: lineTotal,

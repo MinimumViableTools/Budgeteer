@@ -15,7 +15,7 @@
   /* a plan in one shape, so that a round trip compares equal */
   function normalizePlan(plan) {
     return {
-      version: 1, view: plan.view === 'quarter' ? 'quarter' : 'month', length: plan.length, scenario: plan.scenario === 'stretch' ? 'stretch' : 'max',
+      version: 1, name: core.cleanName(plan.name) || 'Untitled plan', view: plan.view === 'quarter' ? 'quarter' : 'month', length: plan.length, scenario: plan.scenario === 'stretch' ? 'stretch' : 'max',
       budgets: { max: plan.budgets.max, stretch: plan.budgets.stretch },
       resources: plan.resources.map(function (r) {
         var o = { id: r.id, name: r.name, type: r.type, mode: r.mode };
@@ -36,7 +36,7 @@
         if (mode === 0) { a = r.rate; b = r.days; } else if (mode === 1) { a = r.amount; b = 0; } else if (mode === 3) { a = r.fteCost; b = r.share; } else { a = r.amount; b = r.due; }
         return [r.id, r.name, TYPES.indexOf(r.type), mode, a, b, r.from, r.to === null ? 0 : r.to, (r.on.max ? 1 : 0) + (r.on.stretch ? 2 : 0)];
       }),
-      p.milestones.map(function (m) { return [m.id, m.name, m.value, m.due, m.linked, IMPORTANCE.indexOf(m.importance)]; })];
+      p.milestones.map(function (m) { return [m.id, m.name, m.value, m.due, m.linked, IMPORTANCE.indexOf(m.importance)]; }), p.name];
   }
 
   /* bytes and base64url */
@@ -137,7 +137,8 @@
   }
 
   function fromCompact(a) {
-    if (!Array.isArray(a) || a.length !== 8 || a[0] !== FORMAT_VERSION) return bad('invalid', INVALID);
+    if (!Array.isArray(a) || a.length !== 9 || a[0] !== FORMAT_VERSION) return bad('invalid', INVALID);
+    if (!isStr(a[8], L.planName) || !a[8].trim()) return bad('invalid', INVALID);
     var view = a[1] === 1 ? 'quarter' : a[1] === 0 ? 'month' : null, length = a[2];
     if (!view || !isInt(length, 1, L.months) || !isNum(a[3], 0, 1e12) || !isNum(a[4], 0, 1e12) || (a[5] !== 0 && a[5] !== 1)) return bad('invalid', INVALID);
     if (view === 'quarter' && length % 3 !== 0) return bad('invalid', INVALID);
@@ -162,7 +163,7 @@
       mids[x[0]] = true;
       milestones.push({ id: x[0], name: x[1], value: x[2], due: x[3], linked: x[4].slice(), importance: IMPORTANCE[x[5]] });
     }
-    return { ok: true, plan: { version: 1, view: view, length: length, scenario: a[5] === 1 ? 'stretch' : 'max', budgets: { max: a[3], stretch: a[4] }, resources: resources, milestones: milestones } };
+    return { ok: true, plan: { version: 1, name: a[8], view: view, length: length, scenario: a[5] === 1 ? 'stretch' : 'max', budgets: { max: a[3], stretch: a[4] }, resources: resources, milestones: milestones } };
   }
 
   /* JSON file: { "app": "Budgeteer", "format": 2, "plan": { ... } }, checked with the same rules as a link */
