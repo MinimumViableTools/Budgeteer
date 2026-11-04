@@ -14,6 +14,14 @@ const { OUT, open, check, done } = require('./lib.js');
   check('max scenario narrative', /Max scenario over 6 months: the plan totals €92,100/.test(t2));
   check('milestone layer: 2 of 3 not reached, must-have first', /2 of 3 goals are not reached/.test(t2) && t2.indexOf('Must-have: Public beta') < t2.indexOf('Nice-to-have: Security audit passed'));
   check('reason and value shown', /Extra freelancer is switched off/.test(t2) && /First external users can sign up and use the product/.test(t2));
+  const st = async () => ({ ok: await p.locator('#sumText .ms-sum .pk-stamp--ok').count(), over: await p.locator('#sumText .ms-sum .pk-stamp--over').count(), first: (await p.locator('#sumText .ms-sum li').first().getAttribute('class')) });
+  const mx = await st();
+  check('max: two red stamps and one green stamp as bullets, not reached first', mx.over === 2 && mx.ok === 1 && mx.first === 'missed', JSON.stringify(mx));
+  check('stamps carry words, not only colour', /Not reached/.test(await p.locator('#sumText .ms-sum .pk-stamp--over').first().textContent()) && /Reached/.test(await p.locator('#sumText .ms-sum .pk-stamp--ok').first().textContent()));
+  check('every goal shows its due unit and its description', /due M6/.test(await p.textContent('#sumText')) && /Stakeholders can click through the core flow/.test(await p.textContent('#sumText')));
+  await p.click('#sStr'); const sr = await st();
+  check('stretch: three green stamps and no red one', sr.ok === 3 && sr.over === 0, JSON.stringify(sr));
+  await p.click('#sMax');
   /* AC16 */
   for (const id of [1, 2, 3, 4]) await p.locator('[data-sw="' + id + '"]').uncheck({ force: true });
   check('AC16 hint when nothing is on', /No resources are switched on in the max scenario\. Switch one on or add one/.test(await p.textContent('#sumText')));

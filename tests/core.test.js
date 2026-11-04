@@ -335,3 +335,18 @@ test('picking a choice gives the month: quarters snap, keep changes nothing, emp
   assert.equal(core.monthFromChoice('start', 'keep'), undefined); assert.equal(core.monthFromChoice('end', ''), null);
   assert.equal(core.monthFromChoice('start', '5'), 5);
 });
+
+test('AC35 the summary lists every milestone, the ones not reached first, with the due unit', () => {
+  const p = samplePlan();
+  const max = core.summary(p, 'max').milestones.items;
+  assert.deepEqual(max.map(x => [x.name, x.reached]), [['Public beta', false], ['Security audit passed', false], ['Prototype ready', true]]);
+  assert.deepEqual(max.map(x => x.due), ['M6', 'M5', 'M2']);
+  assert.equal(max[2].reasonText, '');
+  assert.equal(core.summary(p, 'max').milestones.notReached.length, 2);
+  const str = core.summary(p, 'stretch').milestones.items;
+  assert.deepEqual(str.map(x => x.reached), [true, true, true]);
+  assert.deepEqual(str.map(x => x.name), ['Prototype ready', 'Public beta', 'Security audit passed'], 'reached goals keep the plan order within must-have and nice-to-have');
+  const q = core.summary(Object.assign(samplePlan(), { view: 'quarter' }), 'max').milestones.items;
+  assert.deepEqual(q.map(x => x.due), ['Q2', 'Q2 (M5)', 'Q1 (M2)']);
+  assert.deepEqual(core.summary(core.newPlan('month', 6), 'max').milestones.items, [], 'no milestones, no list');
+});

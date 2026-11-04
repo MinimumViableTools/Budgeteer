@@ -17,9 +17,11 @@
         var m = /^Milestones:(.*)$/.exec(t);
         return '<p>' + (m ? '<b>Milestones:</b>' + esc(m[1]) : esc(t)) + '</p>';
       }).join('');
-      if (s.milestones.notReached.length) {
-        html += '<ul class="ms-missed">' + s.milestones.notReached.map(function (x) {
-          return '<li><b>' + (x.importance === 'must' ? 'Must-have' : 'Nice-to-have') + ': ' + esc(x.name) + '</b>. ' + (x.value ? 'Goal: ' + esc(x.value.replace(/\.$/, '')) + '. ' : '') + 'Not reached because ' + esc(x.reasonText) + '.</li>';
+      if (s.milestones.items.length) {
+        html += '<ul class="ms-sum">' + s.milestones.items.map(function (x) {
+          var stampHtml = '<span class="pk-stamp pk-stamp--' + (x.reached ? 'ok' : 'over') + '">' + (x.reached ? 'Reached' : 'Not reached') + '</span>';
+          return '<li class="' + (x.reached ? 'reached' : 'missed') + '">' + stampHtml + '<div><b>' + (x.importance === 'must' ? 'Must-have' : 'Nice-to-have') + ': ' + esc(x.name) + '</b> <span class="ms-due">due ' + esc(x.due) + '</span>' +
+            (x.value ? '<br>Goal: ' + esc(x.value.replace(/\.$/, '')) + '.' : '') + (x.reached ? '' : '<br>Not reached because ' + esc(x.reasonText) + '.') + '</div></li>';
         }).join('') + '</ul>';
       }
       $('sumText').innerHTML = html;

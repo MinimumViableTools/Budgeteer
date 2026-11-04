@@ -217,7 +217,7 @@
   function summary(plan, scenario) {
     var t = scenarioTotals(plan, scenario), view = plan.view, scn = scenario === 'max' ? 'max' : 'stretch';
     var anyOn = plan.resources.some(function (r) { return r.on[scenario]; });
-    var out = { total: t.total, status: status(t.total, plan.budgets), vsMax: distance(t.total, plan.budgets.max), vsStretch: distance(t.total, plan.budgets.stretch), paragraphs: [], milestones: { total: plan.milestones.length, notReached: [] } };
+    var out = { total: t.total, status: status(t.total, plan.budgets), vsMax: distance(t.total, plan.budgets.max), vsStretch: distance(t.total, plan.budgets.stretch), paragraphs: [], milestones: { total: plan.milestones.length, notReached: [], items: [] } };
     if (!anyOn) { out.paragraphs.push('No resources are switched on in the ' + scn + ' scenario. Switch one on or add one to see the plan.'); return out; }
     var g = groupForView(t.monthly, view), byT = emptyByType(), bestType, bestPeriod = 1, bestVal = -1;
     g.forEach(function (b, i) { TYPE_ORDER.forEach(function (ty) { byT[ty] += b[ty]; }); var v = sumByType(b); if (v > bestVal) { bestVal = v; bestPeriod = i + 1; } });
@@ -229,11 +229,16 @@
     if (t.passedStretch) p2 += ' It passes the stretch budget in ' + monthShort(t.passedStretch, view) + '.';
     out.paragraphs.push(p2);
     if (plan.milestones.length) {
-      plan.milestones.forEach(function (m) {
+      var items = plan.milestones.map(function (m, i) {
         var st = milestoneStatus(plan, m, scenario, t);
-        if (!st.reached) out.milestones.notReached.push({ name: m.name, value: m.value, importance: m.importance, reasonText: st.reasonText });
+        return { name: m.name, value: m.value, importance: m.importance, reached: st.reached, reasonText: st.reasonText, due: monthLabel(m.due, view, 'end'), order: i };
       });
-      out.milestones.notReached.sort(function (a, b) { return (a.importance === 'must' ? 0 : 1) - (b.importance === 'must' ? 0 : 1); });
+      /* goals that are not reached come first, must-have before nice-to-have, then the reached ones in the same order */
+      items.sort(function (a, b) {
+        return (a.reached ? 1 : 0) - (b.reached ? 1 : 0) || (a.importance === 'must' ? 0 : 1) - (b.importance === 'must' ? 0 : 1) || a.order - b.order;
+      });
+      out.milestones.items = items;
+      out.milestones.notReached = items.filter(function (x) { return !x.reached; });
       if (!out.milestones.notReached.length) out.paragraphs.push('Milestones: with the ' + scn + ' budget and resources, all ' + plan.milestones.length + ' goals are reached.');
       else out.paragraphs.push('Milestones: with the current ' + scn + ' budget and resources, ' + out.milestones.notReached.length + ' of ' + plan.milestones.length + ' goals are not reached.');
     }

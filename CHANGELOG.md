@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The summary lists every milestone with a green "Reached" or red "Not reached" stamp as its bullet, not reached goals first.
+
 ## 0.1.0
 
 First complete version.
