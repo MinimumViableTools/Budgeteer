@@ -62,14 +62,14 @@
   }
 
   function costChart(model) {
-    var W = model.width, H = 350, padL = 50, padR = 8, padT = 64, padB = 40, n = model.periods.length;
+    var W = model.width, H = 350, padL = 58, padR = 8, padT = 64, padB = 40, n = model.periods.length;
     var pw = W - padL - padR, ph = H - padT - padB, ax = axis(model.maxPeriod, 4), col = pw / Math.max(1, n), bw = Math.min(52, col * 0.62);
     function y(v) { return padT + ph - (v / ax.top) * ph; }
     var showValues = col >= 44, labelEvery = col >= 26 ? 1 : 2, s = '';
     s += '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-labelledby="costTitle costAlt" focusable="false">';
     ax.ticks.forEach(function (t) {
       s += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + r1(y(t)) + '" y2="' + r1(y(t)) + '" stroke="var(--rule)" stroke-width="1"/>';
-      s += '<text x="' + (padL - 8) + '" y="' + r1(y(t) + 4) + '" text-anchor="end" font-size="12" fill="var(--ink-muted)">' + kfmt(t) + '</text>';
+      s += '<text x="' + (padL - 8) + '" y="' + r1(y(t) + 4) + '" text-anchor="end" font-size="12" fill="var(--ink-muted)">€' + kfmt(t) + '</text>';
     });
     var passRows = [], lastEnd = [-1e9, -1e9];
     (model.passes || []).forEach(function (m) {
