@@ -45,6 +45,13 @@
       <p class="hint" id="viewHint"></p>
     </section>
 
+    <section class="panel" aria-labelledby="h-chart">
+      <div class="panel-head"><h2 id="h-chart">Cost and budget</h2><div class="legend" id="legend"></div></div>
+      <div class="charts" id="charts">
+        <figure class="fig"><p class="chart-title" id="costTitle"></p><div id="costChart" class="chartbox"></div><figcaption class="sr-only" id="costAlt"></figcaption></figure>
+      </div>
+    </section>
+
     <section class="panel" aria-labelledby="h-res">
       <div class="panel-head"><h2 id="h-res">Resources</h2><p class="hint" id="resHint"></p></div>
       <div class="chips" id="tplChips" role="group" aria-label="Add a resource"></div>
@@ -56,8 +63,10 @@
 <script src="js/codec.js"></script>
 <script src="js/sample.js"></script>
 <script src="js/state.js"></script>
+<script src="js/charts.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/ui-resources.js"></script>
+<script src="js/ui-charts.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
