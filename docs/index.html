@@ -30,15 +30,11 @@
     <div class="stamp-row" id="headActions"><button class="pk-btn pk-btn--primary" id="shareBtn" type="button" aria-expanded="false" aria-controls="sharePanel">Share plan</button></div>
   </header>
   <section class="tray" id="tray" aria-label="Plans">
-    <div class="cabinet">
-      <div class="front">
-        <div class="plate"><span id="trayTitle">Plans<span class="tray-count" id="trayCount"></span></span><b class="tray-now" id="trayNow"></b></div>
-        <div class="knob" aria-hidden="true"></div>
-        <button type="button" class="pk-btn pk-btn--ghost slide" id="trayToggle" aria-expanded="true" aria-controls="trayBody">Push in</button>
-      </div>
-      <div class="rail" id="trayBody">
-        <div class="drawer"><div class="back" aria-hidden="true"></div><div class="floor" aria-hidden="true"></div><ul class="tray-cards" id="trayCards"></ul><div class="lip" aria-hidden="true"></div></div>
-      </div>
+    <div class="box">
+      <button type="button" class="tray-arrow" id="trayToggle" aria-expanded="true" aria-controls="trayBody" aria-label="Hide plans"></button>
+      <span class="sr-only" id="trayTitle">Plans<span id="trayCount"></span></span>
+      <b class="tray-now" id="trayNow"></b>
+      <div class="rail" id="trayBody"><ul class="tray-cards" id="trayCards"></ul></div>
     </div>
     <div class="tray-undo" id="trayUndo" role="status" aria-live="polite" hidden><span id="undoText"></span><button type="button" class="pk-btn pk-btn--ghost" id="undoBtn">Undo</button></div>
   </section>

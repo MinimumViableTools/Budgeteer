@@ -24,12 +24,12 @@
   function cardHtml(e, activeId, i) {
     var p = e.plan, active = e.id === activeId, name = esc(p.name);
     if (active) {
-      return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><span class="plan-tab" data-tab aria-hidden="true">' + name + '</span><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span>' +
+      return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><div class="plan-row">' +
         '<input class="plan-name" data-rename aria-label="Plan name" maxlength="' + core.LIMITS.planName + '" autocomplete="off" value="' + name + '">' +
-        '<div class="plan-meta" data-meta>' + esc(meta(p)) + '</div>' +
-        '<div class="plan-actions"><button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div></li>';
+        '<button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div>' +
+        '<div class="plan-sub"><span class="plan-meta" data-meta>' + esc(meta(p)) + '</span><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span></div></li>';
     }
-    return '<li class="plan-card" data-plan="' + e.id + '"><span class="plan-tab" aria-hidden="true">' + name + '</span><button type="button" class="plan-open" data-open="' + e.id + '"><span class="plan-title">' + name + '</span><span class="plan-meta">' + esc(meta(p)) + '</span></button>' +
+    return '<li class="plan-card" data-plan="' + e.id + '"><button type="button" class="plan-open" data-open="' + e.id + '"><span class="plan-title">' + name + '</span><span class="plan-meta">' + esc(meta(p)) + '</span></button>' +
       '<button type="button" class="plan-x" data-close="' + e.id + '" aria-label="Close plan ' + name + '"><span aria-hidden="true">×</span></button></li>';
   }
 
@@ -40,15 +40,21 @@
       '<li class="plan-card plan-new plan-sample"><button type="button" class="plan-add" data-sample' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ Sample plan</button></li>';
     renderBar(); fit(true);
   }
-  /* The cards stand next to each other when they fit. When they do not, they overlap by the missing width,
-     but at least 104 px of each card stays visible. Beyond that the drawer scrolls, and the open card is brought into view. */
+  /* The cards stand next to each other when they fit. When they do not, the plan cards overlap by the missing width,
+     but at least 104 px of each card stays visible. The open card never overlaps: it keeps its full width and its gaps,
+     and only the other cards overlap each other. Beyond that the row scrolls, and the open card is brought into view. */
   function fit(toActive) {
-    var box = $('trayCards'), list = box.querySelectorAll('.plan-card'), n = list.length, rail = $('trayBody'), gap = 12, need = 0, i;
+    var box = $('trayCards'), rail = $('trayBody'), plans = box.querySelectorAll('.plan-card:not(.plan-new)'), adds = box.querySelectorAll('.plan-new'), n = plans.length, gap = 12, i, sum = 0, wmin = 1e9, free = 0;
     if (!n || rail.hidden) return;
-    for (i = 0; i < n; i++) need += list[i].offsetWidth;
-    var cw = list[0].offsetWidth, room = rail.clientWidth - 56;
-    if (n > 1 && need + gap * (n - 1) > room) gap = (room - need) / (n - 1);
-    gap = Math.max(gap, -(cw - 104));
+    for (i = 0; i < n; i++) {
+      sum += plans[i].offsetWidth;
+      if (!plans[i].classList.contains('active')) wmin = Math.min(wmin, plans[i].offsetWidth);
+      if (i > 0 && !plans[i].classList.contains('active') && !plans[i - 1].classList.contains('active')) free++;
+    }
+    var addW = 0; for (i = 0; i < adds.length; i++) addW += adds[i].offsetWidth + 16;
+    var room = rail.clientWidth - addW - 8;
+    if (n > 1 && sum + 12 * (n - 1) > room && free > 0) gap = (room - sum - 12 * (n - 1 - free)) / free;
+    if (wmin < 1e9) gap = Math.max(gap, -(wmin - 104));
     box.style.setProperty('--gap', Math.round(gap) + 'px');
     var a = box.querySelector('.plan-card.active');
     if (!toActive || !a) return;
@@ -66,22 +72,21 @@
   }
   function renderLight() {
     var a = stack.active(); if (!a) return;
-    var card = document.querySelector('.plan-card.active'), m = card && card.querySelector('[data-meta]'), t = card && card.querySelector('[data-tab]');
+    var card = document.querySelector('.plan-card.active'), m = card && card.querySelector('[data-meta]');
     if (m) m.textContent = meta(a.plan);
-    if (t) t.textContent = a.plan.name;
     renderBar();
   }
 
-  /* Push the drawer in or pull it out. The drawer slides; the rail is hidden (and out of the tab order) once it is in. */
+  /* The arrow shuts the row (only the title of the open plan stays) or opens it. The cards are hidden, and out of the tab order, once it is shut. */
   var hideTimer = null;
   function reduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   function applyCollapsed(c, remember, instant) {
     var rail = $('trayBody'), tray = $('tray'), btn = $('trayToggle');
     collapsed = c; if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-    btn.setAttribute('aria-expanded', String(!c)); btn.textContent = c ? 'Pull out' : 'Push in';
+    btn.setAttribute('aria-expanded', String(!c)); btn.setAttribute('aria-label', c ? 'Show plans' : 'Hide plans');
     if (c) {
       tray.classList.add('shut');
-      if (instant || reduced()) rail.hidden = true; else hideTimer = setTimeout(function () { rail.hidden = true; hideTimer = null; }, 450);
+      if (instant || reduced()) rail.hidden = true; else hideTimer = setTimeout(function () { rail.hidden = true; hideTimer = null; }, 220);
     } else {
       rail.hidden = false; void rail.offsetWidth; tray.classList.remove('shut'); fit(true);
     }
