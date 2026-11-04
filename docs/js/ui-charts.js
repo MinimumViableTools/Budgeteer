@@ -11,7 +11,13 @@
     $('costTitle').textContent = 'Cost per ' + model.unit + ' by resource type';
     $('costChart').innerHTML = charts.costChart(model);
     $('costAlt').textContent = charts.costAlt(model);
+    var hm = charts.buildHeadroomModel(plan, plan.scenario, headWidth());
+    $('headChart').innerHTML = charts.headroomChart(hm);
+    $('headAlt').textContent = charts.headroomAlt(hm);
+    var key = core.status(hm.total, plan.budgets);
+    $('headStatus').innerHTML = '<span class="pk-stamp pk-stamp--' + key + '">' + core.STATUS_TEXT[key] + '</span>';
   }
+  function headWidth() { var el = $('headChart'); return el ? Math.floor(el.clientWidth) : 290; }
 
   var part = {
     structure: function () {
@@ -28,6 +34,7 @@
         var w = width(); if (w === last || !lastPlan || pending) return;
         pending = true; requestAnimationFrame(function () { pending = false; last = width(); draw(lastPlan); });
       }).observe($('costChart'));
+      new ResizeObserver(function () { if (lastPlan && !pending) { pending = true; requestAnimationFrame(function () { pending = false; draw(lastPlan); }); } }).observe($('headChart'));
     }
   });
 })();

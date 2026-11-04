@@ -36,12 +36,25 @@
     return out;
   }
 
+  /* the shown period in which the running total first passes a budget: [{ index, kind: 'max' | 'stretch' | 'both' }] */
+  function passMarks(plan, t) {
+    var out = {}, order = [];
+    [['max', t.passedMax], ['stretch', t.passedStretch]].forEach(function (x) {
+      if (!x[1]) return;
+      var i = (plan.view === 'quarter' ? core.quarterOf(x[1]) : x[1]) - 1;
+      if (!out[i]) { out[i] = { index: i, kind: x[0] }; order.push(i); } else out[i].kind = 'both';
+    });
+    return order.map(function (i) { return out[i]; });
+  }
+  var PASS_TEXT = { max: 'Passes max', stretch: 'Passes stretch', both: 'Passes max + stretch' };
+
   /* the numbers behind the cost chart: one entry per shown period */
   function buildCostModel(plan, scenario, width) {
     var t = core.scenarioTotals(plan, scenario), g = core.groupForView(t.monthly, plan.view);
     var periods = g.map(function (b, i) { return { label: core.periodLabel(i + 1, plan.view), byType: b, total: core.sumByType(b) }; });
     var maxP = 0; periods.forEach(function (p) { if (p.total > maxP) maxP = p.total; });
-    return { view: plan.view, scenario: scenario, width: Math.max(280, width || 640), periods: periods, maxPeriod: maxP, unit: core.unitName(plan.view) };
+    var passes = passMarks(plan, t);
+    return { view: plan.view, scenario: scenario, width: Math.max(280, width || 640), periods: periods, maxPeriod: maxP, unit: core.unitName(plan.view), passes: passes };
   }
 
   function costChart(model) {
@@ -53,6 +66,12 @@
     ax.ticks.forEach(function (t) {
       s += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + r1(y(t)) + '" y2="' + r1(y(t)) + '" stroke="var(--rule)" stroke-width="1"/>';
       s += '<text x="' + (padL - 8) + '" y="' + r1(y(t) + 4) + '" text-anchor="end" font-size="12" fill="var(--ink-muted)">' + kfmt(t) + '</text>';
+    });
+    var passRows = [], lastEnd = [-1e9, -1e9];
+    (model.passes || []).forEach(function (m) {
+      var cx = padL + col * m.index + col / 2, text = PASS_TEXT[m.kind], half = text.length * 3.7 + 6, row = (cx - half) < lastEnd[0] ? 1 : 0;
+      lastEnd[row] = cx + half; passRows.push({ m: m, cx: cx, text: text, row: row });
+      s += '<rect data-pass="' + m.index + '" x="' + r1(padL + col * m.index + 2) + '" y="' + (padT - 20) + '" width="' + r1(col - 4) + '" height="' + (ph + 20) + '" fill="' + (m.kind === 'max' ? 'var(--status-warn)' : 'var(--status-over)') + '" fill-opacity="0.2" rx="2"/>';
     });
     (model.underlay || []).forEach(function (u) { s += u(padL, col, padT, ph, y); });
     var peak = -1, peakV = -1; model.periods.forEach(function (p, i) { if (p.total > peakV) { peakV = p.total; peak = i; } });
@@ -68,6 +87,9 @@
       if (idx % labelEvery === 0) s += '<text x="' + r1(x + bw / 2) + '" y="' + (H - padB + 20) + '" text-anchor="middle" font-size="12" fill="var(--ink-muted)">' + esc(p.label) + '</text>';
     });
     s += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + r1(y(0)) + '" y2="' + r1(y(0)) + '" stroke="var(--border-strong)" stroke-width="2"/>';
+    passRows.forEach(function (r) {
+      s += '<text data-passlabel="' + r.m.index + '" x="' + r1(r.cx) + '" y="' + (padT - 8 - r.row * 15) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">' + r.text + '</text>';
+    });
     (model.overlay || []).forEach(function (o) { s += o(padL, col, padT, ph, y); });
     return s + '</svg>';
   }
@@ -75,5 +97,49 @@
     return 'Cost per ' + model.unit + ' in the ' + model.scenario + ' scenario: ' + model.periods.map(function (p) { return p.label + ' ' + core.formatEuro(p.total); }).join(', ') + '.';
   }
 
-  return { TYPE_COLORS: TYPE_COLORS, esc: esc, kfmt: kfmt, niceStep: niceStep, axis: axis, spreadLabels: spreadLabels, buildCostModel: buildCostModel, costChart: costChart, costAlt: costAlt };
+  /* the headroom bar: the plan total stacked by period against the max and stretch budgets */
+  function buildHeadroomModel(plan, scenario, width) {
+    var t = core.scenarioTotals(plan, scenario), g = core.groupForView(t.monthly, plan.view);
+    var cross = {}; passMarks(plan, t).forEach(function (m) { cross[m.index] = m.kind; });
+    return {
+      view: plan.view, scenario: scenario, width: Math.max(250, width || 290), total: t.total, budgets: plan.budgets, unit: core.unitName(plan.view),
+      periods: g.map(function (b, i) { return { label: core.periodLabel(i + 1, plan.view), byType: b, total: core.sumByType(b), cross: cross[i] || null }; }),
+      passedMax: t.passedMax ? core.monthShort(t.passedMax, plan.view) : null, passedStretch: t.passedStretch ? core.monthShort(t.passedStretch, plan.view) : null
+    };
+  }
+  function headroomChart(model) {
+    var W = model.width, H = 350, bx = 56, bw = 44, top = 18, bottom = 312, total = model.total, b = model.budgets;
+    var yMax = Math.max(total, b.stretch, b.max) * 1.1 || 1000;
+    function y(v) { return bottom - (v / yMax) * (bottom - top); }
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-labelledby="headTitle headAlt" focusable="false">', acc = 0;
+    model.periods.forEach(function (p, idx) {
+      var start = acc;
+      core.TYPE_ORDER.forEach(function (ty) {
+        var v = p.byType[ty]; if (v <= 0) return;
+        s += '<rect data-slice="' + idx + '" data-type="' + ty + '" x="' + bx + '" y="' + r1(y(acc + v)) + '" width="' + bw + '" height="' + r1(Math.max(0, y(acc) - y(acc + v))) + '" fill="' + TYPE_COLORS[ty] + '" stroke="var(--surface-raised)" stroke-width="1.5"><title>' + esc(p.label + ' ' + core.TYPE_LABELS[ty] + ' ' + core.formatEuro(v)) + '</title></rect>';
+        acc += v;
+      });
+      var h = y(start) - y(acc);
+      if (h >= 12 || p.cross) s += '<text data-slicelabel="' + idx + '" x="' + (bx - 8) + '" y="' + r1((y(start) + y(acc)) / 2 + 4) + '" text-anchor="end" font-size="12" ' + (p.cross ? 'font-weight="700" fill="var(--ink)"' : 'fill="var(--ink-muted)"') + '>' + esc(p.label) + '</text>';
+    });
+    s += '<line x1="' + bx + '" x2="' + (bx + bw) + '" y1="' + bottom + '" y2="' + bottom + '" stroke="var(--border-strong)" stroke-width="2"/>';
+    s += '<line data-tick="max" x1="' + (bx - 6) + '" x2="' + (bx + bw + 8) + '" y1="' + r1(y(b.max)) + '" y2="' + r1(y(b.max)) + '" stroke="var(--ink)" stroke-width="2"/>';
+    s += '<line data-tick="stretch" x1="' + (bx - 6) + '" x2="' + (bx + bw + 8) + '" y1="' + r1(y(b.stretch)) + '" y2="' + r1(y(b.stretch)) + '" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"/>';
+    spreadLabels([
+      { y: y(b.stretch), text: 'Stretch ' + core.formatEuro(b.stretch), kind: 'stretch' },
+      { y: y(total), text: 'Total ' + core.formatEuro(total), kind: 'total' },
+      { y: y(b.max), text: 'Max ' + core.formatEuro(b.max), kind: 'max' }
+    ], 17, top, bottom).forEach(function (l) {
+      s += '<text data-label="' + l.kind + '" x="' + (bx + bw + 14) + '" y="' + r1(l.y + 4) + '" font-size="12" fill="var(--ink)"' + (l.kind === 'total' ? ' font-weight="700"' : '') + '>' + esc(l.text) + '</text>';
+    });
+    return s + '<text x="' + (bx + bw / 2) + '" y="' + (H - 12) + '" text-anchor="middle" font-size="12" fill="var(--ink-muted)">' + (model.scenario === 'max' ? 'Max' : 'Stretch') + ' total</text></svg>';
+  }
+  function headroomAlt(model) {
+    var t = 'The ' + model.scenario + ' scenario totals ' + core.formatEuro(model.total) + ', against a max budget of ' + core.formatEuro(model.budgets.max) + ' and a stretch budget of ' + core.formatEuro(model.budgets.stretch) + '.';
+    if (model.passedMax) t += ' The running total passes the max budget in ' + model.passedMax + '.';
+    if (model.passedStretch) t += ' It passes the stretch budget in ' + model.passedStretch + '.';
+    return t;
+  }
+
+  return { PASS_TEXT: PASS_TEXT, buildHeadroomModel: buildHeadroomModel, headroomChart: headroomChart, headroomAlt: headroomAlt, TYPE_COLORS: TYPE_COLORS, esc: esc, kfmt: kfmt, niceStep: niceStep, axis: axis, spreadLabels: spreadLabels, buildCostModel: buildCostModel, costChart: costChart, costAlt: costAlt };
 });

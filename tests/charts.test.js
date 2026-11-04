@@ -83,3 +83,77 @@ test('an empty plan still draws an axis and no bars', () => {
   const svg = charts.costChart(model);
   assert.equal(bars(svg).length, 0); assert.ok(svg.includes('<svg'));
 });
+
+function attr(svg, re) { return [...svg.matchAll(re)]; }
+
+test('AC11 the period in which a budget is first passed is marked, once per budget', () => {
+  const plan = samplePlan(), m = charts.buildCostModel(plan, 'stretch', 640);
+  assert.deepEqual(m.passes, [{ index: 4, kind: 'max' }]);
+  const svg = charts.costChart(m);
+  assert.equal(attr(svg, /data-pass="4"/g).length, 1);
+  assert.ok(svg.includes('>Passes max<'));
+  assert.deepEqual(charts.buildCostModel(plan, 'max', 640).passes, [], 'the max scenario never passes a budget: its own running total is the one that counts');
+});
+
+test('AC11 max and stretch passed in the same period read "Passes max + stretch"', () => {
+  const plan = samplePlan(); plan.budgets = { max: 20000, stretch: 21000 };
+  const m = charts.buildCostModel(plan, 'stretch', 640);
+  assert.equal(m.passes.length, 1); assert.equal(m.passes[0].kind, 'both');
+  assert.ok(charts.costChart(m).includes('>Passes max + stretch<'));
+});
+
+test('AC11 passes in neighbouring periods do not overlap their labels', () => {
+  const plan = samplePlan(); plan.budgets = { max: 60000, stretch: 80000 }; /* running totals 71,000 in M4 and 99,150 in M5 */
+  const m = charts.buildCostModel(plan, 'stretch', 640);
+  assert.deepEqual(m.passes.map(x => x.index), [3, 4]);
+  const ys = attr(charts.costChart(m), /data-passlabel="\d" x="[\d.]+" y="(\d+)"/g).map(x => +x[1]);
+  assert.equal(new Set(ys).size, 2, 'the second label moves up a row');
+});
+
+test('quarter view: the pass mark is on the quarter that contains the month', () => {
+  const plan = Object.assign(samplePlan(), { view: 'quarter' });
+  assert.deepEqual(charts.buildCostModel(plan, 'stretch', 640).passes, [{ index: 1, kind: 'max' }]);
+  assert.equal(charts.buildHeadroomModel(plan, 'stretch', 290).passedMax, 'Q2');
+});
+
+test('AC10 the headroom bar stacks the periods, with a solid max tick and a dashed stretch tick, both labelled', () => {
+  const plan = samplePlan(), m = charts.buildHeadroomModel(plan, 'stretch', 290), svg = charts.headroomChart(m);
+  assert.equal(m.total, 119300);
+  const slices = attr(svg, /data-slice="(\d)" data-type="(\w+)" x="\d+" y="([\d.]+)" width="44" height="([\d.]+)"/g).map(x => ({ i: +x[1], h: +x[4] }));
+  const sum = slices.reduce((s, x) => s + x.h, 0), yMax = 125000 * 1.1;
+  assert.ok(Math.abs(sum - 119300 / yMax * (312 - 18)) < 3, 'stack height ' + sum);
+  assert.equal(new Set(slices.map(x => x.i)).size, 6);
+  assert.match(svg, /data-tick="max"[^>]*stroke-width="2"\/>/); assert.ok(!/data-tick="max"[^>]*dasharray/.test(svg));
+  assert.match(svg, /data-tick="stretch"[^>]*stroke-dasharray="5 4"/);
+  assert.ok(svg.includes('>Max €95,000<') && svg.includes('>Stretch €125,000<') && svg.includes('>Total €119,300<'));
+});
+
+test('AC10 labels next to the bar stay at least 17px apart even when the values are close', () => {
+  const plan = samplePlan(); plan.budgets = { max: 119000, stretch: 119500 };
+  const svg = charts.headroomChart(charts.buildHeadroomModel(plan, 'stretch', 290));
+  const ys = ['max', 'total', 'stretch'].map(k => +attr(svg, new RegExp('data-label="' + k + '" x="\\d+" y="([\\d.]+)"', 'g'))[0][1]).sort((a, b) => a - b);
+  assert.ok(ys[1] - ys[0] >= 17 - 0.01 && ys[2] - ys[1] >= 17 - 0.01, ys.join(','));
+});
+
+test('AC11 the label of the crossing period is bold in the headroom bar, thin slices get no label', () => {
+  const svg = charts.headroomChart(charts.buildHeadroomModel(samplePlan(), 'stretch', 290));
+  assert.match(svg, /data-slicelabel="4"[^>]*font-weight="700"/);
+  assert.ok(!/data-slicelabel="3"[^>]*font-weight="700"/.test(svg));
+  const thin = samplePlan(); thin.resources.push({ id: 7, name: 'Tiny', type: 'subscription', mode: 'oneTime', amount: 5, due: 1, from: 1, to: null, on: { max: true, stretch: true } });
+  thin.budgets = { max: 500000, stretch: 600000 };
+  const labels = attr(charts.headroomChart(charts.buildHeadroomModel(thin, 'max', 290)), /data-slicelabel="(\d)"/g).length;
+  assert.ok(labels <= 6);
+});
+
+test('AC25 the headroom text alternative names the totals, the budgets and the periods where they are passed', () => {
+  assert.equal(charts.headroomAlt(charts.buildHeadroomModel(samplePlan(), 'stretch', 290)),
+    'The stretch scenario totals €119,300, against a max budget of €95,000 and a stretch budget of €125,000. The running total passes the max budget in M5.');
+  assert.equal(charts.headroomAlt(charts.buildHeadroomModel(samplePlan(), 'max', 290)),
+    'The max scenario totals €92,100, against a max budget of €95,000 and a stretch budget of €125,000.');
+});
+
+test('a total far above both budgets still fits inside the drawing', () => {
+  const plan = samplePlan(); plan.budgets = { max: 1000, stretch: 2000 };
+  const svg = charts.headroomChart(charts.buildHeadroomModel(plan, 'stretch', 290));
+  for (const m of attr(svg, /y="(-?[\d.]+)"/g)) assert.ok(+m[1] >= 0 && +m[1] <= 350, 'y ' + m[1]);
+});
