@@ -35,10 +35,12 @@
   function unitName(view) { return view === 'quarter' ? 'quarter' : 'month'; }
   function periodLabel(index, view) { return (view === 'quarter' ? 'Q' : 'M') + index; }
   function monthShort(month, view) { return view === 'quarter' ? 'Q' + quarterOf(month) : 'M' + month; }
-  /* "M5" in the month view; "Q2" or "Q2 (M5)" in the quarter view when the month is not the first or last of its quarter */
-  function monthLabel(month, view) {
+  /* "M5" in the month view. In the quarter view a month that sits where an edit would put it shows only the quarter, any other month
+     shows both ("Q2 (M5)"). kind is 'start' for a start or a one-time due (the first month of a quarter) and 'end' for an end or a milestone due (the last). */
+  function monthLabel(month, view, kind) {
     if (view !== 'quarter') return 'M' + month;
-    return 'Q' + quarterOf(month) + (month % 3 === 0 ? '' : ' (M' + month + ')');
+    var aligned = kind === 'start' ? month % 3 === 1 : month % 3 === 0;
+    return 'Q' + quarterOf(month) + (aligned ? '' : ' (M' + month + ')');
   }
   function canUseQuarterView(length) { return length % 3 === 0; }
 
@@ -111,6 +113,12 @@
   }
   var STATUS_TEXT = { ok: 'Within max budget', warn: 'In stretch zone', over: 'Over stretch budget' };
   function distance(total, budget) { return { amount: Math.abs(total - budget), over: total > budget }; }
+
+  /* a resource that starts, or is due, after the plan ends adds nothing */
+  function outsidePlan(r, length) {
+    if (r.mode === 'oneTime') return r.due > length;
+    return (r.from || 1) > length;
+  }
 
   /* milestones */
   function findResource(plan, id) { for (var i = 0; i < plan.resources.length; i++) if (plan.resources[i].id === id) return plan.resources[i]; return null; }
@@ -212,7 +220,7 @@
     canUseQuarterView: canUseQuarterView, clampLength: clampLength, shownValue: shownValue, storedValue: storedValue,
     snapStart: snapStart, snapEnd: snapEnd, snapOneTimeDue: snapOneTimeDue, snapMilestoneDue: snapMilestoneDue, isAligned: isAligned,
     costAt: costAt, monthlyByType: monthlyByType, sumByType: sumByType, runningTotals: runningTotals, groupForView: groupForView, lineTotal: lineTotal,
-    firstPassedMonth: firstPassedMonth, scenarioTotals: scenarioTotals, status: status, distance: distance,
+    firstPassedMonth: firstPassedMonth, outsidePlan: outsidePlan, scenarioTotals: scenarioTotals, status: status, distance: distance,
     findResource: findResource, milestoneStatus: milestoneStatus, lateLinks: lateLinks, validateMilestone: validateMilestone,
     newPlan: newPlan, addResource: addResource, removeResource: removeResource, setResourceOn: setResourceOn, addMilestone: addMilestone,
     summary: summary

@@ -290,3 +290,19 @@ test('the largest share and the most expensive month in the max scenario', () =>
   assert.match(s.paragraphs[1], /most expensive month is M1 at €15,350/);
   assert.doesNotMatch(s.paragraphs[1], /passes/);
 });
+
+test('a resource that starts or is due after the plan ends is found', () => {
+  assert.equal(core.outsidePlan({ mode: 'oneTime', due: 7 }, 6), true);
+  assert.equal(core.outsidePlan({ mode: 'oneTime', due: 6 }, 6), false);
+  assert.equal(core.outsidePlan({ mode: 'fixed', from: 7, to: null }, 6), true);
+  assert.equal(core.outsidePlan({ mode: 'rateDays', from: 3, to: 4 }, 6), false);
+});
+
+test('quarter labels show the month unless it is where an edit would put it', () => {
+  assert.equal(core.monthLabel(3, 'quarter', 'start'), 'Q1 (M3)');
+  assert.equal(core.monthLabel(4, 'quarter', 'start'), 'Q2');
+  assert.equal(core.monthLabel(3, 'quarter', 'end'), 'Q1');
+  assert.equal(core.monthLabel(4, 'quarter', 'end'), 'Q2 (M4)');
+  assert.equal(core.monthLabel(2, 'quarter'), 'Q1 (M2)');
+  assert.equal(core.monthLabel(3, 'month', 'start'), 'M3');
+});

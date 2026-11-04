@@ -6,7 +6,8 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmtInput(n) { return String(Math.round(n * 100) / 100).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
-  var store, parts = [];
+  var store, parts = [], readyFns = [];
+  function onReady(fn) { readyFns.push(fn); }
 
   /* parts register a render function and, optionally, a function for value-only changes */
   function addPart(part) { parts.push(part); }
@@ -59,11 +60,12 @@
   function init(theStore) {
     store = theStore;
     addPart(settings);
+    readyFns.forEach(function (fn) { fn(store); });
     bindSettings();
     store.subscribe(render);
     render({ kind: 'init', plan: store.getPlan(), notice: store.getNotice() });
     typedHeadline();
   }
 
-  Budgeteer.ui = { init: init, addPart: addPart, esc: esc, fmtInput: fmtInput, $: $, getStore: function () { return store; } };
+  Budgeteer.ui = { init: init, onReady: onReady, addPart: addPart, esc: esc, fmtInput: fmtInput, $: $, getStore: function () { return store; } };
 })();
