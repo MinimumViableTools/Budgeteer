@@ -11,7 +11,7 @@ A product manager has to commit to a budget and needs to see what spending alloc
 
 ## Outcome
 
-A product manager can describe the resources of a plan, see immediately how the total compares to a maximum and a stretch budget, adjust single resources like playing with scenarios, and share the plan with a link. The tool runs by opening a local HTML file or from a GitHub Pages demo.
+A product manager can describe the resources of a plan, see immediately how the total compares to a maximum and a stretch budget, adjust single resources like playing with scenarios, and share the plan with a link. The tool runs by opening a local HTML file or from its GitHub Pages site. At first that site is a demo with sample data, and later it becomes the actual hosted tool.
 
 ## Scope
 
@@ -117,6 +117,7 @@ Template defaults (can be tuned): internal developer 1,000 per day for 10 days; 
 - AC26: Given a plan with 20 resources, 12 months and 8 milestones with full-length descriptions, when the link is created and opened in a new browser, then the plan is restored completely.
 - AC27: Given a plan with 20 resources, when the user adds another, then the tool refuses with a short message to remove one first.
 - AC28: Given a plan, when it is exported as JSON and imported again, then the resulting plan is identical, and an invalid file shows a clear message and changes nothing.
+- AC42: Given a link made by an earlier release (an older plan format version), when it is opened in a later release, then the plan is upgraded and restored completely. Given a link with a newer version than the tool knows, when it is opened, then the tool shows a clear message that the link comes from a newer release and changes nothing.
 - AC29: Given the user opens the "Add milestone" dialog, when a name, a value description of up to 140 characters, a due unit, linked resources and an importance are entered and saved, then the milestone appears in the milestone list, as a marker at its due unit on the cost chart, and in the summary.
 - AC30: Given a value description longer than 140 characters, when it is typed, then the input stops at 140 characters and shows the remaining count. Given 8 milestones, when the user tries to add another, then the tool refuses with a short message.
 - AC31: Given a milestone due in period 5 with a linked resource that is off in the scenario being viewed, when the status is shown, then the milestone is not reached and the reason names the switched-off resource.
@@ -165,6 +166,7 @@ Milestones for the test case:
 
 - A user who has never seen the tool can enter a plan of five resources and read the result within a few minutes without instructions.
 - The demo mode loads invented sample data and shows all views.
+- The GitHub Pages site can become the actual hosted tool without changing how people use it: links people have shared keep working in later releases.
 - The repo is finished at this scope: no open features required to use it, and no maintenance needed.
 
 ## Decisions
@@ -189,6 +191,7 @@ Milestones for the test case:
 - Milestones are value based: each describes the goal achieved when it is reached. A milestone is linked to a planning unit, because resources may run longer than the milestone and only contribute to it up to its unit. It is reached in a scenario if the scenario's own budget has not been passed by that unit and all linked resources are on.
 - Milestone fields: name, value description (up to 140 characters), due unit, linked resources, importance with two levels (must-have, nice-to-have). Up to 8 milestones. The name is limited to 40 characters. A milestone may link a resource that starts after its due unit, with a short warning in the dialog, because that resource would contribute nothing to it.
 - Milestones are defined in a dialog opened from an "Add milestone" button. They show up in the summary, as markers on the cost chart, and in a status list that compares both scenarios.
+- GitHub Pages is the hosted version: a demo with sample data at first, the actual hosted tool later. Everything stays in the browser, so the hosted tool stores nothing about its users, and the shared plan lives in the URL fragment, which is never sent to a server. The address and the link format must therefore stay stable, and every plan link carries a format version.
 - Name: Budgeteer.
 
 ## Open questions

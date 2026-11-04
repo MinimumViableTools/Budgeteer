@@ -124,7 +124,7 @@ Each step is small, finishable on its own, and points to the acceptance criteria
 9. [ ] Milestones: the "Add milestone" dialog with its fields, the 8 milestone and 140 character limits, markers on the cost chart, the status list comparing both scenarios, and the milestone layer of the summary. Sketch the dialog in a quick mockup first. (AC29 to AC31, AC34 to AC37)
 10. [ ] Link codec in the UI, restore, invalid link handling, 20 resource limit, JSON export and import. (AC17, AC18, AC26 to AC28, including milestones)
 11. [ ] Phone layout, keyboard use, focus, text alternatives and contrast check. (AC21, AC24, AC25)
-12. [ ] Demo mode with sample data, GitHub Pages from `main` and `/docs`, one Actions workflow running the tests with a badge, README with outcome, demo GIF and how it was scoped, tag v0.1.0 with a changelog. (AC20, success criteria)
+12. [ ] Demo mode with sample data, the GitHub Pages site from `main` and `/docs` (a demo first, the hosted tool later), one Actions workflow running the tests with a badge, README with outcome, demo GIF and how it was scoped, tag v0.1.0 with a changelog. (AC20, success criteria)
 
 Order logic: the calculation and the link size are the main risks, so they come first, before any visual work. Charts come before the summary so the numbers can be checked visually.
 
@@ -144,4 +144,5 @@ See the ADRs in `adr/`:
 - Label collisions next to the headroom bar and axis scaling are fiddly without a library. Mitigated by building them as small, tested pure functions where possible.
 - Milestones add text to the link and a new dialog. Mitigated by the length limits, the spike in step 3, and a quick mockup before step 9.
 - Quarter view editing: the rules for editing precise months in the quarter view are proposed in the spec and need your confirmation before step 5 builds the cards.
+- Pages becomes the hosted tool: links people share must keep working. Mitigated by the plan format version in every link and AC42.
 - Floating point: converting months to quarters and back must keep totals unchanged. Mitigated by ADR 0003 and tests with a small tolerance.

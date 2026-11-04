@@ -13,4 +13,6 @@ The plan is encoded as compact JSON in base64url in the fragment. A plan holds a
 
 ## Consequences
 
+Because the Pages site is meant to become the hosted tool, every link carries a plan format version and later releases must keep reading older versions. A newer version than the tool knows is refused with a clear message.
+
 No backend, and nothing stored anywhere. Links change whenever the plan changes. Very large plans need the JSON fallback.

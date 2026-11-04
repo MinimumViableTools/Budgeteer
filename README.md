@@ -9,7 +9,7 @@ Status: in specification. The first version is not built yet.
 ## How it will be used
 
 - Locally: clone the repo and open `docs/index.html`.
-- As a demo on GitHub Pages, with invented sample data.
+- Hosted on GitHub Pages: first as a demo with invented sample data, later as the actual hosted tool.
 - Later, possibly as a small container image.
 
 ## How this is scoped
