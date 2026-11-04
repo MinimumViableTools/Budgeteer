@@ -84,7 +84,7 @@
       return zipped.length < plain.length ? zipped : plain;
     }, function () { return plain; });
   }
-  /* the address of this page without a fragment, for example https://nlsplgrnd.github.io/Budgeteer/ */
+  /* the address of this page without a fragment, for example https://minimumviabletools.github.io/Budgeteer/ */
   function pageBase(href) { return String(href).replace(/#.*$/, '').replace(/\?.*$/, ''); }
   function buildLink(base, fragment) { return pageBase(base) + '#' + fragment; }
   function fragmentOf(link) { var i = link.indexOf('#'); return i < 0 ? '' : link.slice(i + 1); }

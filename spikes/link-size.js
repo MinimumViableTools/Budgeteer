@@ -6,7 +6,7 @@ const core = require('../docs/js/core.js');
 const codec = require('../docs/js/codec.js');
 const { samplePlan } = require('../docs/js/sample.js');
 
-const BASE = 'https://nlsplgrnd.github.io/Budgeteer/'; /* the Pages address of the repo */
+const BASE = 'https://minimumviabletools.github.io/Budgeteer/'; /* the Pages address of the repo */
 const WORDS = ('plan budget team design review launch customer data security audit beta users sign onboard feedback prototype release support '
   + 'quality access report training pilot partner contract license cloud hosting analytics tool service sprint roadmap scope risk change owner approve '
   + 'finance legal market sales invoice vendor retail mobile web portal search checkout payment account profile settings export import backup').split(' ');
