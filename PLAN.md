@@ -23,8 +23,13 @@ docs/
     codec.js          pure functions: plan to link fragment, plan to JSON, parsing and validation
     sample.js         invented sample plan for demo mode, embedded as data
     state.js          the plan state, actions and change notification
-    charts.js         cost chart and headroom bar as SVG and HTML, axis scaling, label placement
-    ui.js             cards, settings, summary, total bar, events, keyboard and aria
+    charts.js         cost chart and headroom bar as SVG, axis scaling, label placement, milestone markers
+    ui.js             start-up of the page, settings, notice, typed headline
+    ui-resources.js   resource cards
+    ui-charts.js      the charts on the page
+    ui-summary.js     summary and sticky total bar
+    ui-milestones.js  milestone list and dialog
+    ui-share.js       link, JSON export and import, new and sample plans
     main.js           start-up: read the link, demo mode, first render
 tests/
   core.test.js        node --test
@@ -115,15 +120,15 @@ Each step is small, finishable on its own, and points to the acceptance criteria
 1. [x] Create the project repo, copy the spec, plan and `CLAUDE.md` into it as the first commit, and attach it to the session. The decision records stay outside this repo.
 2. [x] Core logic with tests: period costs for the three modes, scenario totals, running totals, budget passed, status, milestone status with reasons, euro formatting, input validation, and the sample plan with its milestones as the test case. (AC1 to AC4, AC6, AC7, AC12, AC15, AC23, AC31 to AC33, test case)
 3. [x] Spike for the link size: encode a plan of 20 resources, 12 months and 8 milestones with full-length texts in the fragment, check its length and that it restores. Decide whether compression is needed. Records the result in ADR 0002. (AC26, open question on link size)
-4. [ ] Page skeleton and dark theme: settings (unit, length, budgets, scenario), state and rendering loop. (AC13, AC15, AC19, AC20)
-5. [ ] Resource cards: template chips, sliders with number fields, More settings, scenario switch, add and remove, new resource starts in the current scenario only. (AC4, AC5, AC8, AC14, AC27)
-6. [ ] Cost chart with axis scaling. (AC9)
-7. [ ] Headroom bar with budget ticks, period slices, label placement and the passed-budget markers, status chip. (AC10, AC11, AC12)
-8. [ ] Narrative summary and the sticky scenario total bar. (AC12, AC16, AC22)
-9. [ ] Milestones: the "Add milestone" dialog with its fields, the 8 milestone and 140 character limits, markers on the cost chart, the status list comparing both scenarios, and the milestone layer of the summary. Sketch the dialog in a quick mockup first. (AC29 to AC31, AC34 to AC37)
-10. [ ] Link codec in the UI, restore, invalid link handling, 20 resource limit, JSON export and import. (AC17, AC18, AC26 to AC28, including milestones)
-11. [ ] Phone layout, keyboard use, focus, text alternatives and contrast check. (AC21, AC24, AC25)
-12. [ ] Demo mode with sample data, the GitHub Pages site from `main` and `/docs` (a demo first, the hosted tool later), one Actions workflow running the tests with a badge, README with outcome, demo GIF and how it was scoped, tag v0.1.0 with a changelog. (AC20, success criteria)
+4. [x] Page skeleton and dark theme: settings (unit, length, budgets, scenario), state and rendering loop. (AC13, AC15, AC19, AC20)
+5. [x] Resource cards: template chips, sliders with number fields, More settings, scenario switch, add and remove, new resource starts in the current scenario only. (AC4, AC5, AC8, AC14, AC27)
+6. [x] Cost chart with axis scaling. (AC9)
+7. [x] Headroom bar with budget ticks, period slices, label placement and the passed-budget markers, status chip. (AC10, AC11, AC12)
+8. [x] Narrative summary and the sticky scenario total bar. (AC12, AC16, AC22)
+9. [x] Milestones: the "Add milestone" dialog with its fields, the 8 milestone and 140 character limits, markers on the cost chart, the status list comparing both scenarios, and the milestone layer of the summary. Sketch the dialog in a quick mockup first. (AC29 to AC31, AC34 to AC37)
+10. [x] Link codec in the UI, restore, invalid link handling, 20 resource limit, JSON export and import. (AC17, AC18, AC26 to AC28, including milestones)
+11. [x] Phone layout, keyboard use, focus, text alternatives and contrast check. (AC21, AC24, AC25)
+12. [x] Demo mode with sample data, the GitHub Pages site from `main` and `/docs` (a demo first, the hosted tool later), one Actions workflow running the tests with a badge, README with outcome, demo GIF and how it was scoped, tag v0.1.0 with a changelog. (AC20, success criteria) Done: the sample plan as the default, the test workflow, README with badge, changelog and a footer with the version. Left to do by hand: merge the branch into `main`, switch on Pages (Settings, Pages, branch `main`, folder `/docs`) and tag v0.1.0, because tags cannot be pushed from the build session.
 
 Order logic: the calculation and the link size are the main risks, so they come first, before any visual work. Charts come before the summary so the numbers can be checked visually.
 

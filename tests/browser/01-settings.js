@@ -1,0 +1,28 @@
+const { OUT, open, check, done } = require('./lib.js');
+(async () => {
+  const { b, p, errs } = await open();
+  check('title', (await p.title()) === 'Budgeteer');
+  check('length shows 6', (await p.inputValue('#length')) === '6');
+  check('budgets formatted', (await p.inputValue('#bMax')) === '95,000' && (await p.inputValue('#bStr')) === '125,000');
+  check('stretch pressed', (await p.getAttribute('#sStr', 'aria-pressed')) === 'true');
+  await p.click('#sMax'); check('max pressed', (await p.getAttribute('#sMax', 'aria-pressed')) === 'true');
+  await p.fill('#length', '14'); await p.dispatchEvent('#length', 'change');
+  check('clamped to 12 with notice', (await p.inputValue('#length')) === '12' && /at most 12 months/.test(await p.textContent('#notice')));
+  await p.fill('#length', '4'); await p.dispatchEvent('#length', 'change');
+  check('quarter view disabled at 4 months', await p.isDisabled('#vQuarter'));
+  check('hint explains it', /multiple of 3 months/.test(await p.textContent('#viewHint')));
+  await p.fill('#length', '6'); await p.dispatchEvent('#length', 'change');
+  await p.click('#vQuarter');
+  check('quarter view shows 2', (await p.inputValue('#length')) === '2' && /quarters \(1 to 4\)/.test(await p.textContent('#lblLen')));
+  await p.fill('#length', '9'); await p.dispatchEvent('#length', 'change');
+  check('quarters clamp to 4', (await p.inputValue('#length')) === '4' && /at most 4 quarters/.test(await p.textContent('#notice')));
+  await p.click('#vMonth'); check('back to months shows 12', (await p.inputValue('#length')) === '12');
+  await p.fill('#bMax', '80000'); await p.dispatchEvent('#bMax', 'input'); await p.dispatchEvent('#bMax', 'blur');
+  check('budget reformatted', (await p.inputValue('#bMax')) === '80,000');
+  const fonts = await p.evaluate(async () => { await document.fonts.load('700 16px "Courier Prime"'); return [...document.fonts].filter(f => f.status === 'loaded').length; });
+  check('vendored fonts load offline', fonts >= 2, fonts);
+  const sw = await p.evaluate(() => document.documentElement.scrollWidth); check('no horizontal scroll at 1280', sw <= 1280);
+  await p.screenshot({ path: OUT + '/step04.png' });
+  check('no errors', errs.length === 0, errs.join(' | '));
+  await b.close(); done();
+})();

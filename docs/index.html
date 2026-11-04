@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Budgeteer</title>
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1a1814">
 <meta name="description" content="A project budget calculator for exploring planning scenarios. Everything stays in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a1814'/%3E%3Crect x='6' y='16' width='5' height='10' fill='%233f86d4'/%3E%3Crect x='13.5' y='9' width='5' height='17' fill='%23e8a93a'/%3E%3Crect x='21' y='13' width='5' height='13' fill='%23ee7c63'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="design/fonts.css">
 <link rel="stylesheet" href="design/tokens.css">
 <link rel="stylesheet" href="design/components.css">
@@ -12,6 +15,7 @@
 </head>
 <body>
 <a class="skip" href="#main">Skip to the plan</a>
+<noscript><p class="notice" style="padding:16px">Budgeteer needs JavaScript to run. Everything stays in your browser.</p></noscript>
 <div class="page">
   <header class="top">
     <div>
@@ -85,6 +89,7 @@
       <div class="cards" id="cards"></div>
     </section>
   </main>
+  <footer class="foot"><span>Budgeteer 0.1.0</span><span>Your plan stays in your browser.</span><a href="https://github.com/NLSPLGRND/Budgeteer">Source and licence (MIT)</a></footer>
 </div>
 <dialog id="msDlg" aria-labelledby="dlgTitle">
   <form method="dialog" class="dlg" id="msForm" novalidate>
