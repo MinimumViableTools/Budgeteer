@@ -18,9 +18,17 @@
       <h1>Budgeteer</h1>
       <div class="tagline"><span id="typed">Plan what fits, then see what does not.</span><span class="caret" aria-hidden="true"></span></div>
     </div>
-    <div class="stamp-row" id="headActions"></div>
+    <div class="stamp-row" id="headActions"><button class="pk-btn pk-btn--primary" id="shareBtn" type="button" aria-expanded="false" aria-controls="sharePanel">Share plan</button></div>
   </header>
   <p class="notice" id="notice" role="status" aria-live="polite"></p>
+  <div class="demo-banner" id="demoBanner" hidden><span>This is a sample plan with invented data. Change anything you like.</span><button type="button" class="pk-btn pk-btn--ghost" id="bannerNew">Start an empty plan</button></div>
+  <section class="panel" id="sharePanel" aria-labelledby="h-share" hidden>
+    <div class="panel-head"><h2 id="h-share">Share this plan</h2><button type="button" class="pk-btn pk-btn--ghost" id="closeShare">Close</button></div>
+    <div class="share-row"><label class="pk-label" for="shareLink">Link</label><input class="txt" id="shareLink" readonly autocomplete="off"><button type="button" class="pk-btn pk-btn--primary" id="copyLink">Copy link</button></div>
+    <p class="hint" id="shareNote" role="status"></p>
+    <div class="share-row"><button type="button" class="pk-btn" id="exportBtn">Download as JSON</button><button type="button" class="pk-btn" id="importBtn">Open a JSON file</button><input type="file" id="importFile" accept=".json,application/json" hidden></div>
+    <div class="share-row"><button type="button" class="pk-btn pk-btn--ghost" id="newPlan">Start an empty plan</button><button type="button" class="pk-btn pk-btn--ghost" id="samplePlan">Load the sample plan</button></div>
+  </section>
   <main id="main" class="stack">
     <section class="panel" aria-labelledby="h-settings">
       <h2 id="h-settings">Plan settings</h2>
@@ -105,6 +113,7 @@
 <script src="js/ui-charts.js"></script>
 <script src="js/ui-summary.js"></script>
 <script src="js/ui-milestones.js"></script>
+<script src="js/ui-share.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

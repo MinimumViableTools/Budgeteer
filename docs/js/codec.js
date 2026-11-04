@@ -164,5 +164,20 @@
     return { ok: true, plan: { version: 1, view: view, length: length, scenario: a[5] === 1 ? 'stretch' : 'max', budgets: { max: a[3], stretch: a[4] }, resources: resources, milestones: milestones } };
   }
 
-  return { FORMAT_VERSION: FORMAT_VERSION, LINK_WARN_LENGTH: LINK_WARN_LENGTH, normalizePlan: normalizePlan, encodePlan: encodePlan, encodePlanShort: encodePlanShort, buildLink: buildLink, pageBase: pageBase, fragmentOf: fragmentOf, shareAdvice: shareAdvice, decodePlan: decodePlan, decodePlanShort: decodePlanShort };
+  /* JSON file: { "app": "Budgeteer", "format": 1, "plan": { ... } }, checked with the same rules as a link */
+  var MAX_FILE_BYTES = 262144;
+  var NOT_A_PLAN = 'This file is not a valid Budgeteer plan, so nothing was changed.';
+  function exportJson(plan) { return JSON.stringify({ app: 'Budgeteer', format: FORMAT_VERSION, plan: normalizePlan(plan) }, null, 2) + '\n'; }
+  function importJson(text) {
+    if (typeof text !== 'string' || text.length > MAX_FILE_BYTES) return bad('invalid', NOT_A_PLAN);
+    var doc; try { doc = JSON.parse(text); } catch (e) { return bad('invalid', NOT_A_PLAN); }
+    if (!doc || typeof doc !== 'object' || doc.app !== 'Budgeteer' || typeof doc.format !== 'number' || !doc.plan || typeof doc.plan !== 'object') return bad('invalid', NOT_A_PLAN);
+    if (doc.format > FORMAT_VERSION) return bad('newer', 'This file comes from a newer release of Budgeteer than this page. Nothing was changed.');
+    if (doc.format < 1) return bad('invalid', NOT_A_PLAN);
+    var compact; try { compact = toCompact(doc.plan); } catch (e) { return bad('invalid', NOT_A_PLAN); }
+    var r = fromCompactV1(JSON.parse(JSON.stringify(compact)));
+    return r.ok ? r : bad('invalid', NOT_A_PLAN);
+  }
+
+  return { exportJson: exportJson, importJson: importJson, NOT_A_PLAN: NOT_A_PLAN, FORMAT_VERSION: FORMAT_VERSION, LINK_WARN_LENGTH: LINK_WARN_LENGTH, normalizePlan: normalizePlan, encodePlan: encodePlan, encodePlanShort: encodePlanShort, buildLink: buildLink, pageBase: pageBase, fragmentOf: fragmentOf, shareAdvice: shareAdvice, decodePlan: decodePlan, decodePlanShort: decodePlanShort };
 });

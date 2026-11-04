@@ -183,3 +183,42 @@ test('AC28 the same validation applies to a plan that is decoded again after ano
   for (let i = 0; i < 3; i++) p = codec.decodePlan(codec.encodePlan(p)).plan;
   assert.deepEqual(p, norm(samplePlan()));
 });
+
+test('AC28 a plan exported as JSON and imported again is identical, for the sample and for the largest plan', () => {
+  for (const p of [samplePlan(), biggest(words), biggest(noise), core.newPlan('quarter', 3)]) {
+    const text = codec.exportJson(p), r = codec.importJson(text);
+    assert.equal(r.ok, true);
+    assert.deepEqual(r.plan, norm(p));
+  }
+  const doc = JSON.parse(codec.exportJson(samplePlan()));
+  assert.equal(doc.app, 'Budgeteer'); assert.equal(doc.format, 1); assert.equal(doc.plan.resources.length, 6);
+});
+
+test('AC28 an invalid file gives a clear message and no plan', () => {
+  const good = JSON.parse(codec.exportJson(samplePlan()));
+  const cases = {
+    'not JSON': 'hello', 'empty': '', 'null': 'null', 'array': '[]', 'number': '42',
+    'wrong app': JSON.stringify(Object.assign({}, good, { app: 'Other' })),
+    'no plan': JSON.stringify({ app: 'Budgeteer', format: 1 }),
+    'plan is a string': JSON.stringify({ app: 'Budgeteer', format: 1, plan: 'x' }),
+    'format 0': JSON.stringify(Object.assign({}, good, { format: 0 })),
+    'format is text': JSON.stringify(Object.assign({}, good, { format: '1' })),
+    'length 13': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { length: 13 }) })),
+    'budget text': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { budgets: { max: 'a', stretch: 1 } }) })),
+    'no budgets': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { budgets: undefined }) })),
+    'bad resource type': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { resources: [Object.assign({}, good.plan.resources[0], { type: 'robot' })] }) })),
+    'milestone links a missing resource': JSON.stringify(Object.assign({}, good, { plan: Object.assign({}, good.plan, { milestones: [Object.assign({}, good.plan.milestones[0], { linked: [99] })] }) })),
+    'too large': ' '.repeat(300000) + JSON.stringify(good)
+  };
+  for (const [name, text] of Object.entries(cases)) {
+    const r = codec.importJson(text);
+    assert.equal(r.ok, false, name); assert.equal(r.code, 'invalid', name); assert.equal(r.message, codec.NOT_A_PLAN, name);
+  }
+  assert.equal(codec.importJson(undefined).ok, false);
+});
+
+test('AC42 a JSON file from a newer format is refused with a message', () => {
+  const good = JSON.parse(codec.exportJson(samplePlan()));
+  const r = codec.importJson(JSON.stringify(Object.assign({}, good, { format: 2 })));
+  assert.equal(r.ok, false); assert.equal(r.code, 'newer'); assert.match(r.message, /newer release/);
+});
