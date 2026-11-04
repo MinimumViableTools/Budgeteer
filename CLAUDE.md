@@ -11,5 +11,5 @@ Agent context for this repository. Read this first.
 - `core.js` and `codec.js` are pure functions with no access to the page, and are tested with `node --test`.
 - Plan: the steps in `PLAN.md` are the order of work.
 - Do not commit credentials or confidential content. Demo data is invented.
-- Do not open pull requests unless asked.
+- Work on a feature branch and open a pull request for every change. Nono merges; Claude never merges. Commits are authored as Nono (GitHub noreply address) and keep the `Co-Authored-By` trailer for Claude.
 - Ask clarifying questions before making assumptions. Do not use horizontal rules in documents.

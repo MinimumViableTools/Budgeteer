@@ -186,3 +186,12 @@ test('AC25 the chart text alternative lists the milestones and whether they are 
   const alt = charts.costAlt(charts.buildCostModel(samplePlan(), 'max', 640));
   assert.match(alt, /Milestones: Prototype ready due M2, reached; Security audit passed due M5, not reached; Public beta due M6, not reached\./);
 });
+
+test('the axis labels carry the euro sign, the bar value labels do not', () => {
+  const model = charts.buildCostModel(samplePlan(), 'max', 760);
+  const svg = charts.costChart(model);
+  const axisLabels = [...svg.matchAll(/text-anchor="end"[^>]*>([^<]*)</g)].map(m => m[1]);
+  assert.ok(axisLabels.length > 1 && axisLabels.every(t => t.startsWith('€')), axisLabels.join(','));
+  const barLabels = [...svg.matchAll(/text-anchor="middle" font-size="12" fill="var\(--ink\)">([^<]*)</g)].map(m => m[1]);
+  assert.ok(barLabels.length > 0 && barLabels.every(t => !t.includes('€')), barLabels.join(','));
+});

@@ -146,8 +146,13 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .tb-mark.str span{top:auto;bottom:100%;left:auto;right:4px;padding-bottom:2px}
 @media (max-width:760px){
  .totalbar-in{gap:var(--space-1) var(--space-3);justify-content:space-between}
- .tb-track{order:3;flex-basis:100%;margin-block:20px 18px}
- .tb-num{font-size:24px}
+ .tb-track{order:3;flex-basis:100%;margin-block:17px 15px}
+ .tb-num{font-size:20px}
+ .tb-label{font-size:11px}
+ .tb-mark span{font-size:11px}
+ .totalbar{padding-block:var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom,0px))}
+ #tbStamp .pk-stamp{font-size:11px;padding:2px var(--space-2)}
+ #tbStamp .pk-stamp::before{width:12px;height:12px}
 }
 
 .share-row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
