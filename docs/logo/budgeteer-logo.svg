@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="1024" height="1024">
+  <title>Budgeteer</title>
+  <!-- Budgeteer logo, version 1. Three bars like a small stacked chart, on the Ink surface.
+       Colours are the Ink theme tokens of the Pocketknife design, written out because an image cannot read CSS variables:
+       surface #1a1814, data-internal-dev #3f86d4, data-freelancer #e8a93a, ribbon (the accent of Budgeteer) #ee7c63.
+       Corner radius 6 of 32 is radius-md (6px) at the 32 px size. No gradients, shadows or text. -->
+  <rect width="32" height="32" rx="6" fill="#1a1814"/>
+  <rect x="6" y="16" width="5" height="10" fill="#3f86d4"/>
+  <rect x="13.5" y="9" width="5" height="17" fill="#e8a93a"/>
+  <rect x="21" y="13" width="5" height="13" fill="#ee7c63"/>
+</svg>

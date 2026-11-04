@@ -72,3 +72,24 @@ test('the slogan and the description of the page', () => {
   assert.match(html, /<span id="typed">Budget\? Nudge it\. Judge it\.<\/span>/);
   assert.match(html, /<meta name="description" content="Rehearse your budget before you commit\.">/);
 });
+
+test('the logo: files, token colours, and its place before the name', () => {
+  const dir = path.join(DOCS, 'logo'), svg = fs.readFileSync(path.join(dir, 'budgeteer-logo.svg'), 'utf8');
+  const tokens = fs.readFileSync(path.join(DOCS, 'design', 'tokens.css'), 'utf8');
+  const ink = tokens.slice(tokens.indexOf('[data-theme="ink"]'), tokens.indexOf(':root {', tokens.indexOf('[data-theme="ink"]')));
+  const allowed = ['--surface', '--data-internal-dev', '--data-freelancer', '--ribbon'].map((n) => new RegExp(n + ': (#[0-9a-f]{6});').exec(ink)[1]);
+  const fills = [...svg.matchAll(/fill="(#[0-9a-fA-F]{6})"/g)].map((m) => m[1].toLowerCase());
+  assert.equal(fills.length, 4);
+  assert.deepEqual([...new Set(fills)].sort(), [...allowed].sort(), 'only Ink theme tokens');
+  assert.ok(!/gradient|filter|shadow|<text|<image/i.test(svg.replace(/<!--[\s\S]*?-->/g, '')), 'flat, no text');
+  assert.match(svg, /viewBox="0 0 32 32"/); assert.match(svg, /rx="6"/);
+  for (const [f, size] of [['budgeteer-logo-1024.png', 1024], ['budgeteer-logo-512.png', 512], ['apple-touch-icon.png', 180], ['favicon-32.png', 32]]) {
+    const b = fs.readFileSync(path.join(dir, f));
+    assert.equal(b.subarray(1, 4).toString(), 'PNG'); assert.equal(b.readUInt32BE(16), size); assert.equal(b.readUInt32BE(20), size);
+  }
+  assert.ok(html.indexOf('class="logo"') > 0 && html.indexOf('class="logo"') < html.indexOf('<h1>'), 'the logo comes before the headline');
+  assert.match(html, /<img class="logo" src="logo\/budgeteer-logo\.svg" alt="" width="56" height="56">/);
+  assert.match(html, /<link rel="icon" href="logo\/budgeteer-logo\.svg" type="image\/svg\+xml">/);
+  assert.match(html, /<link rel="apple-touch-icon" href="logo\/apple-touch-icon\.png">/);
+  for (const f of refs(/<link rel="(?:icon|apple-touch-icon)" href="([^"]+)"/g)) assert.ok(fs.existsSync(path.join(DOCS, f)), 'missing ' + f);
+});

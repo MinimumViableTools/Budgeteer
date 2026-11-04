@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.1
 
 - The summary lists every milestone with a green "Reached" or red "Not reached" stamp as its bullet, not reached goals first.
+- The first official logo: three bars on the dark tile, shown before the name in the header and used as the icon of the page. Master file as SVG in `docs/logo/`, with PNG versions at 1024, 512, 180 and 32 pixels.
 
 ## 0.1.0
 
