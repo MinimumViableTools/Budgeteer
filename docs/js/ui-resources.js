@@ -17,19 +17,11 @@
   }
 
   /* period options: months in the month view; quarters in the quarter view, with a "keep" entry for a precise month */
+  var KIND = { from: 'start', to: 'end', due: 'oneTime' };
   function periodOptions(plan, kind, current) {
-    var h = '', n = core.periodCount(plan), i, q = plan.view === 'quarter';
-    var lk = kind === 'from' ? 'start' : kind === 'to' ? 'end' : 'start';
-    if (!q) {
-      if (kind === 'to') h += '<option value=""' + (current === null ? ' selected' : '') + '>End of plan</option>';
-      for (i = 1; i <= plan.length; i++) h += '<option value="' + i + '"' + (current === i ? ' selected' : '') + '>M' + i + '</option>';
-      return h;
-    }
-    var aligned = current === null || core.isAligned(lk, current);
-    if (kind === 'to') h += '<option value=""' + (current === null ? ' selected' : '') + '>End of plan</option>';
-    if (current !== null && !aligned) h += '<option value="keep" selected>' + core.monthLabel(current, 'quarter', kind === 'to' ? 'end' : 'start') + '</option>';
-    for (i = 1; i <= n; i++) h += '<option value="q' + i + '"' + (aligned && current !== null && core.quarterOf(current) === i ? ' selected' : '') + '>Q' + i + '</option>';
-    return h;
+    return core.periodChoices(plan, KIND[kind], current).map(function (c) {
+      return '<option value="' + c.value + '"' + (c.selected ? ' selected' : '') + '>' + c.label + '</option>';
+    }).join('');
   }
 
   function cardHtml(plan, r) {
@@ -114,13 +106,13 @@
       var t = e.target, id = +t.getAttribute('data-id');
       if (t.hasAttribute('data-sw')) { store.setResourceOn(+t.getAttribute('data-sw'), store.getPlan().scenario, t.checked); return; }
       var pk = t.getAttribute('data-pk'); if (!pk) return;
-      var v = t.value, q = /^q(\d+)$/.exec(v);
+      var v = t.value;
       if (pk === 'type') { store.updateResource(id, { type: v }, 'structure'); return; }
       if (pk === 'mode') { store.changeResourceMode(id, v); return; }
-      if (v === 'keep') return;
-      if (pk === 'due') store.updateResource(id, { due: q ? core.snapOneTimeDue(+q[1]) : +v }, 'structure');
-      if (pk === 'from') store.updateResource(id, { from: q ? core.snapStart(+q[1]) : +v }, 'structure');
-      if (pk === 'to') store.updateResource(id, { to: v === '' ? null : (q ? core.snapEnd(+q[1]) : +v) }, 'structure');
+      var month = core.monthFromChoice(KIND[pk], v);
+      if (month === undefined) return;
+      var patch = {}; patch[pk] = month;
+      store.updateResource(id, patch, 'structure');
     });
     cards.addEventListener('toggle', function (e) { var d = e.target; if (d.hasAttribute && d.hasAttribute('data-more')) openMore[d.getAttribute('data-more')] = d.open; }, true);
     cards.addEventListener('click', function (e) {

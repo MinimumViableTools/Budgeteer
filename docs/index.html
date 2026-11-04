@@ -65,6 +65,12 @@
       </div>
     </section>
 
+    <section class="panel" aria-labelledby="h-ms">
+      <div class="panel-head"><h2 id="h-ms">Milestones</h2><button class="pk-btn" id="addMs" type="button">+ Add milestone</button></div>
+      <p class="hint">Describe the goal each milestone achieves. It is reached in a scenario when the budget has not been passed by its due unit and all linked resources are on.</p>
+      <div class="ms-list" id="msList"></div>
+    </section>
+
     <section class="panel" aria-labelledby="h-res">
       <div class="panel-head"><h2 id="h-res">Resources</h2><p class="hint" id="resHint"></p></div>
       <div class="chips" id="tplChips" role="group" aria-label="Add a resource"></div>
@@ -72,6 +78,18 @@
     </section>
   </main>
 </div>
+<dialog id="msDlg" aria-labelledby="dlgTitle">
+  <form method="dialog" class="dlg" id="msForm" novalidate>
+    <h2 id="dlgTitle">Add milestone</h2>
+    <div><label class="pk-label" for="msName">Name</label><input class="txt" id="msName" maxlength="40" autocomplete="off" aria-describedby="nameErr"><p class="err" id="nameErr" role="alert"></p></div>
+    <div><label class="pk-label" for="msValue">Goal achieved when it is reached</label><textarea id="msValue" maxlength="140" aria-describedby="valCount"></textarea><div class="count" id="valCount"></div></div>
+    <div><label class="pk-label" for="msDue" id="lblDue">Due</label><select class="sel" id="msDue"></select></div>
+    <div><span class="pk-label" id="lblLinks" style="display:block;margin-bottom:8px">Resources it depends on</span><div class="chips" id="msLinks" role="group" aria-labelledby="lblLinks"></div><p class="hint" style="margin-top:8px">Leave empty if only the budget decides.</p></div>
+    <div id="msWarn"></div>
+    <div><span class="pk-label" id="lblImp" style="display:block;margin-bottom:8px">Importance</span><div class="seg" role="group" aria-labelledby="lblImp"><button type="button" id="impMust" aria-pressed="true">Must-have</button><button type="button" id="impNice" aria-pressed="false">Nice-to-have</button></div></div>
+    <div class="dlg-actions"><button type="button" class="pk-btn pk-btn--ghost" id="msDelete" hidden>Delete</button><span class="spacer"></span><button type="button" class="pk-btn pk-btn--ghost" id="msCancel">Cancel</button><button type="submit" class="pk-btn pk-btn--primary" id="msSave">Save milestone</button></div>
+  </form>
+</dialog>
 <div class="totalbar" id="totalbar" role="region" aria-label="Scenario total"><div class="totalbar-in">
   <span><span class="tb-label" id="tbLabel"></span><br><span class="tb-num" id="tbNum"></span></span>
   <div class="tb-track" id="tbTrack" aria-hidden="true"><div class="tb-fill" id="tbFill"></div><div class="tb-mark" id="tbMax"><span>Max</span></div><div class="tb-mark str" id="tbStr"><span>Stretch</span></div></div>
@@ -86,6 +104,7 @@
 <script src="js/ui-resources.js"></script>
 <script src="js/ui-charts.js"></script>
 <script src="js/ui-summary.js"></script>
+<script src="js/ui-milestones.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

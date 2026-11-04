@@ -64,6 +64,33 @@
     return month % 3 === 1;
   }
 
+  /* the choices of a period select. kind: 'start', 'end' (may be empty: end of plan), 'oneTime' or 'milestone'.
+     In the quarter view a month that is not where an edit would put it gets its own entry, "keep", so nothing changes until the person picks a quarter. */
+  function periodChoices(plan, kind, current) {
+    var out = [], n = periodCount(plan), i, q = plan.view === 'quarter', endish = kind === 'end' || kind === 'milestone';
+    if (kind === 'end') out.push({ value: '', label: 'End of plan', selected: current === null });
+    if (!q) {
+      for (i = 1; i <= plan.length; i++) out.push({ value: String(i), label: 'M' + i, selected: current === i });
+      return out;
+    }
+    var aligned = current === null || isAligned(endish ? 'end' : 'start', current);
+    if (current !== null && !aligned) out.push({ value: 'keep', label: monthLabel(current, 'quarter', endish ? 'end' : 'start'), selected: true });
+    for (i = 1; i <= n; i++) out.push({ value: 'q' + i, label: 'Q' + i, selected: aligned && current !== null && quarterOf(current) === i });
+    return out;
+  }
+  /* the month a choice stands for, null for "end of plan", undefined for "keep" */
+  function monthFromChoice(kind, value) {
+    if (value === 'keep') return undefined;
+    if (value === '') return null;
+    var m = /^q(\d+)$/.exec(value);
+    if (!m) return parseInt(value, 10);
+    var q = parseInt(m[1], 10);
+    if (kind === 'start') return snapStart(q);
+    if (kind === 'oneTime') return snapOneTimeDue(q);
+    if (kind === 'end') return snapEnd(q);
+    return snapMilestoneDue(q);
+  }
+
   /* costs */
   function costAt(r, month, length) {
     var from = r.from || 1, to = r.to || length;
@@ -218,7 +245,7 @@
     formatEuro: formatEuro, parseAmount: parseAmount,
     quarterOf: quarterOf, periodCount: periodCount, unitName: unitName, periodLabel: periodLabel, monthShort: monthShort, monthLabel: monthLabel,
     canUseQuarterView: canUseQuarterView, clampLength: clampLength, shownValue: shownValue, storedValue: storedValue,
-    snapStart: snapStart, snapEnd: snapEnd, snapOneTimeDue: snapOneTimeDue, snapMilestoneDue: snapMilestoneDue, isAligned: isAligned,
+    periodChoices: periodChoices, monthFromChoice: monthFromChoice, snapStart: snapStart, snapEnd: snapEnd, snapOneTimeDue: snapOneTimeDue, snapMilestoneDue: snapMilestoneDue, isAligned: isAligned,
     costAt: costAt, monthlyByType: monthlyByType, sumByType: sumByType, runningTotals: runningTotals, groupForView: groupForView, lineTotal: lineTotal,
     firstPassedMonth: firstPassedMonth, outsidePlan: outsidePlan, scenarioTotals: scenarioTotals, status: status, distance: distance,
     findResource: findResource, milestoneStatus: milestoneStatus, lateLinks: lateLinks, validateMilestone: validateMilestone,

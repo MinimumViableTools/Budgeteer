@@ -54,7 +54,11 @@
     var periods = g.map(function (b, i) { return { label: core.periodLabel(i + 1, plan.view), byType: b, total: core.sumByType(b) }; });
     var maxP = 0; periods.forEach(function (p) { if (p.total > maxP) maxP = p.total; });
     var passes = passMarks(plan, t);
-    return { view: plan.view, scenario: scenario, width: Math.max(280, width || 640), periods: periods, maxPeriod: maxP, unit: core.unitName(plan.view), passes: passes };
+    var markers = plan.milestones.map(function (m) {
+      var st = core.milestoneStatus(plan, m, scenario, t);
+      return { id: m.id, name: m.name, index: (plan.view === 'quarter' ? core.quarterOf(m.due) : m.due) - 1, reached: st.reached, due: core.monthLabel(m.due, plan.view, 'end') };
+    });
+    return { view: plan.view, scenario: scenario, width: Math.max(280, width || 640), periods: periods, maxPeriod: maxP, unit: core.unitName(plan.view), passes: passes, markers: markers };
   }
 
   function costChart(model) {
@@ -90,11 +94,24 @@
     passRows.forEach(function (r) {
       s += '<text data-passlabel="' + r.m.index + '" x="' + r1(r.cx) + '" y="' + (padT - 8 - r.row * 15) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">' + r.text + '</text>';
     });
+    var slot = {};
+    (model.markers || []).forEach(function (mk) {
+      var k = slot[mk.index] || 0; slot[mk.index] = k + 1;
+      var cx = padL + col * mk.index + col / 2 + k * 24, cy = 16, tip = esc(mk.name + ': ' + (mk.reached ? 'reached' : 'not reached') + ', due ' + mk.due);
+      s += '<g class="mk" data-ms="' + mk.id + '" data-reached="' + (mk.reached ? 1 : 0) + '" tabindex="0" role="button" aria-label="Milestone ' + esc(mk.name) + ', ' + (mk.reached ? 'reached' : 'not reached') + ', due ' + esc(mk.due) + '. Edit">';
+      s += mk.reached
+        ? '<circle cx="' + r1(cx) + '" cy="' + cy + '" r="10" fill="var(--status-ok)"/><path d="M' + r1(cx - 4.5) + ' ' + (cy + 0.5) + 'l3 3L' + r1(cx + 4.5) + ' ' + (cy - 3.5) + '" fill="none" stroke="var(--surface-raised)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+        : '<rect x="' + r1(cx - 8) + '" y="' + (cy - 8) + '" width="16" height="16" fill="var(--status-over)" transform="rotate(45 ' + r1(cx) + ' ' + cy + ')"/><path d="M' + r1(cx - 3.5) + ' ' + (cy - 3.5) + 'l7 7M' + r1(cx + 3.5) + ' ' + (cy - 3.5) + 'l-7 7" fill="none" stroke="var(--surface-raised)" stroke-width="2.2" stroke-linecap="round"/>';
+      s += '<title>' + tip + '</title></g>';
+      s += '<line x1="' + r1(cx) + '" x2="' + r1(cx) + '" y1="' + (cy + 11) + '" y2="' + (cy + 18) + '" stroke="var(--border-strong)"/>';
+    });
     (model.overlay || []).forEach(function (o) { s += o(padL, col, padT, ph, y); });
     return s + '</svg>';
   }
   function costAlt(model) {
-    return 'Cost per ' + model.unit + ' in the ' + model.scenario + ' scenario: ' + model.periods.map(function (p) { return p.label + ' ' + core.formatEuro(p.total); }).join(', ') + '.';
+    var t = 'Cost per ' + model.unit + ' in the ' + model.scenario + ' scenario: ' + model.periods.map(function (p) { return p.label + ' ' + core.formatEuro(p.total); }).join(', ') + '.';
+    if (model.markers && model.markers.length) t += ' Milestones: ' + model.markers.map(function (m) { return m.name + ' due ' + m.due + ', ' + (m.reached ? 'reached' : 'not reached'); }).join('; ') + '.';
+    return t;
   }
 
   /* the headroom bar: the plan total stacked by period against the max and stretch budgets */

@@ -306,3 +306,32 @@ test('quarter labels show the month unless it is where an edit would put it', ()
   assert.equal(core.monthLabel(2, 'quarter'), 'Q1 (M2)');
   assert.equal(core.monthLabel(3, 'month', 'start'), 'M3');
 });
+
+test('period choices: months in the month view, with an empty end', () => {
+  const p = samplePlan();
+  const start = core.periodChoices(p, 'start', 3);
+  assert.deepEqual(start.map(c => c.label), ['M1', 'M2', 'M3', 'M4', 'M5', 'M6']);
+  assert.deepEqual(start.filter(c => c.selected).map(c => c.value), ['3']);
+  const end = core.periodChoices(p, 'end', null);
+  assert.equal(end[0].label, 'End of plan'); assert.equal(end[0].selected, true); assert.equal(end.length, 7);
+  assert.deepEqual(core.periodChoices(p, 'end', 6).filter(c => c.selected).map(c => c.value), ['6']);
+});
+
+test('AC39 AC40 period choices in the quarter view keep a precise month until a quarter is picked', () => {
+  const p = Object.assign(samplePlan(), { view: 'quarter' });
+  const s2 = core.periodChoices(p, 'start', 2);
+  assert.deepEqual(s2.map(c => c.label), ['Q1 (M2)', 'Q1', 'Q2']); assert.deepEqual(s2.filter(c => c.selected).map(c => c.value), ['keep']);
+  const s4 = core.periodChoices(p, 'start', 4);
+  assert.deepEqual(s4.map(c => c.label), ['Q1', 'Q2']); assert.deepEqual(s4.filter(c => c.selected).map(c => c.value), ['q2']);
+  const e5 = core.periodChoices(p, 'end', 5); assert.equal(e5[1].label, 'Q2 (M5)');
+  const open = core.periodChoices(p, 'end', null); assert.equal(open[0].selected, true); assert.equal(open.length, 3);
+  const o5 = core.periodChoices(p, 'oneTime', 5); assert.equal(o5[0].label, 'Q2 (M5)');
+  const m5 = core.periodChoices(p, 'milestone', 5); assert.equal(m5[0].label, 'Q2 (M5)'); assert.equal(core.periodChoices(p, 'milestone', 6).filter(c => c.selected)[0].value, 'q2');
+});
+
+test('picking a choice gives the month: quarters snap, keep changes nothing, empty is the end of the plan', () => {
+  assert.equal(core.monthFromChoice('start', 'q2'), 4); assert.equal(core.monthFromChoice('end', 'q2'), 6);
+  assert.equal(core.monthFromChoice('oneTime', 'q2'), 4); assert.equal(core.monthFromChoice('milestone', 'q2'), 6);
+  assert.equal(core.monthFromChoice('start', 'keep'), undefined); assert.equal(core.monthFromChoice('end', ''), null);
+  assert.equal(core.monthFromChoice('start', '5'), 5);
+});

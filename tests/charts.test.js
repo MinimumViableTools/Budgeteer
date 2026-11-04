@@ -57,7 +57,7 @@ test('AC9 the quarter view draws one bar per quarter with the same total', () =>
 
 test('AC25 the text alternative gives every period total', () => {
   const alt = charts.costAlt(charts.buildCostModel(samplePlan(), 'max', 640));
-  assert.equal(alt, 'Cost per month in the max scenario: M1 €15,350, M2 €15,350, M3 €15,350, M4 €15,350, M5 €15,350, M6 €15,350.');
+  assert.ok(alt.startsWith('Cost per month in the max scenario: M1 €15,350, M2 €15,350, M3 €15,350, M4 €15,350, M5 €15,350, M6 €15,350.'));
 });
 
 test('narrow charts keep labels readable: value labels are thinned, axis labels skip every second period', () => {
@@ -156,4 +156,33 @@ test('a total far above both budgets still fits inside the drawing', () => {
   const plan = samplePlan(); plan.budgets = { max: 1000, stretch: 2000 };
   const svg = charts.headroomChart(charts.buildHeadroomModel(plan, 'stretch', 290));
   for (const m of attr(svg, /y="(-?[\d.]+)"/g)) assert.ok(+m[1] >= 0 && +m[1] <= 350, 'y ' + m[1]);
+});
+
+test('AC29 milestone markers sit at their due period, with a different shape when not reached', () => {
+  const m = charts.buildCostModel(samplePlan(), 'max', 640);
+  assert.deepEqual(m.markers.map(x => [x.index, x.reached]), [[1, true], [4, false], [5, false]]);
+  const svg = charts.costChart(m);
+  assert.equal((svg.match(/class="mk"/g) || []).length, 3);
+  assert.equal((svg.match(/<circle cx="[\d.]+" cy="16" r="10"/g) || []).length, 1, 'one circle with a check');
+  assert.equal((svg.match(/rotate\(45/g) || []).length, 2, 'two diamonds with a cross');
+  assert.match(svg, /aria-label="Milestone Public beta, not reached, due M6\. Edit"/);
+  const all = charts.costChart(charts.buildCostModel(samplePlan(), 'stretch', 640));
+  assert.equal((all.match(/data-reached="1"/g) || []).length, 3);
+});
+
+test('AC29 two milestones in one period do not sit on top of each other', () => {
+  const plan = samplePlan(); plan.milestones.push({ id: 4, name: 'Another', value: '', due: 6, linked: [], importance: 'must' });
+  const svg = charts.costChart(charts.buildCostModel(plan, 'stretch', 640));
+  const xs = [...svg.matchAll(/data-ms="[34]"[\s\S]*?<(?:circle cx|rect x)="([\d.-]+)"/g)].map(x => +x[1]);
+  assert.equal(xs.length, 2); assert.ok(Math.abs(xs[0] - xs[1]) >= 16, xs.join(','));
+});
+
+test('AC29 in the quarter view the markers move to the quarter that contains the month, the label keeps the month', () => {
+  const m = charts.buildCostModel(Object.assign(samplePlan(), { view: 'quarter' }), 'stretch', 640);
+  assert.deepEqual(m.markers.map(x => [x.index, x.due]), [[0, 'Q1 (M2)'], [1, 'Q2 (M5)'], [1, 'Q2']]);
+});
+
+test('AC25 the chart text alternative lists the milestones and whether they are reached', () => {
+  const alt = charts.costAlt(charts.buildCostModel(samplePlan(), 'max', 640));
+  assert.match(alt, /Milestones: Prototype ready due M2, reached; Security audit passed due M5, not reached; Public beta due M6, not reached\./);
 });
