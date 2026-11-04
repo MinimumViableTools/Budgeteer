@@ -113,7 +113,7 @@ sequenceDiagram
 Each step is small, finishable on its own, and points to the acceptance criteria it satisfies. Steps 2 to 12 happen in the project repo.
 
 1. [x] Create the project repo, copy the spec, plan and `CLAUDE.md` into it as the first commit, and attach it to the session. The decision records stay outside this repo.
-2. [ ] Core logic with tests: period costs for the three modes, scenario totals, running totals, budget passed, status, milestone status with reasons, euro formatting, input validation, and the sample plan with its milestones as the test case. (AC1 to AC4, AC6, AC7, AC12, AC15, AC23, AC31 to AC33, test case)
+2. [x] Core logic with tests: period costs for the three modes, scenario totals, running totals, budget passed, status, milestone status with reasons, euro formatting, input validation, and the sample plan with its milestones as the test case. (AC1 to AC4, AC6, AC7, AC12, AC15, AC23, AC31 to AC33, test case)
 3. [ ] Spike for the link size: encode a plan of 20 resources, 12 months and 8 milestones with full-length texts in the fragment, check its length and that it restores. Decide whether compression is needed. Records the result in ADR 0002. (AC26, open question on link size)
 4. [ ] Page skeleton and dark theme: settings (unit, length, budgets, scenario), state and rendering loop. (AC13, AC15, AC19, AC20)
 5. [ ] Resource cards: template chips, sliders with number fields, More settings, scenario switch, add and remove, new resource starts in the current scenario only. (AC4, AC5, AC8, AC14, AC27)
