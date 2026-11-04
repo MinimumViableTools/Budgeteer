@@ -4,6 +4,10 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Changed
+
+- The page moved to a new address: https://minimumviabletools.github.io/Budgeteer/. The old address no longer works. A share link made at the old address does not open any more; to open it, replace the start of the link before the `#` with the new address.
+
 ## 0.2.1 - 2026-11-04
 
 ### Added

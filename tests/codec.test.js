@@ -6,7 +6,7 @@ const core = require('../docs/js/core.js');
 const codec = require('../docs/js/codec.js');
 const { samplePlan } = require('../docs/js/sample.js');
 
-const PAGES = 'https://nlsplgrnd.github.io/Budgeteer/';
+const PAGES = 'https://minimumviabletools.github.io/Budgeteer/';
 const norm = codec.normalizePlan;
 
 let seed = 11; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
@@ -95,7 +95,7 @@ test('Pages links: the base is the address without fragment and query, the forma
   assert.equal(codec.fragmentOf(PAGES), '');
   assert.equal(codec.decodePlan(codec.fragmentOf(a)).ok, true);
   assert.equal(codec.decodePlan('#' + frag).ok, true, 'a leading # is accepted');
-  assert.equal(PAGES.length + 1, 39);
+  assert.equal(PAGES.length + 1, 48);
 });
 
 test('a link opened from disk only works on this computer, and is not flagged as the hosted tool', () => {

@@ -4,7 +4,7 @@
 # Reads CHANGELOG.md and the footer of docs/index.html (override with CHANGELOG and PAGE). The notes go to stdout, problems to stderr with exit code 1.
 set -euo pipefail
 VERSION="${1:-}"; PREV="${2:-}"
-LOG="${CHANGELOG:-CHANGELOG.md}"; PAGE="${PAGE:-docs/index.html}"; REPO="${GITHUB_REPOSITORY:-NLSPLGRND/Budgeteer}"
+LOG="${CHANGELOG:-CHANGELOG.md}"; PAGE="${PAGE:-docs/index.html}"; REPO="${GITHUB_REPOSITORY:-MinimumViableTools/Budgeteer}"
 fail() { echo "$1" >&2; exit 1; }
 
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "The version must look like 0.1.0"

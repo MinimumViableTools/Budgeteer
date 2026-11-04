@@ -17,7 +17,7 @@ test('every local file the page loads exists', () => {
 
 test('the page loads nothing from the network, only a link to the source is external', () => {
   const external = [...html.matchAll(/(?:src|href)="(https?:\/\/[^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(external, ['https://github.com/NLSPLGRND/Budgeteer']);
+  assert.deepEqual(external, ['https://github.com/MinimumViableTools/Budgeteer']);
   const css = ['style.css', 'design/tokens.css', 'design/fonts.css', 'design/components.css'].map((f) => fs.readFileSync(path.join(DOCS, f), 'utf8')).join('\n');
   assert.ok(!/url\(\s*["']?https?:/i.test(css) && !/@import/.test(css), 'no remote CSS resources');
 });
@@ -119,14 +119,24 @@ test('the changelog is structured: dated versions, only the allowed headings, ne
 
 test('the release script accepts the newest version and writes notes with a compare link', () => {
   const { spawnSync } = require('node:child_process');
+  const os = require('node:os');
   const root = path.join(__dirname, '..');
   const log = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
   const newest = log.split('\n').filter((l) => /^## \d/.test(l))[0].split(' ')[1];
-  const run = (version, prev) => spawnSync('bash', ['.github/scripts/release-notes.sh', version].concat(prev ? [prev] : []), { cwd: root, encoding: 'utf8' });
+  /* a copy with an empty Unreleased section, so pending entries do not matter here */
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'changelog-'));
+  const emptied = path.join(dir, 'CHANGELOG.md');
+  fs.writeFileSync(emptied, log.replace(/## Unreleased\n[\s\S]*?(?=\n## \d)/, '## Unreleased\n'));
+  const withPending = path.join(dir, 'PENDING.md');
+  fs.writeFileSync(withPending, fs.readFileSync(emptied, 'utf8').replace('## Unreleased\n', '## Unreleased\n\n- Something not released yet.\n'));
+  const run = (version, prev, file) => spawnSync('bash', ['.github/scripts/release-notes.sh', version].concat(prev ? [prev] : []), { cwd: root, encoding: 'utf8', env: Object.assign({}, process.env, { CHANGELOG: file || emptied }) });
   const ok = run(newest, 'v0.0.1');
   assert.equal(ok.status, 0, ok.stderr);
   assert.match(ok.stdout, /^### /);
   assert.match(ok.stdout, /\*\*Full changelog\*\*: https:\/\/github\.com\/.+\/compare\/v0\.0\.1\.\.\.v/);
   assert.notEqual(run(newest, 'v' + newest).status, 0, 'a version that is not newer is refused');
   assert.notEqual(run('9.9.9').status, 0, 'a version the page does not show is refused');
+  const pending = run(newest, 'v0.0.1', withPending);
+  assert.notEqual(pending.status, 0, 'entries left under Unreleased are refused');
+  assert.match(pending.stderr, /Unreleased/);
 });
