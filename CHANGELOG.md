@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The tray of plans is one flat rectangular row of cards. An arrow (">" shut, "<" open) shuts it to the title of the open plan or opens the cards again. Cards overlap when they do not fit next to each other, the open card holds name, Copy and Close in one line, and the row needs about 83 px of height when open and 57 px when shut.
 - The axis of the cost chart shows the euro sign (€10k, €20k).
 - On a phone the total bar at the bottom is lower: smaller figure, label and stamp.
 

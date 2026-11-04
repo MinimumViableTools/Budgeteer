@@ -29,13 +29,14 @@
     </div>
     <div class="stamp-row" id="headActions"><button class="pk-btn pk-btn--primary" id="shareBtn" type="button" aria-expanded="false" aria-controls="sharePanel">Share plan</button></div>
   </header>
-  <section class="tray" id="tray" aria-labelledby="trayTitle">
-    <div class="tray-bar">
-      <button type="button" class="tray-tab" id="trayToggle" aria-expanded="true" aria-controls="trayBody"><span id="trayTitle">Plans</span><span class="tray-count" id="trayCount"></span><span class="tray-chev" aria-hidden="true"></span></button>
-      <span class="tray-now" id="trayNow"></span>
+  <section class="tray" id="tray" aria-label="Plans">
+    <div class="box">
+      <button type="button" class="tray-arrow" id="trayToggle" aria-expanded="true" aria-controls="trayBody" aria-label="Hide plans"></button>
+      <span class="sr-only" id="trayTitle">Plans<span id="trayCount"></span></span>
+      <b class="tray-now" id="trayNow"></b>
+      <div class="rail" id="trayBody"><ul class="tray-cards" id="trayCards"></ul></div>
     </div>
     <div class="tray-undo" id="trayUndo" role="status" aria-live="polite" hidden><span id="undoText"></span><button type="button" class="pk-btn pk-btn--ghost" id="undoBtn">Undo</button></div>
-    <div class="tray-body" id="trayBody"><ul class="tray-cards" id="trayCards"></ul></div>
   </section>
   <p class="notice" id="notice" role="status" aria-live="polite"></p>
   <div class="demo-banner" id="demoBanner" hidden>This is a sample plan with invented data. Change anything you like, or start your own with “New plan” in the tray above.</div>

@@ -24,10 +24,10 @@
   function cardHtml(e, activeId, i) {
     var p = e.plan, active = e.id === activeId, name = esc(p.name);
     if (active) {
-      return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span>' +
+      return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><div class="plan-row">' +
         '<input class="plan-name" data-rename aria-label="Plan name" maxlength="' + core.LIMITS.planName + '" autocomplete="off" value="' + name + '">' +
-        '<div class="plan-meta" data-meta>' + esc(meta(p)) + '</div>' +
-        '<div class="plan-actions"><button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div></li>';
+        '<button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div>' +
+        '<div class="plan-sub"><span class="plan-meta" data-meta>' + esc(meta(p)) + '</span><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span></div></li>';
     }
     return '<li class="plan-card" data-plan="' + e.id + '"><button type="button" class="plan-open" data-open="' + e.id + '"><span class="plan-title">' + name + '</span><span class="plan-meta">' + esc(meta(p)) + '</span></button>' +
       '<button type="button" class="plan-x" data-close="' + e.id + '" aria-label="Close plan ' + name + '"><span aria-hidden="true">×</span></button></li>';
@@ -38,12 +38,36 @@
     $('trayCards').innerHTML = list.map(function (e, i) { return cardHtml(e, activeId, i); }).join('') +
       '<li class="plan-card plan-new"><button type="button" class="plan-add" data-new' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ New plan</button></li>' +
       '<li class="plan-card plan-new plan-sample"><button type="button" class="plan-add" data-sample' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ Sample plan</button></li>';
-    renderBar();
+    renderBar(); fit(true);
+  }
+  /* The cards stand next to each other when they fit. When they do not, the plan cards overlap by the missing width,
+     but at least 104 px of each card stays visible. The open card never overlaps: it keeps its full width and its gaps,
+     and only the other cards overlap each other. Beyond that the row scrolls, and the open card is brought into view. */
+  function fit(toActive) {
+    var box = $('trayCards'), rail = $('trayBody'), plans = box.querySelectorAll('.plan-card:not(.plan-new)'), adds = box.querySelectorAll('.plan-new'), n = plans.length, gap = 12, i, sum = 0, wmin = 1e9, free = 0;
+    if (!n || rail.hidden) return;
+    for (i = 0; i < n; i++) {
+      sum += plans[i].offsetWidth;
+      if (!plans[i].classList.contains('active')) wmin = Math.min(wmin, plans[i].offsetWidth);
+      if (i > 0 && !plans[i].classList.contains('active') && !plans[i - 1].classList.contains('active')) free++;
+    }
+    var addW = 0; for (i = 0; i < adds.length; i++) addW += adds[i].offsetWidth + 16;
+    var room = rail.clientWidth - addW - 8;
+    if (n > 1 && sum + 12 * (n - 1) > room && free > 0) gap = (room - sum - 12 * (n - 1 - free)) / free;
+    if (wmin < 1e9) gap = Math.max(gap, -(wmin - 104));
+    box.style.setProperty('--gap', Math.round(gap) + 'px');
+    var a = box.querySelector('.plan-card.active');
+    if (!toActive || !a) return;
+    if (rail.scrollWidth - rail.clientWidth < 8) { rail.scrollLeft = 0; return; }
+    var left = a.offsetLeft - 40, right = a.offsetLeft + a.offsetWidth + 40;
+    if (left < rail.scrollLeft) rail.scrollLeft = Math.max(0, left);
+    else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollLeft = right - rail.clientWidth;
   }
   function renderBar() {
     var a = stack.active();
     $('trayCount').textContent = ' (' + stack.count() + ')';
-    $('trayNow').textContent = a ? a.plan.name + ' · ' + meta(a.plan) : '';
+    $('trayNow').textContent = a ? a.plan.name : '';
+    $('trayNow').title = a ? meta(a.plan) : '';
     $('demoBanner').hidden = !(a && a.sample);
   }
   function renderLight() {
@@ -53,9 +77,19 @@
     renderBar();
   }
 
-  function applyCollapsed(c, remember) {
-    collapsed = c; $('tray').classList.toggle('collapsed', c); $('trayBody').hidden = c;
-    $('trayToggle').setAttribute('aria-expanded', String(!c));
+  /* The arrow shuts the row (only the title of the open plan stays) or opens it. The cards are hidden, and out of the tab order, once it is shut. */
+  var hideTimer = null;
+  function reduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function applyCollapsed(c, remember, instant) {
+    var rail = $('trayBody'), tray = $('tray'), btn = $('trayToggle');
+    collapsed = c; if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    btn.setAttribute('aria-expanded', String(!c)); btn.setAttribute('aria-label', c ? 'Show plans' : 'Hide plans');
+    if (c) {
+      tray.classList.add('shut');
+      if (instant || reduced()) rail.hidden = true; else hideTimer = setTimeout(function () { rail.hidden = true; hideTimer = null; }, 220);
+    } else {
+      rail.hidden = false; void rail.offsetWidth; tray.classList.remove('shut'); fit(true);
+    }
     if (remember) write(PREF, c ? '1' : '0');
   }
 
@@ -110,6 +144,7 @@
       if (r.ok) { $('trayUndo').hidden = true; if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } show('Brought “' + r.entry.plan.name + '” back.'); var a = document.querySelector('.plan-card.active [data-rename]'); if (a) a.focus(); }
       else store.say(r.error);
     });
+    window.addEventListener('resize', function () { fit(false); });
     window.addEventListener('pagehide', flush);
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
   }
@@ -120,7 +155,7 @@
 
   ui.onReady(function (s) {
     store = s;
-    applyCollapsed(read(PREF) === '1', false);
+    applyCollapsed(read(PREF) === '1', false, true);
     renderAll(); bind();
     stack.subscribe(function (what) { if (what === 'plan') renderLight(); else renderAll(); persist(); });
     store.subscribe(function () { if (suppress) return; stack.updateActive(store.getPlan()); });
