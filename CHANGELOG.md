@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The axis of the cost chart shows the euro sign (€10k, €20k).
+- On a phone the total bar at the bottom is lower: smaller figure, label and stamp.
+
 ## 0.2.0
 
 - Plans have a name. The tray under the headline holds up to 10 open plans as index cards: start a new plan with one click, copy the open plan, open, rename and close plans (with undo), and fold the tray. Imports and links open as new cards. The plans are kept in the tab, so a reload does not lose them.

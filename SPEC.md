@@ -225,7 +225,7 @@ Milestones for the test case:
 
 The real product stays dependency-free. These need real care:
 
-- Axis scaling: round tick steps (1, 2, 2.5 or 5 times a power of ten) and a top value with some headroom.
+- Axis scaling: round tick steps (1, 2, 2.5 or 5 times a power of ten) and a top value with some headroom. The axis labels carry the euro sign (€10k), the bar value labels do not.
 - Label collisions next to the headroom bar when values are close (for example 119,300 next to 125,000).
 - Period labels in the headroom bar: thin slices get no label unless they are a crossing period.
 - Responsive sizing and readable text at narrow widths.
