@@ -24,12 +24,12 @@
   function cardHtml(e, activeId, i) {
     var p = e.plan, active = e.id === activeId, name = esc(p.name);
     if (active) {
-      return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span>' +
+      return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><span class="plan-tab" data-tab aria-hidden="true">' + name + '</span><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span>' +
         '<input class="plan-name" data-rename aria-label="Plan name" maxlength="' + core.LIMITS.planName + '" autocomplete="off" value="' + name + '">' +
         '<div class="plan-meta" data-meta>' + esc(meta(p)) + '</div>' +
         '<div class="plan-actions"><button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div></li>';
     }
-    return '<li class="plan-card" data-plan="' + e.id + '"><button type="button" class="plan-open" data-open="' + e.id + '"><span class="plan-title">' + name + '</span><span class="plan-meta">' + esc(meta(p)) + '</span></button>' +
+    return '<li class="plan-card" data-plan="' + e.id + '"><span class="plan-tab" aria-hidden="true">' + name + '</span><button type="button" class="plan-open" data-open="' + e.id + '"><span class="plan-title">' + name + '</span><span class="plan-meta">' + esc(meta(p)) + '</span></button>' +
       '<button type="button" class="plan-x" data-close="' + e.id + '" aria-label="Close plan ' + name + '"><span aria-hidden="true">×</span></button></li>';
   }
 
@@ -38,24 +38,53 @@
     $('trayCards').innerHTML = list.map(function (e, i) { return cardHtml(e, activeId, i); }).join('') +
       '<li class="plan-card plan-new"><button type="button" class="plan-add" data-new' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ New plan</button></li>' +
       '<li class="plan-card plan-new plan-sample"><button type="button" class="plan-add" data-sample' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ Sample plan</button></li>';
-    renderBar();
+    renderBar(); fit(true);
+  }
+  /* The cards stand next to each other when they fit. When they do not, they overlap by the missing width,
+     but at least 104 px of each card stays visible. Beyond that the drawer scrolls, and the open card is brought into view. */
+  function fit(toActive) {
+    var box = $('trayCards'), list = box.querySelectorAll('.plan-card'), n = list.length, rail = $('trayBody'), gap = 12, need = 0, i;
+    if (!n || rail.hidden) return;
+    for (i = 0; i < n; i++) need += list[i].offsetWidth;
+    var cw = list[0].offsetWidth, room = rail.clientWidth - 56;
+    if (n > 1 && need + gap * (n - 1) > room) gap = (room - need) / (n - 1);
+    gap = Math.max(gap, -(cw - 104));
+    box.style.setProperty('--gap', Math.round(gap) + 'px');
+    var a = box.querySelector('.plan-card.active');
+    if (!toActive || !a) return;
+    if (rail.scrollWidth - rail.clientWidth < 8) { rail.scrollLeft = 0; return; }
+    var left = a.offsetLeft - 40, right = a.offsetLeft + a.offsetWidth + 40;
+    if (left < rail.scrollLeft) rail.scrollLeft = Math.max(0, left);
+    else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollLeft = right - rail.clientWidth;
   }
   function renderBar() {
     var a = stack.active();
     $('trayCount').textContent = ' (' + stack.count() + ')';
-    $('trayNow').textContent = a ? a.plan.name + ' · ' + meta(a.plan) : '';
+    $('trayNow').textContent = a ? a.plan.name : '';
+    $('trayNow').title = a ? meta(a.plan) : '';
     $('demoBanner').hidden = !(a && a.sample);
   }
   function renderLight() {
     var a = stack.active(); if (!a) return;
-    var card = document.querySelector('.plan-card.active'), m = card && card.querySelector('[data-meta]');
+    var card = document.querySelector('.plan-card.active'), m = card && card.querySelector('[data-meta]'), t = card && card.querySelector('[data-tab]');
     if (m) m.textContent = meta(a.plan);
+    if (t) t.textContent = a.plan.name;
     renderBar();
   }
 
-  function applyCollapsed(c, remember) {
-    collapsed = c; $('tray').classList.toggle('collapsed', c); $('trayBody').hidden = c;
-    $('trayToggle').setAttribute('aria-expanded', String(!c));
+  /* Push the drawer in or pull it out. The drawer slides; the rail is hidden (and out of the tab order) once it is in. */
+  var hideTimer = null;
+  function reduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function applyCollapsed(c, remember, instant) {
+    var rail = $('trayBody'), tray = $('tray'), btn = $('trayToggle');
+    collapsed = c; if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    btn.setAttribute('aria-expanded', String(!c)); btn.textContent = c ? 'Pull out' : 'Push in';
+    if (c) {
+      tray.classList.add('shut');
+      if (instant || reduced()) rail.hidden = true; else hideTimer = setTimeout(function () { rail.hidden = true; hideTimer = null; }, 450);
+    } else {
+      rail.hidden = false; void rail.offsetWidth; tray.classList.remove('shut'); fit(true);
+    }
     if (remember) write(PREF, c ? '1' : '0');
   }
 
@@ -110,6 +139,7 @@
       if (r.ok) { $('trayUndo').hidden = true; if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } show('Brought “' + r.entry.plan.name + '” back.'); var a = document.querySelector('.plan-card.active [data-rename]'); if (a) a.focus(); }
       else store.say(r.error);
     });
+    window.addEventListener('resize', function () { fit(false); });
     window.addEventListener('pagehide', flush);
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
   }
@@ -120,7 +150,7 @@
 
   ui.onReady(function (s) {
     store = s;
-    applyCollapsed(read(PREF) === '1', false);
+    applyCollapsed(read(PREF) === '1', false, true);
     renderAll(); bind();
     stack.subscribe(function (what) { if (what === 'plan') renderLight(); else renderAll(); persist(); });
     store.subscribe(function () { if (suppress) return; stack.updateActive(store.getPlan()); });
