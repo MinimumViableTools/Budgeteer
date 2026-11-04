@@ -12,6 +12,9 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   /* AC47 one click, always */
   await p.click('[data-new]');
   check('AC47 one click starts an empty plan, the old one stays', (await names(p)).join() === 'Sample plan,New plan' && (await resCount(p)) === 0 && !(await p.locator('#demoBanner').isVisible()) && /Started an empty plan/.test(await p.textContent('#notice')));
+  const gapOf = () => p.evaluate(() => parseFloat(getComputedStyle(document.getElementById('trayCards')).getPropertyValue('--gap')));
+  const inRail = () => p.evaluate(() => { const r = document.getElementById('trayBody').getBoundingClientRect(), f = document.querySelector('.front').getBoundingClientRect(); return [...document.querySelectorAll('#trayCards .plan-card')].every((c) => { const b = c.getBoundingClientRect(); return b.left >= f.right - 1 && b.right <= r.right + 1; }); });
+  check('AC54 a few cards stand next to each other: no overlap, no scrolling, all inside the drawer', (await gapOf()) >= 0 && (await p.evaluate(() => document.getElementById('trayBody').scrollLeft)) === 0 && (await inRail()));
   check('focus goes to the name of the new plan', (await p.evaluate(() => document.activeElement.hasAttribute('data-rename'))));
   await p.click('[data-open]');
   check('AC49 opening the sample card shows it as it was', (await resCount(p)) === 6 && (await p.textContent('#sumTotal')) === '€119,300' && (await p.locator('#demoBanner').isVisible()));
@@ -36,9 +39,9 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   await p.fill('[data-rename]', 'x'.repeat(60)); check('names stop at 40 characters', (await p.inputValue('[data-rename]')).length === 40 && (await plan(p)).name.length === 40);
   await p.fill('[data-rename]', 'Q3 budget für Größe'); await p.keyboard.press('Enter');
   /* collapse */
-  await p.click('#trayToggle');
-  check('the tray folds: body hidden, flag set, the open plan stays visible in the bar', !(await p.locator('#trayBody').isVisible()) && (await p.getAttribute('#trayToggle', 'aria-expanded')) === 'false' && /Q3 budget für Größe/.test(await p.textContent('#trayNow')) && (await p.locator('#trayNow').isVisible()));
-  await p.click('#trayToggle'); check('and unfolds again', (await p.locator('#trayBody').isVisible()) && (await p.getAttribute('#trayToggle', 'aria-expanded')) === 'true');
+  await p.click('#trayToggle'); await p.waitForTimeout(700);
+  check('the drawer is pushed in: rail hidden, flag set, the open plan stays visible in the bar', !(await p.locator('#trayBody').isVisible()) && (await p.getAttribute('#trayToggle', 'aria-expanded')) === 'false' && /Q3 budget für Größe/.test(await p.textContent('#trayNow')) && (await p.locator('#trayNow').isVisible()));
+  await p.click('#trayToggle'); await p.waitForTimeout(700); check('and pulled out again', (await p.locator('#trayBody').isVisible()) && (await p.getAttribute('#trayToggle', 'aria-expanded')) === 'true');
   /* AC51 close with undo */
   await p.click('[data-close="2"]');
   check('AC51 closing a card that is not open: it is gone, the undo note appears, the shown plan stays', (await names(p)).join() === 'Sample plan,Q3 budget für Größe' && !(await p.locator('#trayUndo').isHidden()) && /Closed “New plan”/.test(await p.textContent('#undoText')));
@@ -51,9 +54,9 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   await p.reload(); await p.waitForTimeout(900);
   check('AC52 a reload keeps the plans, their order, the open plan and the edits', (await names(p)).join() === 'Sample plan,Q3 budget für Größe' && (await p.inputValue('[data-rename]')) === 'Sample plan' && (await p.inputValue('#bStr')) === '130,000' && (await resCount(p)) === 6);
   check('the undo of a close does not survive a reload', await p.locator('#trayUndo').isHidden());
-  await p.click('#trayToggle'); await p.reload(); await p.waitForTimeout(700);
-  check('the folded state also survives a reload', !(await p.locator('#trayBody').isVisible()));
-  await p.click('#trayToggle');
+  await p.click('#trayToggle'); await p.waitForTimeout(700); await p.reload(); await p.waitForTimeout(700);
+  check('the pushed-in state also survives a reload', !(await p.locator('#trayBody').isVisible()));
+  await p.click('#trayToggle'); await p.waitForTimeout(700);
   /* closing the last plan */
   await p.click('.plan-card.active [data-close]'); await p.click('.plan-card.active [data-close]');
   check('closing the last plan leaves an empty plan', (await names(p)).join() === 'New plan' && (await resCount(p)) === 0);
@@ -61,11 +64,14 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   /* AC50 limit */
   for (let i = 0; i < 12; i++) { if ((await p.locator('#trayCards .plan-card[data-plan]').count()) < 10) await p.click('[data-new]'); }
   check('AC50 the tray holds ten plans', (await p.locator('#trayCards .plan-card[data-plan]').count()) === 10 && (await p.textContent('#trayCount')).trim() === '(10)');
+  const g10 = await gapOf();
+  check('AC54 many cards overlap, and at least 100 px of every card stays visible', g10 < 0 && g10 >= -(200 - 104) - 1, String(g10));
+  check('AC54 the open card is fully inside the visible drawer', await p.evaluate(() => { const r = document.getElementById('trayBody').getBoundingClientRect(), b = document.querySelector('.plan-card.active').getBoundingClientRect(), f = document.querySelector('.front').getBoundingClientRect(); return b.left >= f.right - 1 && b.right <= r.right + 1; }));
   await p.click('[data-new]', { force: true }); check('AC50 the eleventh is refused with a message', (await p.locator('#trayCards .plan-card[data-plan]').count()) === 10 && /at most 10 plans/.test(await p.textContent('#notice')));
   await p.click('[data-copy]'); check('copy is refused at the limit too', /at most 10 plans/.test(await p.textContent('#notice')) && (await p.locator('#trayCards .plan-card[data-plan]').count()) === 10);
   /* phone */
   await p.setViewportSize({ width: 390, height: 844 }); await p.waitForTimeout(300);
-  check('phone: the page does not scroll sideways, the tray does', (await p.evaluate(() => document.documentElement.scrollWidth)) <= 390 && (await p.evaluate(() => { const c = document.getElementById('trayCards'); return c.scrollWidth > c.clientWidth; })));
+  check('phone: the page does not scroll sideways, the tray does', (await p.evaluate(() => document.documentElement.scrollWidth)) <= 390 && (await p.evaluate(() => { const c = document.getElementById('trayBody'); return c.scrollWidth > c.clientWidth; })));
   await p.screenshot({ path: OUT + '/step21-phone.png', clip: { x: 0, y: 0, width: 390, height: 420 } });
   await p.setViewportSize({ width: 1280, height: 900 }); await p.waitForTimeout(300);
   await p.locator('#tray').screenshot({ path: OUT + '/step21.png' });
