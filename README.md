@@ -2,24 +2,15 @@
 
 A project budget calculator focused on intuitive use and exploration of planning scenarios.
 
-Describe the resources of a plan, such as internal developers, freelancers, subscriptions, infrastructure and one-time costs. See at once how the total compares to a maximum and a stretch budget, switch resources on and off per scenario, and check which milestone goals the plan reaches. Everything runs in the browser, with no server and no account.
+Add the resources a project needs, see whether the total fits a maximum and a stretch budget, switch resources on and off per scenario, and check which milestone goals the plan reaches. It runs in the browser, with no server and no account, and a plan can be shared as a link.
 
 Status: in specification. The first version is not built yet.
 
-## How it will be used
+## Use
 
 - Locally: clone the repo and open `docs/index.html`.
-- Hosted on GitHub Pages: first as a demo with invented sample data, later as the actual hosted tool.
-- Later, possibly as a small container image.
-
-## How this is scoped
-
-Budgeteer is a small, finished tool, not an enterprise suite. The spec states the problem, scope, non-goals and acceptance criteria before any code is written.
-
-- `SPEC.md`: the specification
-- `PLAN.md`: the build steps and the component diagram
-- `adr/`: the key decisions
+- Hosted on GitHub Pages: a demo with sample data at first.
 
 ## License
 
-MIT, see `LICENSE`. The fonts that will be bundled later (Courier Prime and Source Serif 4) are licensed separately under the SIL Open Font License 1.1, and their licence texts will ship with them.
+MIT, see `LICENSE`.

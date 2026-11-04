@@ -29,7 +29,6 @@ docs/
 tests/
   core.test.js        node --test
   codec.test.js
-adr/
 SPEC.md
 PLAN.md
 CLAUDE.md
@@ -113,7 +112,7 @@ sequenceDiagram
 
 Each step is small, finishable on its own, and points to the acceptance criteria it satisfies. Steps 2 to 12 happen in the project repo.
 
-1. [x] Create the project repo, copy the spec, plan, ADRs and `CLAUDE.md` into it as the first commit, and attach it to the session.
+1. [x] Create the project repo, copy the spec, plan and `CLAUDE.md` into it as the first commit, and attach it to the session. The decision records stay outside this repo.
 2. [ ] Core logic with tests: period costs for the three modes, scenario totals, running totals, budget passed, status, milestone status with reasons, euro formatting, input validation, and the sample plan with its milestones as the test case. (AC1 to AC4, AC6, AC7, AC12, AC15, AC23, AC31 to AC33, test case)
 3. [ ] Spike for the link size: encode a plan of 20 resources, 12 months and 8 milestones with full-length texts in the fragment, check its length and that it restores. Decide whether compression is needed. Records the result in ADR 0002. (AC26, open question on link size)
 4. [ ] Page skeleton and dark theme: settings (unit, length, budgets, scenario), state and rendering loop. (AC13, AC15, AC19, AC20)
@@ -130,13 +129,13 @@ Order logic: the calculation and the link size are the main risks, so they come 
 
 ## Decisions
 
-See the ADRs in `adr/`:
+The decision records (ADRs) are kept outside this repo, in the private planning repo. In short:
 
-- `0001` no build step, classic scripts, no libraries, charts in HTML and SVG
-- `0002` plan state in the URL fragment, with JSON export as fallback
-- `0003` numbers are kept unrounded, rounding only for display
-- `0004` the tool is dark only
-- `0005` months are the only stored unit, quarters are a view
+- No build step, classic scripts, no libraries, charts in HTML and SVG
+- Plan state in the URL fragment, with JSON export as fallback
+- Numbers are kept unrounded, rounding only for display
+- The tool is dark only
+- Months are the only stored unit, quarters are a view
 
 ## Risks
 
@@ -145,4 +144,4 @@ See the ADRs in `adr/`:
 - Milestones add text to the link and a new dialog. Mitigated by the length limits, the spike in step 3, and a quick mockup before step 9.
 - Quarter view editing: the rules for editing precise months in the quarter view are proposed in the spec and need your confirmation before step 5 builds the cards.
 - Pages becomes the hosted tool: links people share must keep working. Mitigated by the plan format version in every link and AC42.
-- Floating point: converting months to quarters and back must keep totals unchanged. Mitigated by ADR 0003 and tests with a small tolerance.
+- Floating point: converting months to quarters and back must keep totals unchanged. Mitigated by keeping numbers unrounded and testing with a small tolerance.

@@ -3,7 +3,7 @@
 Status: draft
 Date: 2026-11-04
 
-Plan: `PLAN.md`. Decisions: `adr/`.
+Plan: `PLAN.md`.
 
 ## Problem
 
