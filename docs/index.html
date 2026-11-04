@@ -53,6 +53,18 @@
       </div>
     </section>
 
+    <section class="panel" aria-labelledby="h-sum">
+      <h2 id="h-sum">Summary</h2>
+      <div class="sumgrid">
+        <div class="sumleft">
+          <div class="sum-total" id="sumTotal"></div>
+          <div class="stamp-row" id="sumStatus"></div>
+          <div class="sum-lines" id="sumLines"></div>
+        </div>
+        <div class="sum-text" id="sumText"></div>
+      </div>
+    </section>
+
     <section class="panel" aria-labelledby="h-res">
       <div class="panel-head"><h2 id="h-res">Resources</h2><p class="hint" id="resHint"></p></div>
       <div class="chips" id="tplChips" role="group" aria-label="Add a resource"></div>
@@ -60,6 +72,11 @@
     </section>
   </main>
 </div>
+<div class="totalbar" id="totalbar" role="region" aria-label="Scenario total"><div class="totalbar-in">
+  <span><span class="tb-label" id="tbLabel"></span><br><span class="tb-num" id="tbNum"></span></span>
+  <div class="tb-track" id="tbTrack" aria-hidden="true"><div class="tb-fill" id="tbFill"></div><div class="tb-mark" id="tbMax"><span>Max</span></div><div class="tb-mark str" id="tbStr"><span>Stretch</span></div></div>
+  <span id="tbStamp"></span>
+</div></div>
 <script src="js/core.js"></script>
 <script src="js/codec.js"></script>
 <script src="js/sample.js"></script>
@@ -68,6 +85,7 @@
 <script src="js/ui.js"></script>
 <script src="js/ui-resources.js"></script>
 <script src="js/ui-charts.js"></script>
+<script src="js/ui-summary.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

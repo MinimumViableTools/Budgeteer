@@ -90,7 +90,7 @@ textarea{min-height:92px;resize:vertical;line-height:25px}
 .totalbar-in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:var(--space-4);align-items:center}
 .tb-label{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
 .tb-num{font-family:var(--font-display);font-weight:700;font-size:28px;font-variant-numeric:tabular-nums}
-.tb-track{position:relative;flex:1;min-width:200px;height:12px;background:var(--surface-sunken);border-radius:2px;border:1.5px solid var(--border-strong);margin-block:14px}
+.tb-track{position:relative;flex:1;min-width:200px;height:12px;background:var(--surface-sunken);border-radius:2px;border:1.5px solid var(--border-strong);margin-block:22px}
 .tb-fill{position:absolute;inset:0 auto 0 0;background:var(--accent)}
 .tb-mark{position:absolute;top:-8px;bottom:-8px;width:0;border-left:2px solid var(--ink)}
 .tb-mark.str{border-left-style:dashed}
@@ -134,3 +134,11 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .charts{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--space-5);align-items:start}
 .fig-side{display:flex;flex-direction:column;gap:var(--space-2)}
 @media (max-width:980px){.charts{grid-template-columns:minmax(0,1fr)}}
+.ms-missed{margin:0 0 var(--space-3);padding-left:20px}
+.ms-missed li{margin-bottom:var(--space-2)}
+.tb-mark.str span{top:auto;bottom:100%;left:auto;right:4px;padding-bottom:2px}
+@media (max-width:760px){
+ .totalbar-in{gap:var(--space-1) var(--space-3);justify-content:space-between}
+ .tb-track{order:3;flex-basis:100%;margin-block:20px 18px}
+ .tb-num{font-size:24px}
+}
