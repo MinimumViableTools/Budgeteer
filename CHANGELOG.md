@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The tray of plans is a card box in a drawer that is pulled out, seen from the side. Cards overlap when they do not fit next to each other, and the open card is lifted to the front. "Push in" slides the drawer shut, "Pull out" opens it again.
 - The axis of the cost chart shows the euro sign (€10k, €20k).
 - On a phone the total bar at the bottom is lower: smaller figure, label and stamp.
 
