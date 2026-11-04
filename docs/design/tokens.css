@@ -1,0 +1,86 @@
+/* Pocketknife design version 1 (2026-11-04). Update this line when tokens, components or fonts change.
+   Shared tokens for all tools. Source of truth for colours, type, spacing, radius and shadow. */
+/* Paper is the default theme. Ink is the dark theme. Use <html data-theme="ink"> for dark. */
+
+:root, [data-theme="paper"] {
+  --surface: #f3eddf;
+  --surface-raised: #fbf8f0;
+  --surface-sunken: #e9e1ce;
+  --ink: #1e2330;
+  --ink-muted: #555a68;
+  --border-strong: #857b63;
+  --rule: #d3c9b2;
+  --ribbon: #b23a26;
+  --blade-teal: #1f6b66;
+  --blade-mustard: #8f6200;
+  --blade-blue: #2d5a9b;
+  --blade-plum: #7a3a72;
+  --accent: var(--ribbon);
+  --on-accent: #fbf8f0;
+  --focus: #2b4fd0;
+  --data-internal-dev: #1a5a9e;
+  --data-freelancer: #b87500;
+  --data-subscription: #00805f;
+  --data-infrastructure: #2f86be;
+  --data-one-time: #b04f8a;
+  --status-ok: #00805f;
+  --status-warn: #b87500;
+  --status-over: #c2410c;
+  --shadow-lift: 3px 3px 0 #1e233038;
+  --shadow-press: 1px 1px 0 #1e233038;
+}
+
+[data-theme="ink"] {
+  --surface: #1a1814;
+  --surface-raised: #24211c;
+  --surface-sunken: #13110e;
+  --ink: #f1e9d8;
+  --ink-muted: #b5ac98;
+  --border-strong: #8c826c;
+  --rule: #3a352c;
+  --ribbon: #ee7c63;
+  --blade-teal: #5cbdb4;
+  --blade-mustard: #e6b54a;
+  --blade-blue: #86aae8;
+  --blade-plum: #cd92c4;
+  --accent: var(--ribbon);
+  --on-accent: #1a1814;
+  --focus: #9db8ff;
+  --data-internal-dev: #3f86d4;
+  --data-freelancer: #e8a93a;
+  --data-subscription: #2db88f;
+  --data-infrastructure: #9ad8f5;
+  --data-one-time: #d98db8;
+  --status-ok: #2db88f;
+  --status-warn: #e8a93a;
+  --status-over: #f08a55;
+  --shadow-lift: 3px 3px 0 #00000080;
+  --shadow-press: 1px 1px 0 #00000080;
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --font-display: "Courier Prime", "Courier New", Courier, monospace;
+  --font-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+
+.display-xl { font-family: var(--font-display); font-size: 56px; line-height: 60px; font-weight: 700; }
+.display-lg { font-family: var(--font-display); font-size: 40px; line-height: 44px; font-weight: 700; }
+.headline { font-family: var(--font-display); font-size: 28px; line-height: 34px; font-weight: 700; }
+.body-lg { font-family: var(--font-body); font-size: 19px; line-height: 30px; font-weight: 400; }
+.body { font-family: var(--font-body); font-size: 17px; line-height: 27px; font-weight: 400; }
+.small { font-family: var(--font-body); font-size: 15px; line-height: 23px; font-weight: 400; }
+.label { font-family: var(--font-display); font-size: 13px; line-height: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.caption { font-family: var(--font-display); font-size: 13px; line-height: 19px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.numeral-xl { font-family: var(--font-display); font-size: 48px; line-height: 52px; font-weight: 700; font-variant-numeric: tabular-nums; }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" data-theme="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Budgeteer</title>
+<meta name="description" content="A project budget calculator for exploring planning scenarios. Everything stays in your browser.">
+<link rel="stylesheet" href="design/fonts.css">
+<link rel="stylesheet" href="design/tokens.css">
+<link rel="stylesheet" href="design/components.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the plan</a>
+<div class="page">
+  <header class="top">
+    <div>
+      <h1>Budgeteer</h1>
+      <div class="tagline"><span id="typed">Plan what fits, then see what does not.</span><span class="caret" aria-hidden="true"></span></div>
+    </div>
+    <div class="stamp-row" id="headActions"></div>
+  </header>
+  <p class="notice" id="notice" role="status" aria-live="polite"></p>
+  <main id="main" class="stack">
+    <section class="panel" aria-labelledby="h-settings">
+      <h2 id="h-settings">Plan settings</h2>
+      <div class="settings">
+        <div class="set"><span class="pk-label" id="lblView">View</span>
+          <div class="seg" role="group" aria-labelledby="lblView">
+            <button type="button" id="vMonth" aria-pressed="true">Months</button>
+            <button type="button" id="vQuarter" aria-pressed="false">Quarters</button>
+          </div></div>
+        <div class="set"><label class="pk-label" for="length" id="lblLen">Number of months (1 to 12)</label>
+          <input class="pk-input" id="length" inputmode="numeric" autocomplete="off"></div>
+        <div class="set"><label class="pk-label" for="bMax">Max budget (€)</label>
+          <input class="pk-input" id="bMax" inputmode="numeric" autocomplete="off" style="width:130px"></div>
+        <div class="set"><label class="pk-label" for="bStr">Stretch budget (€)</label>
+          <input class="pk-input" id="bStr" inputmode="numeric" autocomplete="off" style="width:130px"></div>
+        <div class="set"><span class="pk-label" id="lblScn">Scenario</span>
+          <div class="seg" role="group" aria-labelledby="lblScn">
+            <button type="button" id="sMax" aria-pressed="false">Max</button>
+            <button type="button" id="sStr" aria-pressed="true">Stretch</button>
+          </div></div>
+      </div>
+      <p class="hint" id="viewHint"></p>
+    </section>
+  </main>
+</div>
+<script src="js/core.js"></script>
+<script src="js/codec.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

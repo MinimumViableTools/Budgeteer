@@ -1,0 +1,29 @@
+/* Pocketknife components: Button, Stamp, Card, Field. Needs tokens.css and fonts.css. Class names start with pk-. */
+/* Icons are drawn as SVG masks, never as text characters, because the vendored fonts have no check mark or arrow. */
+.pk-btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-height:44px;padding:0 var(--space-4);font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--surface-raised);border:2px solid var(--ink);border-radius:var(--radius-sm);box-shadow:var(--shadow-lift);cursor:pointer;transition:transform 80ms,box-shadow 80ms}
+.pk-btn:active{transform:translate(2px,2px);box-shadow:var(--shadow-press)}
+.pk-btn:focus-visible,.pk-range:focus-visible,.pk-input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.pk-btn--primary{background:var(--accent);color:var(--on-accent)}
+.pk-btn--ghost{background:transparent;box-shadow:none;border-color:var(--border-strong)}
+.pk-btn[disabled]{opacity:.55;cursor:not-allowed;box-shadow:none}
+.pk-stamp{display:inline-flex;align-items:center;gap:var(--space-1);padding:var(--space-1) var(--space-3);font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);border:2px solid var(--stamp,var(--ink));border-radius:var(--radius-sm);transform:rotate(-2deg);background:transparent}
+.pk-stamp::before{content:"";width:14px;height:14px;flex:none;background:var(--stamp,var(--ink));-webkit-mask:var(--glyph) center/contain no-repeat;mask:var(--glyph) center/contain no-repeat}
+.pk-stamp--ok{--stamp:var(--status-ok);--glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.pk-stamp--warn{--stamp:var(--status-warn);--glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 3v6.2M8 12.4v.1' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.pk-stamp--over{--stamp:var(--status-over);--glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.pk-card{background:var(--surface-raised);color:var(--ink);border:1.5px solid var(--rule);border-radius:var(--radius-md);box-shadow:var(--shadow-lift);padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);font-family:var(--font-body)}
+.pk-card__head{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-display);font-weight:700;font-size:17px}
+.pk-dot{width:12px;height:12px;border-radius:var(--radius-pill);background:var(--dot,var(--accent));flex:none}
+.pk-num{font-family:var(--font-display);font-weight:700;font-size:48px;line-height:52px;font-variant-numeric:tabular-nums}
+.pk-bar{height:6px;border-radius:var(--radius-sm);background:var(--surface-sunken);overflow:hidden}
+.pk-bar>i{display:block;height:100%;background:var(--dot,var(--accent))}
+.pk-muted{color:var(--ink-muted);font-size:15px}
+.pk-field{display:flex;flex-direction:column;gap:var(--space-2);font-family:var(--font-display)}
+.pk-field__row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)}
+.pk-label{font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
+.pk-input{width:96px;min-height:44px;padding:0 var(--space-3);text-align:right;font-family:var(--font-display);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--surface-sunken);border:2px solid var(--border-strong);border-radius:var(--radius-md)}
+.pk-range{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;margin:0;cursor:pointer}
+.pk-range::-webkit-slider-runnable-track{height:8px;border-radius:var(--radius-pill);border:1.5px solid var(--border-strong);background:linear-gradient(to right,var(--accent) var(--p,50%),var(--surface-sunken) var(--p,50%))}
+.pk-range::-moz-range-track{height:8px;border-radius:var(--radius-pill);border:1.5px solid var(--border-strong);background:linear-gradient(to right,var(--accent) var(--p,50%),var(--surface-sunken) var(--p,50%))}
+.pk-range::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9px;border-radius:var(--radius-pill);background:var(--surface-raised);border:2px solid var(--ink);box-shadow:var(--shadow-press)}
+.pk-range::-moz-range-thumb{width:20px;height:20px;border-radius:var(--radius-pill);background:var(--surface-raised);border:2px solid var(--ink);box-shadow:var(--shadow-press)}
