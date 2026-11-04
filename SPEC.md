@@ -15,7 +15,7 @@ A product manager can describe the resources of a plan, see immediately how the 
 
 ## Scope
 
-- Resources are set up as cards, not a table. A row of template chips adds a resource with defaults: internal dev, freelancer, subscription, infrastructure, one-time cost.
+- Resources are set up as cards, not a table. A row of template chips adds a resource with defaults: internal staff, freelancer, subscription, infrastructure, one-time cost.
 - Each card shows the line total for the plan, its share of the scenario total, and sliders with a number field beside each for exact input. A collapsed "More settings" section holds resource type, cost mode, start period and end period.
 - Cost modes: rate times days, fixed per period, one time.
 - A total timeframe of at most one year, stored in months. The planning unit is a view: months (1 to 12) or quarters (1 to 4, available only when the plan length is a multiple of 3 months). Weeks are not a planning unit.
@@ -85,7 +85,7 @@ If a milestone is not reached, its reason is either "budget passed in period p" 
 
 Status: total <= max is "Within max budget" (green). Total above max and <= stretch is "In stretch zone" (amber). Total above stretch is "Over stretch budget" (red).
 
-Template defaults (can be tuned): internal developer 1,000 per day for 10 days; freelancer 650 per day for 5 days; subscription 200 per period; infrastructure 300 per period; one-time cost 5,000 due in the middle period.
+Template defaults (can be tuned): internal team 1,000 per day for 10 days; freelancer 650 per day for 5 days; subscription 200 per period; infrastructure 300 per period; one-time cost 5,000 due in the middle period.
 
 ## Acceptance criteria
 
@@ -141,15 +141,15 @@ The sample plan, 6 months, max budget 95,000 and stretch budget 125,000. Use it 
 
 | Resource | Type | Mode | Inputs | Max | Stretch |
 | --- | --- | --- | --- | --- | --- |
-| Core team | Internal dev | Rate times days | 1,200 x 10 days | on | on |
+| Core team | Internal staff | Rate times days | 1,200 x 10 days | on | on |
 | Freelance designer | Freelancer | Rate times days | 650 x 4 days | on | on |
 | Analytics tool | Subscription | Fixed | 450 | on | on |
 | Hosting | Infrastructure | Fixed | 300 | on | on |
 | Security audit | One time | One time | 8,000 in M5 | off | on |
 | Extra freelancer | Freelancer | Rate times days | 600 x 8 days, M3 to M6 | off | on |
 
-- Max: 15,350 every month, total 92,100, within max (2,900 under). No budget passed. Internal dev is 78 percent.
-- Stretch: months 15,350 / 15,350 / 20,150 / 20,150 / 28,150 / 20,150. Running total 15,350 / 30,700 / 50,850 / 71,000 / 99,150 / 119,300. Total 119,300, in the stretch zone, max passed in M5, stretch not passed (5,700 under). Internal dev is 60 percent.
+- Max: 15,350 every month, total 92,100, within max (2,900 under). No budget passed. Internal staff is 78 percent.
+- Stretch: months 15,350 / 15,350 / 20,150 / 20,150 / 28,150 / 20,150. Running total 15,350 / 30,700 / 50,850 / 71,000 / 99,150 / 119,300. Total 119,300, in the stretch zone, max passed in M5, stretch not passed (5,700 under). Internal staff is 60 percent.
 
 The plan is one resource list, with the audit and the extra freelancer off in max and on in stretch.
 

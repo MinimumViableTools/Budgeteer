@@ -6,7 +6,7 @@
 })(typeof self !== 'undefined' ? self : this, function (core) {
   'use strict';
 
-  var TYPE_COLORS = { internalDev: 'var(--data-internal-dev)', freelancer: 'var(--data-freelancer)', subscription: 'var(--data-subscription)', infrastructure: 'var(--data-infrastructure)', oneTime: 'var(--data-one-time)' };
+  var TYPE_COLORS = { internalStaff: 'var(--data-internal-staff)', freelancer: 'var(--data-freelancer)', subscription: 'var(--data-subscription)', infrastructure: 'var(--data-infrastructure)', oneTime: 'var(--data-one-time)' };
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function r1(n) { return Math.round(n * 10) / 10; }
   function kfmt(n) { return n >= 1000 ? (Math.round(n / 100) / 10) + 'k' : String(Math.round(n)); }

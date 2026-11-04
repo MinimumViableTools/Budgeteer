@@ -1,4 +1,4 @@
-/* Pocketknife design version 1 (2026-11-04). Update this line when tokens, components or fonts change.
+/* Pocketknife design version 2 (2026-11-04). Version 2 renames data-internal-dev to data-internal-staff. Update this line when tokens, components or fonts change.
    Shared tokens for all tools. Source of truth for colours, type, spacing, radius and shadow. */
 /* Paper is the default theme. Ink is the dark theme. Use <html data-theme="ink"> for dark. */
 
@@ -18,7 +18,7 @@
   --accent: var(--ribbon);
   --on-accent: #fbf8f0;
   --focus: #2b4fd0;
-  --data-internal-dev: #1a5a9e;
+  --data-internal-staff: #1a5a9e;
   --data-freelancer: #b87500;
   --data-subscription: #00805f;
   --data-infrastructure: #2f86be;
@@ -46,7 +46,7 @@
   --accent: var(--ribbon);
   --on-accent: #1a1814;
   --focus: #9db8ff;
-  --data-internal-dev: #3f86d4;
+  --data-internal-staff: #3f86d4;
   --data-freelancer: #e8a93a;
   --data-subscription: #2db88f;
   --data-infrastructure: #9ad8f5;

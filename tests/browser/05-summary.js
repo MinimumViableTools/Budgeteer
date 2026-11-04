@@ -7,7 +7,7 @@ const { OUT, open, check, done } = require('./lib.js');
   check('AC12 distances', /Max budget €95,000/.test(lines) && /€24,300 over/.test(lines) && /Stretch budget €125,000/.test(lines) && /€5,700 under/.test(lines), lines);
   const t = await p.textContent('#sumText');
   check('narrative states totals', /plan totals €119,300\. That is €24,300 over the max budget and €5,700 under the stretch budget\./.test(t));
-  check('largest share and passes', /Internal dev is the largest share at 60% \(€72,000\)/.test(t) && /passes the max budget in M5/.test(t));
+  check('largest share and passes', /Internal staff is the largest share at 60% \(€72,000\)/.test(t) && /passes the max budget in M5/.test(t));
   check('milestone layer: all reached in stretch', /all 3 goals are reached/.test(t));
   await p.click('#sMax');
   const t2 = await p.textContent('#sumText');

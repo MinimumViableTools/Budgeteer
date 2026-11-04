@@ -39,7 +39,7 @@ test('AC9 one bar per period, split by type, heights proportional to the values'
   const svg = charts.costChart(model), b = bars(svg);
   assert.ok(b.length > 6);
   const m5 = b.filter(x => x.i === 4);
-  assert.deepEqual(m5.map(x => x.type), ['internalDev', 'freelancer', 'subscription', 'infrastructure', 'oneTime']);
+  assert.deepEqual(m5.map(x => x.type), ['internalStaff', 'freelancer', 'subscription', 'infrastructure', 'oneTime']);
   const ax = charts.axis(28150, 4), ph = 350 - 64 - 40;
   const sum = m5.reduce((s, x) => s + x.h, 0);
   assert.ok(Math.abs(sum - 28150 / ax.top * ph) < 1.5, 'stack height ' + sum);

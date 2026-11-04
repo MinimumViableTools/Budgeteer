@@ -67,7 +67,7 @@ test('AC8 a new resource starts with template defaults, on in the viewed scenari
 test('AC9 the monthly split by type adds up to the period totals', () => {
   const t = core.scenarioTotals(samplePlan(), 'stretch');
   const m5 = t.monthly[4];
-  assert.equal(m5.internalDev, 12000); assert.equal(m5.freelancer, 2600 + 4800);
+  assert.equal(m5.internalStaff, 12000); assert.equal(m5.freelancer, 2600 + 4800);
   assert.equal(m5.subscription, 450); assert.equal(m5.infrastructure, 300); assert.equal(m5.oneTime, 8000);
   assert.equal(core.sumByType(m5), 28150);
 });
@@ -286,7 +286,7 @@ test('the summary reads in quarters when the quarter view is on', () => {
 
 test('the largest share and the most expensive month in the max scenario', () => {
   const s = core.summary(samplePlan(), 'max');
-  assert.match(s.paragraphs[1], /Internal dev is the largest share at 78% \(€72,000\)/);
+  assert.match(s.paragraphs[1], /Internal staff is the largest share at 78% \(€72,000\)/);
   assert.match(s.paragraphs[1], /most expensive month is M1 at €15,350/);
   assert.doesNotMatch(s.paragraphs[1], /passes/);
 });

@@ -77,7 +77,7 @@ test('the logo: files, token colours, and its place before the name', () => {
   const dir = path.join(DOCS, 'logo'), svg = fs.readFileSync(path.join(dir, 'budgeteer-logo.svg'), 'utf8');
   const tokens = fs.readFileSync(path.join(DOCS, 'design', 'tokens.css'), 'utf8');
   const ink = tokens.slice(tokens.indexOf('[data-theme="ink"]'), tokens.indexOf(':root {', tokens.indexOf('[data-theme="ink"]')));
-  const allowed = ['--surface', '--data-internal-dev', '--data-freelancer', '--ribbon'].map((n) => new RegExp(n + ': (#[0-9a-f]{6});').exec(ink)[1]);
+  const allowed = ['--surface', '--data-internal-staff', '--data-freelancer', '--ribbon'].map((n) => new RegExp(n + ': (#[0-9a-f]{6});').exec(ink)[1]);
   const fills = [...svg.matchAll(/fill="(#[0-9a-fA-F]{6})"/g)].map((m) => m[1].toLowerCase());
   assert.equal(fills.length, 4);
   assert.deepEqual([...new Set(fills)].sort(), [...allowed].sort(), 'only Ink theme tokens');

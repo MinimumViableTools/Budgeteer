@@ -8,10 +8,10 @@
   'use strict';
 
   var LIMITS = { months: 12, quarters: 4, resources: 20, milestones: 8, milestoneName: 40, milestoneValue: 140 };
-  var TYPE_ORDER = ['internalDev', 'freelancer', 'subscription', 'infrastructure', 'oneTime'];
-  var TYPE_LABELS = { internalDev: 'Internal dev', freelancer: 'Freelancer', subscription: 'Subscription', infrastructure: 'Infrastructure', oneTime: 'One time' };
+  var TYPE_ORDER = ['internalStaff', 'freelancer', 'subscription', 'infrastructure', 'oneTime'];
+  var TYPE_LABELS = { internalStaff: 'Internal staff', freelancer: 'Freelancer', subscription: 'Subscription', infrastructure: 'Infrastructure', oneTime: 'One time' };
   var TEMPLATES = {
-    internalDev: { name: 'Internal developer', type: 'internalDev', mode: 'rateDays', rate: 1000, days: 10 },
+    internalStaff: { name: 'Internal team', type: 'internalStaff', mode: 'rateDays', rate: 1000, days: 10 },
     freelancer: { name: 'Freelancer', type: 'freelancer', mode: 'rateDays', rate: 650, days: 5 },
     subscription: { name: 'Subscription', type: 'subscription', mode: 'fixed', amount: 200 },
     infrastructure: { name: 'Infrastructure', type: 'infrastructure', mode: 'fixed', amount: 300 },

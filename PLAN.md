@@ -51,7 +51,7 @@ plan:
   budgets: { max, stretch }
   scenario: "max" | "stretch"      (the one being viewed)
   resources: up to 20 of
-    id, name, type, mode            type: internalDev | freelancer | subscription | infrastructure | oneTime
+    id, name, type, mode            type: internalStaff | freelancer | subscription | infrastructure | oneTime
                                     mode: rateDays | fixed | oneTime
     rate, days                      for rateDays
     amount                          for fixed and oneTime

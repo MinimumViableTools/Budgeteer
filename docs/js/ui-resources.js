@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var core = Budgeteer.core, ui = Budgeteer.ui, $ = ui.$, esc = ui.esc;
-  var COLORS = { internalDev: 'var(--data-internal-dev)', freelancer: 'var(--data-freelancer)', subscription: 'var(--data-subscription)', infrastructure: 'var(--data-infrastructure)', oneTime: 'var(--data-one-time)' };
+  var COLORS = { internalStaff: 'var(--data-internal-staff)', freelancer: 'var(--data-freelancer)', subscription: 'var(--data-subscription)', infrastructure: 'var(--data-infrastructure)', oneTime: 'var(--data-one-time)' };
   var RANGES = { rate: [0, 2000, 50], days: [0, 22, 0.5], amount: [0, 2000, 10], amount1: [0, 30000, 250] };
   var store, openMore = {};
 
