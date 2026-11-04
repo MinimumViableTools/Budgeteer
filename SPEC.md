@@ -131,6 +131,9 @@ Template defaults (can be tuned): internal developer 1,000 per day for 10 days; 
 - AC40: Given a one-time cost due in month 5 and a milestone due in month 5, when the quarter view is shown, then both show Q2 with their month and keep their exact month; and when either is edited in the quarter view to Q2, then the one-time cost moves to month 4 and the milestone to month 6.
 - AC41: Given a new plan, when it is created in the quarter view with a length of 2 quarters, then it is stored as 6 months and the month view shows it as 6 months.
 - AC42: Given a link made by an earlier release (an older plan format version), when it is opened in a later release, then the plan is upgraded and restored completely. Given a link with a newer version than the tool knows, when it is opened, then the tool shows a clear message that the link comes from a newer release and changes nothing.
+- AC43: Given a plan whose link is longer than 2,000 characters including the address of the page, when the person shares it, then the tool still gives the link but shows a short note that some apps may cut it off, and offers the JSON export as the safe way.
+- AC44: Given the page is opened from a file on disk, when the person shares the plan, then the tool says the link only works on this computer and points to the hosted page or the JSON export.
+- AC45: Given a link made in a browser that can compress, when it is opened in a browser that cannot, then the tool shows a clear message that the link needs a newer browser and changes nothing.
 
 ## Test case
 
@@ -183,6 +186,7 @@ Milestones for the test case:
 - The scenario total bar is in. It keeps the effect of a slider visible while adjusting cards, especially on a phone.
 - Numbers use one fixed English format that does not depend on the browser, for example €92,100, so tests and demos are deterministic.
 - Accessibility is an acceptance criterion from the start: keyboard use, text alternatives for the charts, contrast.
+- Link size, measured: a typical plan is about 470 characters including the Pages address (https://nlsplgrnd.github.io/Budgeteer/#, 39 characters). The largest plan the limits allow (20 resources, 12 months, 8 milestones with full-length texts) is about 1,600 characters with English-like text and about 3,000 with random text, using a compact format and compression. Links over 2,000 characters get a note, because some apps cut long links off, and the JSON export is the safe way. The fragment itself is never sent to the server, so server limits do not apply.
 - A plan holds at most 20 resources. The plan is encoded in the URL fragment, which is never sent to a server. JSON export and import is the fallback. The practical link size still has to be checked with a prototype in the plan phase.
 - The tool uses the Ink (dark) theme only in version 1. Colours, contrast checks and screenshots are made for Ink. The Paper theme is a later item.
 - Rate times days keeps "days" in version 1. The unit is stored as a label, so hours or licences can be added later without changing the data model.
@@ -196,7 +200,6 @@ Milestones for the test case:
 
 ## Open questions
 
-- Practical size of the shareable link: does a plan of 20 resources, 12 months and 8 milestones with 140-character descriptions fit comfortably? Milestone texts add roughly 1.5 KB before encoding (an estimate). Check with a prototype in the plan phase.
 - Slider ranges and styling: to be tuned in the plan and build phase. The starting ranges (day rate 0 to 2,000 in steps of 50, days 0 to 22 in steps of 0.5, fixed cost 0 to 2,000 in steps of 10, one-time 0 to 30,000 in steps of 250) are the starting point.
 
 ## Hard parts without a library

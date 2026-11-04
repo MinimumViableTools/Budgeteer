@@ -114,7 +114,7 @@ Each step is small, finishable on its own, and points to the acceptance criteria
 
 1. [x] Create the project repo, copy the spec, plan and `CLAUDE.md` into it as the first commit, and attach it to the session. The decision records stay outside this repo.
 2. [x] Core logic with tests: period costs for the three modes, scenario totals, running totals, budget passed, status, milestone status with reasons, euro formatting, input validation, and the sample plan with its milestones as the test case. (AC1 to AC4, AC6, AC7, AC12, AC15, AC23, AC31 to AC33, test case)
-3. [ ] Spike for the link size: encode a plan of 20 resources, 12 months and 8 milestones with full-length texts in the fragment, check its length and that it restores. Decide whether compression is needed. Records the result in ADR 0002. (AC26, open question on link size)
+3. [x] Spike for the link size: encode a plan of 20 resources, 12 months and 8 milestones with full-length texts in the fragment, check its length and that it restores. Decide whether compression is needed. Records the result in ADR 0002. (AC26, open question on link size)
 4. [ ] Page skeleton and dark theme: settings (unit, length, budgets, scenario), state and rendering loop. (AC13, AC15, AC19, AC20)
 5. [ ] Resource cards: template chips, sliders with number fields, More settings, scenario switch, add and remove, new resource starts in the current scenario only. (AC4, AC5, AC8, AC14, AC27)
 6. [ ] Cost chart with axis scaling. (AC9)
@@ -132,14 +132,14 @@ Order logic: the calculation and the link size are the main risks, so they come 
 The decision records (ADRs) are kept outside this repo, in the private planning repo. In short:
 
 - No build step, classic scripts, no libraries, charts in HTML and SVG
-- Plan state in the URL fragment, with JSON export as fallback
+- Plan state in the URL fragment as a compact JSON array, base64url, deflated when that is shorter, with a format version in every link and JSON export as fallback
 - Numbers are kept unrounded, rounding only for display
 - The tool is dark only
 - Months are the only stored unit, quarters are a view
 
 ## Risks
 
-- Link size: a plan of 20 resources may be too long for some apps. Mitigated by the spike in step 3 and the JSON fallback.
+- Link size: measured in step 3. A typical plan is about 470 characters, the largest plan with English-like text about 1,600, with random text about 3,000, including the Pages address. Links over 2,000 characters get a note and the JSON export is the way out.
 - Label collisions next to the headroom bar and axis scaling are fiddly without a library. Mitigated by building them as small, tested pure functions where possible.
 - Milestones add text to the link and a new dialog. Mitigated by the length limits, the spike in step 3, and a quick mockup before step 9.
 - Quarter view editing: the rules for editing precise months in the quarter view are proposed in the spec and need your confirmation before step 5 builds the cards.
