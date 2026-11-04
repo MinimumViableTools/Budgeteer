@@ -117,7 +117,6 @@ Template defaults (can be tuned): internal developer 1,000 per day for 10 days; 
 - AC26: Given a plan with 20 resources, 12 months and 8 milestones with full-length descriptions, when the link is created and opened in a new browser, then the plan is restored completely.
 - AC27: Given a plan with 20 resources, when the user adds another, then the tool refuses with a short message to remove one first.
 - AC28: Given a plan, when it is exported as JSON and imported again, then the resulting plan is identical, and an invalid file shows a clear message and changes nothing.
-- AC42: Given a link made by an earlier release (an older plan format version), when it is opened in a later release, then the plan is upgraded and restored completely. Given a link with a newer version than the tool knows, when it is opened, then the tool shows a clear message that the link comes from a newer release and changes nothing.
 - AC29: Given the user opens the "Add milestone" dialog, when a name, a value description of up to 140 characters, a due unit, linked resources and an importance are entered and saved, then the milestone appears in the milestone list, as a marker at its due unit on the cost chart, and in the summary.
 - AC30: Given a value description longer than 140 characters, when it is typed, then the input stops at 140 characters and shows the remaining count. Given 8 milestones, when the user tries to add another, then the tool refuses with a short message.
 - AC31: Given a milestone due in period 5 with a linked resource that is off in the scenario being viewed, when the status is shown, then the milestone is not reached and the reason names the switched-off resource.
@@ -131,6 +130,7 @@ Template defaults (can be tuned): internal developer 1,000 per day for 10 days; 
 - AC39: Given a resource that starts in month 2, when the quarter view is shown, then its start reads "Q1 (M2)" and nothing changes; and when the user edits the start there and chooses Q2, then the stored start becomes month 4, and the end of a resource edited the same way becomes the last month of the chosen quarter.
 - AC40: Given a one-time cost due in month 5 and a milestone due in month 5, when the quarter view is shown, then both show Q2 with their month and keep their exact month; and when either is edited in the quarter view to Q2, then the one-time cost moves to month 4 and the milestone to month 6.
 - AC41: Given a new plan, when it is created in the quarter view with a length of 2 quarters, then it is stored as 6 months and the month view shows it as 6 months.
+- AC42: Given a link made by an earlier release (an older plan format version), when it is opened in a later release, then the plan is upgraded and restored completely. Given a link with a newer version than the tool knows, when it is opened, then the tool shows a clear message that the link comes from a newer release and changes nothing.
 
 ## Test case
 
