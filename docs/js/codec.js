@@ -181,5 +181,12 @@
     return r.ok ? r : bad('invalid', NOT_A_PLAN);
   }
 
-  return { exportJson: exportJson, importJson: importJson, NOT_A_PLAN: NOT_A_PLAN, FORMAT_VERSION: FORMAT_VERSION, LINK_WARN_LENGTH: LINK_WARN_LENGTH, normalizePlan: normalizePlan, encodePlan: encodePlan, encodePlanShort: encodePlanShort, buildLink: buildLink, pageBase: pageBase, fragmentOf: fragmentOf, shareAdvice: shareAdvice, decodePlan: decodePlan, decodePlanShort: decodePlanShort };
+  /* a plan object from anywhere (for example restored from the tab storage), checked with the same rules as a link */
+  function validatePlan(obj) {
+    var compact; try { compact = toCompact(obj); } catch (e) { return bad('invalid', NOT_A_PLAN); }
+    var r = fromCompact(JSON.parse(JSON.stringify(compact)));
+    return r.ok ? r : bad('invalid', NOT_A_PLAN);
+  }
+
+  return { validatePlan: validatePlan, exportJson: exportJson, importJson: importJson, NOT_A_PLAN: NOT_A_PLAN, FORMAT_VERSION: FORMAT_VERSION, LINK_WARN_LENGTH: LINK_WARN_LENGTH, normalizePlan: normalizePlan, encodePlan: encodePlan, encodePlanShort: encodePlanShort, buildLink: buildLink, pageBase: pageBase, fragmentOf: fragmentOf, shareAdvice: shareAdvice, decodePlan: decodePlan, decodePlanShort: decodePlanShort };
 });
