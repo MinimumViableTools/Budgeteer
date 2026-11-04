@@ -100,3 +100,33 @@ test('only the tray stores plans, and only in the tab', () => {
   assert.match(plans, /sessionStorage/); assert.ok(!/localStorage/.test(plans));
   assert.match(plans, /try \{ return window\.sessionStorage; \} catch/, 'blocked storage must not break the page');
 });
+
+test('the changelog is structured: dated versions, only the allowed headings, newest version equals the footer', () => {
+  const log = fs.readFileSync(path.join(__dirname, '..', 'CHANGELOG.md'), 'utf8').split('\n');
+  const versions = log.filter((l) => l.startsWith('## ') && l !== '## Unreleased');
+  assert.ok(versions.length >= 4);
+  for (const h of versions) assert.match(h, /^## \d+\.\d+\.\d+ - \d{4}-\d{2}-\d{2}$/, h);
+  const allowed = ['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security'];
+  for (const l of log.filter((x) => x.startsWith('### '))) assert.ok(allowed.includes(l.slice(4)), l);
+  let current = null; const seen = {};
+  for (const l of log) {
+    if (l.startsWith('## ')) { current = l; seen[current] = 0; } else if (l.startsWith('### ') && current) seen[current]++;
+  }
+  for (const h of versions) assert.ok(seen[h] > 0, 'no ### heading in ' + h);
+  const newest = versions[0].split(' ')[1];
+  assert.match(fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8'), new RegExp('Budgeteer ' + newest.replace(/\./g, '\\.') + '</span>'));
+});
+
+test('the release script accepts the newest version and writes notes with a compare link', () => {
+  const { spawnSync } = require('node:child_process');
+  const root = path.join(__dirname, '..');
+  const log = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
+  const newest = log.split('\n').filter((l) => /^## \d/.test(l))[0].split(' ')[1];
+  const run = (version, prev) => spawnSync('bash', ['.github/scripts/release-notes.sh', version].concat(prev ? [prev] : []), { cwd: root, encoding: 'utf8' });
+  const ok = run(newest, 'v0.0.1');
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.match(ok.stdout, /^### /);
+  assert.match(ok.stdout, /\*\*Full changelog\*\*: https:\/\/github\.com\/.+\/compare\/v0\.0\.1\.\.\.v/);
+  assert.notEqual(run(newest, 'v' + newest).status, 0, 'a version that is not newer is refused');
+  assert.notEqual(run('9.9.9').status, 0, 'a version the page does not show is refused');
+});

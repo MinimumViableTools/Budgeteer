@@ -13,4 +13,5 @@ Agent context for this repository. Read this first.
 - Do not commit credentials or confidential content. Demo data is invented.
 - Work on a feature branch and open a pull request for every change. The owner merges; Claude never merges. Commits are authored as the owner (GitHub noreply address) and keep the `Co-Authored-By` trailer for Claude.
 - In pull requests, issues, comments and commit messages, refer to the person only as "the owner" or "the user", never by name.
+- Releases and the changelog: follow `RELEASING.md`. Add an entry under `## Unreleased` in `CHANGELOG.md` in every pull request that changes what a person sees or can do, sorted into Added, Changed or Fixed.
 - Ask clarifying questions before making assumptions. Do not use horizontal rules in documents.
