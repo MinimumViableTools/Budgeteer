@@ -46,9 +46,11 @@ test('AC5 and AC8 switches and new resources follow the viewed scenario', () => 
   s.setResourceOn(1, 'stretch', false);
   assert.deepEqual(s.getPlan().resources[0].on, { max: true, stretch: false });
   s.setScenario('max'); s.addResource('freelancer');
-  const r = s.getPlan().resources[6];
-  assert.deepEqual(r.on, { max: true, stretch: false });
-  assert.match(s.getNotice(), /Added Freelancer to the max scenario only/);
+  assert.deepEqual(s.getPlan().resources[6].on, { max: true, stretch: true });
+  assert.match(s.getNotice(), /Added Freelancer to both scenarios/);
+  s.setScenario('stretch'); s.addResource('subscription');
+  assert.deepEqual(s.getPlan().resources[7].on, { max: false, stretch: true });
+  assert.match(s.getNotice(), /Added Subscription to the stretch scenario only/);
 });
 
 test('AC27 the 21st resource is refused with a notice', () => {

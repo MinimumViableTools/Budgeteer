@@ -189,7 +189,8 @@
     var t = TEMPLATES[templateKey], r = { id: nextId(plan.resources), name: t.name, type: t.type, mode: t.mode, from: 1, to: null, on: { max: false, stretch: false } };
     if (t.mode === 'rateDays') { r.rate = t.rate; r.days = t.days; } else r.amount = t.amount;
     if (t.mode === 'oneTime') r.due = Math.ceil(plan.length / 2);
-    r.on[plan.scenario] = true;
+    /* Stretch always holds everything. Max holds the resources that were added while viewing max. */
+    r.on.stretch = true; r.on.max = plan.scenario === 'max';
     return { plan: Object.assign({}, plan, { resources: plan.resources.concat([r]) }), resource: r };
   }
   function removeResource(plan, id) {

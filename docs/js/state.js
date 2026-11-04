@@ -44,7 +44,7 @@
       addResource: function (key) {
         var r = core.addResource(plan, key);
         if (r.error) { say(r.error); return; }
-        commit(r.plan, 'structure', 'Added ' + r.resource.name + ' to the ' + plan.scenario + ' scenario only.');
+        commit(r.plan, 'structure', 'Added ' + r.resource.name + (plan.scenario === 'max' ? ' to both scenarios.' : ' to the stretch scenario only.'));
       },
       removeResource: function (id) { commit(core.removeResource(plan, id), 'structure', 'Resource removed. Milestones that depended on it keep working without it.'); },
       setResourceOn: function (id, scenario, on) { commit(core.setResourceOn(plan, id, scenario, !!on), 'value'); },

@@ -52,13 +52,17 @@ test('AC6 a value change on the shared list applies in both scenarios', () => {
   assert.equal(core.scenarioTotals(p, 'stretch').total, 119300 + 2 * 1200 * 6);
 });
 
-test('AC8 a new resource starts with template defaults, on in the viewed scenario only', () => {
+test('AC8 a new resource starts with template defaults, on in stretch always and in max when added while viewing max', () => {
   const p = Object.assign(samplePlan(), { scenario: 'stretch' });
   const res = core.addResource(p, 'freelancer');
   const r = res.resource;
   assert.equal(r.name, 'Freelancer'); assert.equal(r.rate, 650); assert.equal(r.days, 5);
   assert.deepEqual(r.on, { max: false, stretch: true });
   assert.equal(res.plan.resources.length, 7);
+  const inMax = core.addResource(Object.assign(samplePlan(), { scenario: 'max' }), 'freelancer').resource;
+  assert.deepEqual(inMax.on, { max: true, stretch: true });
+  const fresh = core.addResource(core.newPlan('month', 6), 'subscription').plan;
+  assert.equal(core.scenarioTotals(fresh, 'stretch').total, core.scenarioTotals(fresh, 'max').total, 'a new plan built in max is complete in stretch');
   const one = core.addResource(p, 'oneTime').resource;
   assert.equal(one.due, 3, 'the middle month of a 6-month plan');
   assert.equal(one.amount, 5000);

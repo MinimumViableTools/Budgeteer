@@ -27,8 +27,11 @@ const plan = (p) => p.evaluate(() => JSON.parse(JSON.stringify(Budgeteer.ui.getS
   /* add and remove */
   await p.click('[data-tpl="freelancer"]');
   check('seven cards', (await p.locator('#cards .rcard').count()) === 7);
-  check('new resource only in max', JSON.stringify((await plan(p)).resources[6].on) === '{"max":true,"stretch":false}');
-  check('notice', /Added Freelancer to the max scenario only/.test(await p.textContent('#notice')));
+  check('new resource added in max is on in both scenarios', JSON.stringify((await plan(p)).resources[6].on) === '{"max":true,"stretch":true}');
+  check('notice', /Added Freelancer to both scenarios/.test(await p.textContent('#notice')));
+  await p.click('#sStr'); await p.click('[data-tpl="subscription"]');
+  check('added while viewing stretch: stretch only', JSON.stringify((await plan(p)).resources[7].on) === '{"max":false,"stretch":true}' && /to the stretch scenario only/.test(await p.textContent('#notice')));
+  await p.click('[data-rm="8"]'); await p.click('#sMax');
   await p.click('[data-rm="7"]');
   check('removed', (await p.locator('#cards .rcard').count()) === 6 && /Resource removed/.test(await p.textContent('#notice')));
   /* name */
@@ -70,6 +73,11 @@ const plan = (p) => p.evaluate(() => JSON.parse(JSON.stringify(Budgeteer.ui.getS
   check('tab reaches the switch', (await p.evaluate(() => document.activeElement.hasAttribute('data-sw'))));
   await p.keyboard.press('Space');
   check('space toggles it', (await plan(p)).resources[0].on.max === false);
+  /* a new plan built in max is complete in stretch */
+  await p.evaluate(() => { const st = Budgeteer.ui.getStore(); st.loadPlan(Budgeteer.share.emptyPlan(), ''); });
+  await p.click('#sMax'); for (const k of ['internalStaff', 'freelancer', 'subscription']) await p.click('[data-tpl="' + k + '"]');
+  const totalMax = await p.textContent('#sumTotal'); await p.click('#sStr');
+  check('new plan built in max: stretch shows the same resources and total', (await p.textContent('#sumTotal')) === totalMax && (await p.locator('#cards .rcard:not(.off)').count()) === 3 && !/No resources are switched on/.test(await p.textContent('#sumText')), totalMax);
   await p.screenshot({ path: OUT + '/step05.png', fullPage: true });
   check('no errors', errs.length === 0, errs.join(' | '));
   await b.close(); done();

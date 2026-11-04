@@ -21,7 +21,7 @@ A product manager can describe the resources of a plan, see immediately how the 
 - A total timeframe of at most one year, stored in months. The planning unit is a view: months (1 to 12) or quarters (1 to 4, available only when the plan length is a multiple of 3 months). Weeks are not a planning unit.
 - Two scenarios, max and stretch. One shared resource list, with a different combination of on/off switches per resource in each scenario. The budgets are one per scenario.
 - A switch on each card includes or excludes the resource in the scenario currently viewed, labelled "In max" or "In stretch". A resource that is switched off is dimmed and shows "Not in max" (or stretch) instead of its share.
-- A resource added while viewing a scenario starts on in that scenario only and off in the other.
+- Stretch holds everything: a new resource is always on in stretch. It is on in max too when it was added while viewing max. A new plan built in max is therefore complete when the person switches to stretch.
 - Overview with the cost chart (stacked bars per period by resource type), the headroom bar (the plan total stacked by period against the max and stretch budgets), a status chip, and a narrative summary with live numbers.
 - The chart highlights the period in which the running total first passes a budget.
 - Value-based milestones: up to 8, each with a name, a short value description of the goal achieved (up to 140 characters), a due planning unit, linked resources, and an importance (must-have or nice-to-have). They are defined in a dialog opened by an "Add milestone" button.
@@ -96,7 +96,7 @@ Template defaults (can be tuned): internal team 1,000 per day for 10 days; freel
 - AC5: Given a resource that is on in the scenario being viewed, when its switch is turned off, then it is dimmed, labelled "Not in max" (or stretch), and excluded from that scenario's totals, chart and summary, and the other scenario is unchanged.
 - AC6: Given two scenarios that share one resource list, when a value is changed on a card, then the change applies in both scenarios, and the totals of each scenario update according to which resources are on.
 - AC7: Given a resource that is on in max and off in stretch, when the scenario is switched, then the stretch view dims the resource and excludes it from its totals while the max view includes it.
-- AC8: Given the user is viewing the stretch scenario, when a resource is added from a template chip, then it starts with the template defaults, is on in stretch and off in max.
+- AC8: Given the user is viewing the max scenario, when a resource is added from a template chip, then it starts with the template defaults and is on in max and in stretch. Given the user is viewing the stretch scenario, then it is on in stretch and off in max.
 - AC9: Given a plan with lines of two resource types, when the overview is shown, then the cost chart shows one bar per period split by resource type, and the bar heights match the period totals.
 - AC10: Given a scenario total, when the overview is shown, then the headroom bar shows the total stacked by period, with a solid tick for the max budget and a dashed tick for the stretch budget, each labelled with name and amount.
 - AC11: Given a running total that first exceeds the max budget in period 5, when the overview is shown, then period 5 is highlighted in the cost chart with the label "Passes max", and its label in the headroom bar is bold. If max and stretch are passed in the same period, the label reads "Passes max + stretch".
@@ -178,7 +178,7 @@ Milestones for the test case:
 - The headroom bar is stacked by period, and the cost chart marks the period where a budget is passed. Accepted trade-off: the share per resource type is no longer one solid block, so the summary names the largest share instead.
 - Resources are set up as cards with sliders and number fields. The table view is dropped.
 - One switch per card, for the scenario being viewed.
-- New resources start in the current scenario only.
+- New resources: stretch holds everything, so a new resource is always on in stretch. It is also on in max when it was added while viewing max, so a plan built in max is complete after the switch to stretch, and what is explored in stretch does not change max.
 - One shared resource list, with a different combination of on/off switches per resource in each scenario. Separate resource plans per scenario with their own values were considered and moved out of this version.
 - A plan covers at most one year: up to 12 months or up to 4 quarters.
 - Months are the only stored unit. Quarters are a view of the same data (Q1 is M1 to M3, and so on). Switching the unit changes the view only: nothing is converted, no stored value changes, and totals and milestone statuses are identical in both views, so a round trip cannot lose anything. Weeks were removed as a planning unit, because 52 weeks do not divide evenly into 12 months. The 48-week model calendar was rejected earlier because it distorts the year. An earlier idea of converting values at the switch was replaced by this model, because periods such as a start in month 2 or a due date in month 5 do not convert cleanly into quarters.
