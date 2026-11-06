@@ -26,7 +26,7 @@
     if (active) {
       return '<li class="plan-card active" data-plan="' + e.id + '" aria-current="true"><div class="plan-row">' +
         '<input class="plan-name" data-rename aria-label="Plan name" maxlength="' + core.LIMITS.planName + '" autocomplete="off" value="' + name + '">' +
-        '<button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div>' +
+        '<button type="button" class="pk-btn pk-btn--ghost" data-copy>Copy</button><button type="button" class="pk-btn pk-btn--ghost" data-export aria-controls="exportPanel" aria-expanded="' + Budgeteer.share.isOpen() + '">Export</button><button type="button" class="pk-btn pk-btn--ghost" data-close="' + e.id + '" aria-label="Close plan ' + name + '">Close</button></div>' +
         '<div class="plan-sub"><span class="plan-meta" data-meta>' + esc(meta(p)) + '</span><span class="pk-stamp plan-stamp" aria-hidden="true">Open</span></div></li>';
     }
     return '<li class="plan-card" data-plan="' + e.id + '"><button type="button" class="plan-open" data-open="' + e.id + '"><span class="plan-title">' + name + '</span><span class="plan-meta">' + esc(meta(p)) + '</span></button>' +
@@ -37,7 +37,7 @@
     var list = stack.list(), activeId = stack.activeId();
     $('trayCards').innerHTML = list.map(function (e, i) { return cardHtml(e, activeId, i); }).join('') +
       '<li class="plan-card plan-new"><button type="button" class="plan-add" data-new' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ New plan</button></li>' +
-      '<li class="plan-card plan-new plan-sample"><button type="button" class="plan-add" data-sample' + (stack.full() ? ' aria-disabled="true"' : '') + '>+ Sample plan</button></li>';
+      '<li class="plan-card plan-new"><button type="button" class="plan-add" data-import' + (stack.full() ? ' aria-disabled="true"' : '') + '><span class="ic ic-up" aria-hidden="true"></span>Import JSON</button></li>';
     renderBar(); fit(true);
   }
   /* The cards stand next to each other when they fit. When they do not, the plan cards overlap by the missing width,
@@ -59,16 +59,20 @@
     var a = box.querySelector('.plan-card.active');
     if (!toActive || !a) return;
     if (rail.scrollWidth - rail.clientWidth < 8) { rail.scrollLeft = 0; return; }
-    var left = a.offsetLeft - 40, right = a.offsetLeft + a.offsetWidth + 40;
+    var at = a.getBoundingClientRect().left - rail.getBoundingClientRect().left + rail.scrollLeft;
+    var m = Math.max(0, Math.min(40, (rail.clientWidth - a.offsetWidth) / 2)), left = at - m, right = at + a.offsetWidth + m;
     if (left < rail.scrollLeft) rail.scrollLeft = Math.max(0, left);
     else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollLeft = right - rail.clientWidth;
   }
+  /* a plan with nothing in it yet: the hint offers the sample plan */
+  function isBlank(plan) { return !plan.resources.length && !plan.milestones.length; }
   function renderBar() {
     var a = stack.active();
     $('trayCount').textContent = ' (' + stack.count() + ')';
     $('trayNow').textContent = a ? a.plan.name : '';
     $('trayNow').title = a ? meta(a.plan) : '';
     $('demoBanner').hidden = !(a && a.sample);
+    $('blankHint').hidden = !(a && !a.sample && isBlank(a.plan));
   }
   function renderLight() {
     var a = stack.active(); if (!a) return;
@@ -85,6 +89,7 @@
     collapsed = c; if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
     btn.setAttribute('aria-expanded', String(!c)); btn.setAttribute('aria-label', c ? 'Show plans' : 'Hide plans');
     if (c) {
+      Budgeteer.share.close(true);
       tray.classList.add('shut');
       if (instant || reduced()) rail.hidden = true; else hideTimer = setTimeout(function () { rail.hidden = true; hideTimer = null; }, 220);
     } else {
@@ -95,6 +100,7 @@
 
   /* showing a plan from the stack in the page */
   function show(message) {
+    Budgeteer.share.close(true);
     suppress = true; store.loadPlan(stack.active().plan, message || ''); suppress = false;
   }
   function addPlan(plan, message) {
@@ -123,10 +129,11 @@
       if (t.hasAttribute('data-copy')) {
         var c = stack.copy(); if (c.ok) { show('Copied the plan as “' + c.entry.plan.name + '”.'); focusName(); } else store.say(c.error); return;
       }
-      if (t.hasAttribute('data-sample')) {
+      if (t.hasAttribute('data-import')) {
         if (stack.full()) { store.say(Budgeteer.stack.limitMessage()); return; }
-        var sr = stack.add(Budgeteer.sample.samplePlan(), { sample: true }); if (sr.ok) { show('Added the sample plan.'); focusName(); } return;
+        $('importFile').click(); return;
       }
+      if (t.hasAttribute('data-export')) { Budgeteer.share.toggle(); return; }
       if (t.hasAttribute('data-open')) {
         if (stack.open(+t.getAttribute('data-open'))) { show(''); var a = document.querySelector('.plan-card.active [data-rename]'); if (a) a.focus(); } return;
       }
@@ -139,6 +146,10 @@
     cards.addEventListener('focusout', function (e) { if (e.target.hasAttribute && e.target.hasAttribute('data-rename')) e.target.value = stack.active().plan.name; });
     cards.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.hasAttribute('data-rename')) { e.preventDefault(); e.target.blur(); } });
     $('trayToggle').addEventListener('click', function () { applyCollapsed(!collapsed, true); });
+    $('openSample').addEventListener('click', function () {
+      if (stack.full()) { store.say(Budgeteer.stack.limitMessage()); return; }
+      var sr = stack.add(Budgeteer.sample.samplePlan(), { sample: true }); if (sr.ok) { show('Added the sample plan.'); focusName(); }
+    });
     $('undoBtn').addEventListener('click', function () {
       var r = stack.undoClose();
       if (r.ok) { $('trayUndo').hidden = true; if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } show('Brought “' + r.entry.plan.name + '” back.'); var a = document.querySelector('.plan-card.active [data-rename]'); if (a) a.focus(); }
