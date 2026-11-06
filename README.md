@@ -22,9 +22,9 @@ Budgets are often worked out in spreadsheets where one changed resource means re
 - **Tie goals to the budget.** Add milestones with the goal they achieve, and see which ones the plan reaches in each scenario and why.
 - **Share it.** Send a plan as a link, or save and open it as a file. Keep several plans open in one session to try alternatives.
 
-![The cost per month by resource type, and the plan total against the max and stretch budget](assets/overview.png)
+![The cost per month by resource type, the plan total against the max and stretch budget, and the summary in plain words](assets/overview.png)
 
-![Milestones with their status in the max and the stretch scenario](assets/milestones.png)
+![The summary of the max scenario with the milestones that are not reached and why, and the milestone list comparing both scenarios](assets/milestones.png)
 
 ## How it works
 
