@@ -8,9 +8,10 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Added
 
-- An Export button on the open plan card opens an export menu with four formats: Link, JSON, Markdown and CSV. Each one can be copied, and JSON, Markdown and CSV can be downloaded as a file. A preview shows what the file holds.
-- Markdown export: the whole plan as readable text with tables, to read or to hand to an AI assistant for reshaping. It is not opened again by Budgeteer.
-- CSV export: one row per resource with plain numbers and "yes" or "no" for the max and stretch scenario, for a spreadsheet such as Google Sheets. It is not opened again by Budgeteer.
+- Take your plan to the next tool. Budgeteer is made for the early phase of a project, and when the numbers are ready they move on to a spreadsheet or to people who work with them further. The new Export button on the open plan card opens one menu with four formats and a preview of what each file holds. Every format can be copied to the clipboard, and JSON, Markdown and CSV can also be downloaded as a file.
+  - Markdown: the whole plan as readable text with tables, covering the budgets, the totals of both scenarios, the resources, the cost per month and each milestone with its status. Read it as a status note, or paste it into a chat with an AI assistant and ask it to reshape the plan. Budgeteer does not open it again.
+  - CSV: one row per resource with plain numbers, and "yes" or "no" for the max and the stretch scenario. It is made for a spreadsheet such as Google Sheets, so you can keep working with the numbers there, for example by adding up each scenario yourself. Budgeteer does not open it again.
+  - Link and JSON: the same two formats as before, now in the same menu. They are the only ones Budgeteer opens again.
 - An empty plan offers "Open the sample plan" in a hint under the tray.
 
 ### Changed
