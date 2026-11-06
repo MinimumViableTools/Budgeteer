@@ -28,7 +28,7 @@
     var plan = store.getPlan(), f = FORMATS[fmt], mine = ++seq;
     $('exName').textContent = '“' + plan.name + '”';
     [].forEach.call($('fmtSeg').querySelectorAll('button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-f') === fmt)); });
-    var stamp = $('exStamp'); stamp.textContent = f.again ? 'Opens again' : 'Export only'; stamp.className = 'pk-stamp slip-stamp ' + (f.again ? 'pk-stamp--ok' : 'mute');
+    var stamp = $('exStamp'); stamp.textContent = f.again ? 'Opens again' : 'Export only'; stamp.className = 'pk-stamp slip-stamp ' + (f.again ? 'pk-stamp--ok' : 'pk-stamp--note');
     $('exFile').textContent = f.file || 'Link';
     $('exDownload').hidden = fmt === 'link';
     $('exCopy').textContent = fmt === 'link' ? 'Copy link' : 'Copy';
