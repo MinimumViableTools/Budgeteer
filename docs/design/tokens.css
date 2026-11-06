@@ -1,4 +1,4 @@
-/* Pocketknife design version 2 (2026-11-04). Version 2 renames data-internal-dev to data-internal-staff. Update this line when tokens, components or fonts change.
+/* Pocketknife design version 3 (2026-11-06). Version 3 adds the Segment, Panel and Link components and the note stamp; tokens are unchanged. Version 2 renamed data-internal-dev to data-internal-staff. Update this line when tokens, components or fonts change.
    Shared tokens for all tools. Source of truth for colours, type, spacing, radius and shadow. */
 /* Paper is the default theme. Ink is the dark theme. Use <html data-theme="ink"> for dark. */
 

@@ -1,4 +1,4 @@
-/* Pocketknife components: Button, Stamp, Card, Field. Needs tokens.css and fonts.css. Class names start with pk-. */
+/* Pocketknife components: Button, Stamp, Card, Field, Segment, Panel, Link. Needs tokens.css and fonts.css. Class names start with pk-. */
 /* Icons are drawn as SVG masks, never as text characters, because the vendored fonts have no check mark or arrow. */
 .pk-btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-height:44px;padding:0 var(--space-4);font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--surface-raised);border:2px solid var(--ink);border-radius:var(--radius-sm);box-shadow:var(--shadow-lift);cursor:pointer;transition:transform 80ms,box-shadow 80ms}
 .pk-btn:active{transform:translate(2px,2px);box-shadow:var(--shadow-press)}
@@ -27,3 +27,28 @@
 .pk-range::-moz-range-track{height:8px;border-radius:var(--radius-pill);border:1.5px solid var(--border-strong);background:linear-gradient(to right,var(--accent) var(--p,50%),var(--surface-sunken) var(--p,50%))}
 .pk-range::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9px;border-radius:var(--radius-pill);background:var(--surface-raised);border:2px solid var(--ink);box-shadow:var(--shadow-press)}
 .pk-range::-moz-range-thumb{width:20px;height:20px;border-radius:var(--radius-pill);background:var(--surface-raised);border:2px solid var(--ink);box-shadow:var(--shadow-press)}
+
+/* Segment: a row of buttons with aria-pressed, one pressed. pk-seg--grid turns into two columns on a phone. */
+.pk-seg{display:inline-flex;flex-wrap:wrap;border:2px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden;align-self:flex-start}
+.pk-seg button{min-height:44px;padding:0 var(--space-4);font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;background:var(--surface-sunken);color:var(--ink);border:0;cursor:pointer}
+.pk-seg button+button{border-left:2px solid var(--border-strong)}
+.pk-seg button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}
+.pk-seg button[disabled]{opacity:.5;cursor:not-allowed}
+.pk-seg button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+@media (max-width:600px){
+  .pk-seg--grid{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .pk-seg--grid button+button{border-left:0}
+  .pk-seg--grid button:nth-child(even){border-left:2px solid var(--border-strong)}
+  .pk-seg--grid button:nth-child(n+3){border-top:2px solid var(--border-strong)}
+}
+/* Panel: a raised block with a head row (title left, an action right). */
+.pk-panel{background:var(--surface-raised);border:1.5px solid var(--rule);border-radius:var(--radius-md);box-shadow:var(--shadow-lift);padding:var(--space-4) var(--space-5);display:flex;flex-direction:column;gap:var(--space-4)}
+.pk-panel[hidden]{display:none}
+.pk-panel__head{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center;justify-content:space-between}
+@media (max-width:600px){.pk-panel{padding:var(--space-4)}}
+/* Note stamp: a stamp that gives information, not a state. No glyph, muted colour. */
+.pk-stamp--note{--stamp:var(--ink-muted);color:var(--ink-muted)}
+.pk-stamp--note::before{display:none}
+/* Link: a text button that reads as a link. Ink colour, never the accent. */
+.pk-link{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
+.pk-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}

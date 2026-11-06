@@ -32,7 +32,7 @@ const URL = process.env.BASE_URL || 'http://localhost:8765/index.html';
   const clipped = await p.evaluate(() => { const i = document.querySelector('[data-name="1"]'); return i.scrollWidth > i.clientWidth + 1; });
   const w = await p.evaluate(() => document.querySelector('[data-name="1"]').getBoundingClientRect().width);
   check('AC21 a long name has the full card width on a phone', w > 250, w);
-  const stacked = await p.evaluate(() => { const r = [...document.querySelectorAll('.panel')].filter((e) => e.getBoundingClientRect().width > 0).map((e) => Math.round(e.getBoundingClientRect().left)); return new Set(r).size === 1; });
+  const stacked = await p.evaluate(() => { const r = [...document.querySelectorAll('.pk-panel')].filter((e) => e.getBoundingClientRect().width > 0).map((e) => Math.round(e.getBoundingClientRect().left)); return new Set(r).size === 1; });
   check('AC21 everything stacks in one column', stacked);
   await p.screenshot({ path: OUT + '/step11-phone-full.png', fullPage: true });
   check('no errors', errs.length === 0, errs.join(' | '));

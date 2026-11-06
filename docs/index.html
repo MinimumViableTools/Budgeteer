@@ -37,10 +37,10 @@
     </div>
     <div class="tray-undo" id="trayUndo" role="status" aria-live="polite" hidden><span id="undoText"></span><button type="button" class="pk-btn pk-btn--ghost" id="undoBtn">Undo</button></div>
   </section>
-  <section class="panel" id="exportPanel" aria-labelledby="h-export" hidden>
-    <div class="panel-head"><h2 id="h-export">Export <span class="ex-name" id="exName"></span></h2><button type="button" class="pk-btn pk-btn--ghost" id="closeExport">Close</button></div>
+  <section class="pk-panel" id="exportPanel" aria-labelledby="h-export" hidden>
+    <div class="pk-panel__head"><h2 id="h-export">Export <span class="ex-name" id="exName"></span></h2><button type="button" class="pk-btn pk-btn--ghost" id="closeExport">Close</button></div>
     <div class="ex-sub"><span class="pk-label" id="lblFmt">Format</span>
-      <div class="seg" role="group" aria-labelledby="lblFmt" id="fmtSeg">
+      <div class="pk-seg pk-seg--grid" role="group" aria-labelledby="lblFmt" id="fmtSeg">
         <button type="button" data-f="link" aria-pressed="true">Link</button>
         <button type="button" data-f="json" aria-pressed="false">JSON</button>
         <button type="button" data-f="md" aria-pressed="false">Markdown</button>
@@ -58,13 +58,13 @@
   <input type="file" id="importFile" accept=".json,application/json" hidden>
   <p class="notice" id="notice" role="status" aria-live="polite"></p>
   <div class="demo-banner" id="demoBanner" hidden>This is a sample plan with invented data. Change anything you like, start your own with “New plan”, or bring one in with “Import JSON”.</div>
-  <p class="demo-banner" id="blankHint" hidden>This plan is empty. Add a resource below, bring one in with “Import JSON”, or <button type="button" class="linkbtn" id="openSample">open the sample plan</button>.</p>
+  <p class="demo-banner" id="blankHint" hidden>This plan is empty. Add a resource below, bring one in with “Import JSON”, or <button type="button" class="pk-link" id="openSample">open the sample plan</button>.</p>
   <main id="main" class="stack">
-    <section class="panel" aria-labelledby="h-settings">
+    <section class="pk-panel" aria-labelledby="h-settings">
       <h2 id="h-settings">Plan settings</h2>
       <div class="settings">
         <div class="set"><span class="pk-label" id="lblView">View</span>
-          <div class="seg" role="group" aria-labelledby="lblView">
+          <div class="pk-seg" role="group" aria-labelledby="lblView">
             <button type="button" id="vMonth" aria-pressed="true">Months</button>
             <button type="button" id="vQuarter" aria-pressed="false">Quarters</button>
           </div></div>
@@ -75,7 +75,7 @@
         <div class="set"><label class="pk-label" for="bStr">Stretch budget (€)</label>
           <input class="pk-input" id="bStr" inputmode="numeric" autocomplete="off" style="width:130px"></div>
         <div class="set"><span class="pk-label" id="lblScn">Scenario</span>
-          <div class="seg" role="group" aria-labelledby="lblScn">
+          <div class="pk-seg" role="group" aria-labelledby="lblScn">
             <button type="button" id="sMax" aria-pressed="false">Max</button>
             <button type="button" id="sStr" aria-pressed="true">Stretch</button>
           </div></div>
@@ -83,15 +83,15 @@
       <p class="hint" id="viewHint"></p>
     </section>
 
-    <section class="panel" aria-labelledby="h-chart">
-      <div class="panel-head"><h2 id="h-chart">Cost and budget</h2><div class="legend" id="legend"></div></div>
+    <section class="pk-panel" aria-labelledby="h-chart">
+      <div class="pk-panel__head"><h2 id="h-chart">Cost and budget</h2><div class="legend" id="legend"></div></div>
       <div class="charts" id="charts">
         <figure class="fig"><p class="chart-title" id="costTitle"></p><div id="costChart" class="chartbox"></div><figcaption class="sr-only" id="costAlt"></figcaption></figure>
         <figure class="fig fig-side"><p class="chart-title" id="headTitle">Plan total against budget</p><div class="stamp-row" id="headStatus"></div><div id="headChart" class="chartbox"></div><figcaption class="sr-only" id="headAlt"></figcaption></figure>
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="h-sum">
+    <section class="pk-panel" aria-labelledby="h-sum">
       <h2 id="h-sum">Summary</h2>
       <div class="sumgrid">
         <div class="sumleft">
@@ -103,14 +103,14 @@
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="h-ms">
-      <div class="panel-head"><h2 id="h-ms">Milestones</h2><button class="pk-btn" id="addMs" type="button">+ Add milestone</button></div>
+    <section class="pk-panel" aria-labelledby="h-ms">
+      <div class="pk-panel__head"><h2 id="h-ms">Milestones</h2><button class="pk-btn" id="addMs" type="button">+ Add milestone</button></div>
       <p class="hint">Describe the goal each milestone achieves. It is reached in a scenario when the budget has not been passed by its due unit and all linked resources are on.</p>
       <div class="ms-list" id="msList"></div>
     </section>
 
-    <section class="panel" aria-labelledby="h-res">
-      <div class="panel-head"><h2 id="h-res">Resources</h2><p class="hint" id="resHint"></p></div>
+    <section class="pk-panel" aria-labelledby="h-res">
+      <div class="pk-panel__head"><h2 id="h-res">Resources</h2><p class="hint" id="resHint"></p></div>
       <div class="chips" id="tplChips" role="group" aria-label="Add a resource"></div>
       <div class="cards" id="cards"></div>
     </section>
@@ -125,7 +125,7 @@
     <div><label class="pk-label" for="msDue" id="lblDue">Due</label><select class="sel" id="msDue"></select></div>
     <div><span class="pk-label" id="lblLinks" style="display:block;margin-bottom:8px">Resources it depends on</span><div class="chips" id="msLinks" role="group" aria-labelledby="lblLinks"></div><p class="hint" style="margin-top:8px">Leave empty if only the budget decides.</p></div>
     <div id="msWarn"></div>
-    <div><span class="pk-label" id="lblImp" style="display:block;margin-bottom:8px">Importance</span><div class="seg" role="group" aria-labelledby="lblImp"><button type="button" id="impMust" aria-pressed="true">Must-have</button><button type="button" id="impNice" aria-pressed="false">Nice-to-have</button></div></div>
+    <div><span class="pk-label" id="lblImp" style="display:block;margin-bottom:8px">Importance</span><div class="pk-seg" role="group" aria-labelledby="lblImp"><button type="button" id="impMust" aria-pressed="true">Must-have</button><button type="button" id="impNice" aria-pressed="false">Nice-to-have</button></div></div>
     <div class="dlg-actions"><button type="button" class="pk-btn pk-btn--ghost" id="msDelete" hidden>Delete</button><span class="spacer"></span><button type="button" class="pk-btn pk-btn--ghost" id="msCancel">Cancel</button><button type="submit" class="pk-btn pk-btn--primary" id="msSave">Save milestone</button></div>
   </form>
 </dialog>
