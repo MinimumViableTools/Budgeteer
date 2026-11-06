@@ -8,11 +8,12 @@
 
 ![The plan in the max scenario, its summary, the switch to the stretch scenario and the new cost chart, ending on the Budgeteer logo and slogan](assets/budgeteer-demo.gif)
 
-Budgeteer is a project budget calculator for product managers. Add what your project needs, see at once whether it fits your budget, and play with the plan until you can explain it.
+Budgeteer is a project budget calculator for anyone who likes to visually compare budget plans before they enter heavy enterprise solutions. Add what your project needs, see at once if your plan and budget fit together and get a narrative summary for each scenario you create.
 
 ## Why Budgeteer
 
-Budgets are often worked out in spreadsheets where one changed resource means reworking totals and charts by hand, and the result is hard to explain to stakeholders. In Budgeteer you change a number and everything follows: the totals, the charts and a summary in plain words.
+Budgets are often worked out in the spreadsheet they need to fit into at the end of the process. This means you need to follow a formal process at a point in time where you might rather experiment with your options first.
+I created Budgeteer as a tool for this initial, fun phase of project budgeting.
 
 ## What you can do
 
