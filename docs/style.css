@@ -155,8 +155,38 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
  #tbStamp .pk-stamp::before{width:12px;height:12px}
 }
 
-.share-row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
-.share-row .txt{flex:1 1 260px;min-width:0;font-family:var(--font-display);font-size:14px}
+/* the export menu: format segments, a paper slip with a preview, copy and download */
+.panel[hidden]{display:none}
+.ex-name{color:var(--ink-muted);font-weight:400}
+.ex-sub{display:flex;flex-direction:column;gap:var(--space-3)}
+#fmtSeg{flex-wrap:wrap;align-self:flex-start}
+#fmtSeg button+button{border-left:2px solid var(--border-strong)}
+.slip{position:relative;background:var(--surface-sunken);border:1.5px solid var(--rule);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4) var(--space-3) calc(var(--space-4) + 14px);display:flex;flex-direction:column;gap:var(--space-3);min-width:0}
+.slip::before{content:"";position:absolute;left:10px;top:12px;bottom:12px;width:0;border-left:3px dotted var(--border-strong);opacity:.7}
+.slip-head{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center;justify-content:space-between}
+.slip-file{font-family:var(--font-display);font-weight:700;font-size:17px;min-width:0;overflow-wrap:anywhere}
+.slip-stamp{font-size:11px;padding:2px var(--space-2)}
+.slip-stamp::before{width:12px;height:12px}
+.slip-stamp.mute{--stamp:var(--ink-muted);color:var(--ink-muted)}
+.slip-stamp.mute::before{display:none}
+.slip-why{margin:0;font-size:15px;line-height:24px;color:var(--ink-muted)}
+.slip-pre{margin:0;font-family:var(--font-display);font-size:13px;line-height:20px;color:var(--ink);overflow:auto;white-space:pre;max-height:220px;padding-bottom:var(--space-1)}
+.slip-pre.wrap{white-space:pre-wrap;overflow-wrap:anywhere}
+.slip-pre:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.ex-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
+.ex-actions .pk-btn[hidden]{display:none}
+.ex-say{margin:0;min-height:24px;font-family:var(--font-display);font-size:14px;color:var(--ink-muted)}
+.plan-add{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2)}
+.plan-add .ic{width:14px;height:14px;background:var(--ink);flex:none;-webkit-mask:var(--g) center/contain no-repeat;mask:var(--g) center/contain no-repeat}
+.ic-up{--g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 13.5h11' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.plan-card.active .pk-btn[aria-expanded=true]{background:var(--accent);color:var(--on-accent)}
+@media (max-width:760px){
+  #fmtSeg{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  #fmtSeg button+button{border-left:0}
+  #fmtSeg button:nth-child(even){border-left:2px solid var(--border-strong)}
+  #fmtSeg button:nth-child(n+3){border-top:2px solid var(--border-strong)}
+  .panel-head h2 .ex-name{display:block;font-size:15px;line-height:20px;overflow:hidden;text-overflow:ellipsis}
+}
 
 html{color-scheme:dark}
 .mk{outline:none}
@@ -194,7 +224,7 @@ html{color-scheme:dark}
 .plan-card:focus-within{z-index:20}
 .plan-card.active,.plan-card.active+.plan-card:not(.plan-new){margin-left:12px}
 .plan-card.active:first-child{margin-left:0}
-.plan-card.active{--card-w:380px;z-index:30;flex-basis:380px;border:2px solid var(--ink);padding:2px var(--space-2);justify-content:space-between;box-shadow:var(--shadow-lift)}
+.plan-card.active{--card-w:480px;z-index:30;flex-basis:480px;border:2px solid var(--ink);padding:2px var(--space-2);justify-content:space-between;box-shadow:var(--shadow-lift)}
 .plan-row{display:flex;align-items:center;gap:var(--space-2);min-width:0}
 .plan-sub{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);min-width:0;height:18px}
 .plan-stamp{flex:none;--stamp:var(--accent);font-size:11px;padding:0 6px;background:var(--surface-raised);transform:rotate(-3deg);line-height:15px}
@@ -206,9 +236,19 @@ html{color-scheme:dark}
 .plan-x:hover{color:var(--ink)}
 .plan-name{flex:1;min-width:0;min-height:44px;background:transparent;border:0;border-bottom:2px dashed var(--border-strong);color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:15px;padding:var(--space-1) 0}
 .plan-row .pk-btn{flex:none;padding:0 var(--space-3)}
-.plan-new{margin-left:16px;flex-basis:132px;background:transparent;border:2px dashed var(--border-strong);box-shadow:none}
+.plan-new{margin-left:16px;flex-basis:150px;background:transparent;border:2px dashed var(--border-strong);box-shadow:none}
 .plan-add{flex:1;min-height:44px;background:transparent;border:0;color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:0 var(--space-3)}
 .plan-add[aria-disabled=true]{color:var(--ink-muted)}
 .plan-sample .plan-add{font-size:12px}
-@media (max-width:760px){.plan-card{--card-w:164px}.plan-card.active{--card-w:300px;flex-basis:300px}.box{padding-inline:var(--space-1)}}
+@media (max-width:760px){
+  .plan-card{--card-w:164px}.box{padding-inline:var(--space-1)}
+  /* the open card has two lines on a phone: the name, then Copy, Export and Close. The row is a little higher and still scrolls sideways. */
+  .tray-cards{--card-h:104px}
+  .plan-card.active{--card-w:280px;flex-basis:280px}
+  .plan-card.active .plan-row{flex-wrap:wrap;row-gap:2px}
+  .plan-card.active .plan-name{flex:1 1 100%;min-height:36px;padding:0}
+  .plan-card.active .pk-btn{min-height:36px;padding:0 var(--space-2);font-size:12px}
+  .plan-card.active .plan-sub{height:18px}
+  .plan-new{flex-basis:132px}
+}
 @media (prefers-reduced-motion:reduce){.rail{transition:none}}

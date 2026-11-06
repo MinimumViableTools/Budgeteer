@@ -4,6 +4,20 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Added
+
+- An Export button on the open plan card opens an export menu with four formats: Link, JSON, Markdown and CSV. Each one can be copied, and JSON, Markdown and CSV can be downloaded as a file. A preview shows what the file holds.
+- Markdown export: the whole plan as readable text with tables, to read or to hand to an AI assistant for reshaping. It is not opened again by Budgeteer.
+- CSV export: one row per resource with plain numbers and "yes" or "no" for the max and stretch scenario, for a spreadsheet such as Google Sheets. It is not opened again by Budgeteer.
+- An empty plan offers "Open the sample plan" in a hint under the tray.
+
+### Changed
+
+- The button "Share plan" at the top is gone. Sharing a link, JSON and the new formats are in the export menu on the plan card.
+- Opening a JSON file moved to an "Import JSON" tile in the tray, next to "New plan".
+- The tray has no "Sample plan" tile any more. The sample plan is offered in the hint of an empty plan.
+- On a phone the open card has two lines (the name, then Copy, Export and Close), so the tray is a little higher there.
+
 ### Changed
 
 - The page moved to a new address: https://minimumviabletools.github.io/Budgeteer/. The old address no longer works. A share link made at the old address does not open any more; to open it, replace the start of the link before the `#` with the new address.

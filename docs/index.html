@@ -27,7 +27,6 @@
         <div class="tagline"><span id="typed">Budget? Nudge it. Judge it.</span><span class="caret" aria-hidden="true"></span></div>
       </div>
     </div>
-    <div class="stamp-row" id="headActions"><button class="pk-btn pk-btn--primary" id="shareBtn" type="button" aria-expanded="false" aria-controls="sharePanel">Share plan</button></div>
   </header>
   <section class="tray" id="tray" aria-label="Plans">
     <div class="box">
@@ -38,14 +37,28 @@
     </div>
     <div class="tray-undo" id="trayUndo" role="status" aria-live="polite" hidden><span id="undoText"></span><button type="button" class="pk-btn pk-btn--ghost" id="undoBtn">Undo</button></div>
   </section>
-  <p class="notice" id="notice" role="status" aria-live="polite"></p>
-  <div class="demo-banner" id="demoBanner" hidden>This is a sample plan with invented data. Change anything you like, or start your own with “New plan” in the tray above.</div>
-  <section class="panel" id="sharePanel" aria-labelledby="h-share" hidden>
-    <div class="panel-head"><h2 id="h-share">Share this plan</h2><button type="button" class="pk-btn pk-btn--ghost" id="closeShare">Close</button></div>
-    <div class="share-row"><label class="pk-label" for="shareLink">Link</label><input class="txt" id="shareLink" readonly autocomplete="off"><button type="button" class="pk-btn pk-btn--primary" id="copyLink">Copy link</button></div>
-    <p class="hint" id="shareNote" role="status"></p>
-    <div class="share-row"><button type="button" class="pk-btn" id="exportBtn">Download as JSON</button><button type="button" class="pk-btn" id="importBtn">Open a JSON file</button><input type="file" id="importFile" accept=".json,application/json" hidden></div>
+  <section class="panel" id="exportPanel" aria-labelledby="h-export" hidden>
+    <div class="panel-head"><h2 id="h-export">Export <span class="ex-name" id="exName"></span></h2><button type="button" class="pk-btn pk-btn--ghost" id="closeExport">Close</button></div>
+    <div class="ex-sub"><span class="pk-label" id="lblFmt">Format</span>
+      <div class="seg" role="group" aria-labelledby="lblFmt" id="fmtSeg">
+        <button type="button" data-f="link" aria-pressed="true">Link</button>
+        <button type="button" data-f="json" aria-pressed="false">JSON</button>
+        <button type="button" data-f="md" aria-pressed="false">Markdown</button>
+        <button type="button" data-f="csv" aria-pressed="false">CSV</button>
+      </div>
+    </div>
+    <div class="slip">
+      <div class="slip-head"><span class="slip-file" id="exFile"></span><span class="pk-stamp slip-stamp" id="exStamp"></span></div>
+      <p class="slip-why" id="exWhy"></p>
+      <pre class="slip-pre" id="exPre" tabindex="0" aria-label="Preview of the export"></pre>
+    </div>
+    <div class="ex-actions"><button type="button" class="pk-btn pk-btn--primary" id="exCopy">Copy</button><button type="button" class="pk-btn" id="exDownload">Download</button></div>
+    <p class="ex-say" id="exSay" role="status" aria-live="polite"></p>
   </section>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
+  <p class="notice" id="notice" role="status" aria-live="polite"></p>
+  <div class="demo-banner" id="demoBanner" hidden>This is a sample plan with invented data. Change anything you like, start your own with “New plan”, or bring one in with “Import JSON”.</div>
+  <p class="demo-banner" id="blankHint" hidden>This plan is empty. Add a resource below, bring one in with “Import JSON”, or <button type="button" class="linkbtn" id="openSample">open the sample plan</button>.</p>
   <main id="main" class="stack">
     <section class="panel" aria-labelledby="h-settings">
       <h2 id="h-settings">Plan settings</h2>
@@ -123,6 +136,7 @@
 </div></div>
 <script src="js/core.js"></script>
 <script src="js/codec.js"></script>
+<script src="js/export.js"></script>
 <script src="js/sample.js"></script>
 <script src="js/state.js"></script>
 <script src="js/stack.js"></script>

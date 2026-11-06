@@ -30,25 +30,24 @@ function biggest() {
   check('AC17 link restores the whole plan', JSON.stringify(got) === JSON.stringify(norm(p1)));
   check('no banner, no notice for a good link', !(await s.p.locator('#demoBanner').isVisible()) && (await s.p.textContent('#notice')).trim() === '');
   check('quarter view and max scenario are active', (await s.p.getAttribute('#vQuarter', 'aria-pressed')) === 'true' && (await s.p.getAttribute('#sMax', 'aria-pressed')) === 'true');
-  /* share */
-  await s.p.click('#shareBtn');
-  check('share panel opens with the link', (await s.p.locator('#sharePanel').isVisible()) && (await s.p.getAttribute('#shareBtn', 'aria-expanded')) === 'true' && (await s.p.inputValue('#shareLink')).startsWith(HTTP + '#v2'));
-  await s.p.waitForTimeout(200);
-  check('note explains nothing is stored on a server and shows the length', /nothing is stored on a server/.test(await s.p.textContent('#shareNote')) && /characters long/.test(await s.p.textContent('#shareNote')));
-  await s.p.click('#copyLink'); await s.p.waitForTimeout(300);
-  check('copy gives feedback', /Link copied|Ctrl\+C/.test(await s.p.textContent('#shareNote')));
+  /* share: the link is the first format of the export menu */
+  await s.p.click('[data-export]'); await s.p.waitForTimeout(300);
+  check('export menu opens with the link', (await s.p.locator('#exportPanel').isVisible()) && (await s.p.getAttribute('[data-export]', 'aria-expanded')) === 'true' && (await s.p.textContent('#exPre')).startsWith(HTTP + '#v2'));
+  check('note explains nothing is stored on a server and shows the length', /nothing is stored on a server/.test(await s.p.textContent('#exWhy')) && /characters long/.test(await s.p.textContent('#exWhy')));
+  await s.p.click('#exCopy'); await s.p.waitForTimeout(300);
+  check('copy gives feedback', /Copied the link|copy it by hand/.test(await s.p.textContent('#exSay')));
   const clip = await s.p.evaluate(() => navigator.clipboard.readText().catch(() => '')); check('clipboard holds the link', clip === '' || clip.startsWith(HTTP.replace(/index\.html$/, '')), clip.slice(0, 30));
-  const link = await s.p.inputValue('#shareLink');
+  const link = await s.p.textContent('#exPre');
   await s.p.keyboard.press('Escape');
-  check('Escape closes the panel and focus returns', !(await s.p.locator('#sharePanel').isVisible()) && (await s.p.evaluate(() => document.activeElement.id)) === 'shareBtn');
+  check('Escape closes the panel and focus returns', !(await s.p.locator('#exportPanel').isVisible()) && (await s.p.evaluate(() => document.activeElement.hasAttribute('data-export'))));
   /* the shared link opens the same plan in a fresh browser */
   const s2 = await open({ url: link });
   check('AC17 the shared link opens the same plan elsewhere', JSON.stringify(await plan(s2.p)) === JSON.stringify(norm(p1)));
   await s2.b.close();
   /* share follows later edits while open */
-  await s.p.click('#shareBtn'); const before = await s.p.inputValue('#shareLink');
+  await s.p.click('[data-export]'); await s.p.waitForTimeout(300); const before = await s.p.textContent('#exPre');
   await s.p.fill('#bMax', '70000'); await s.p.waitForTimeout(300);
-  check('link follows edits while the panel is open', (await s.p.inputValue('#shareLink')) !== before);
+  check('link follows edits while the panel is open', (await s.p.textContent('#exPre')) !== before);
   /* hashchange */
   const other = await codec.encodePlanShort(core.newPlan('month', 9));
   await s.p.evaluate((f) => { location.hash = f; }, other); await s.p.waitForTimeout(500);
@@ -68,8 +67,8 @@ function biggest() {
   const restored = await plan(s.p); const want = norm((seed = 5, biggest()));
   check('AC26 restored plan has 20 resources, 8 milestones, 12 months', restored.resources.length === 20 && restored.milestones.length === 8 && restored.length === 12);
   /* AC43 long link note */
-  await s.p.click('#shareBtn'); await s.p.waitForTimeout(300);
-  const n = await s.p.textContent('#shareNote');
+  await s.p.click('[data-export]'); await s.p.waitForTimeout(400);
+  const n = await s.p.textContent('#exWhy');
   check('AC43 long link: note says it may be cut off and points to the JSON download', /characters long/.test(n) && /cut/.test(n) && /JSON/.test(n), n);
   await s.b.close();
   const old = await open({ url: HTTP + '#' + bigFrag, init: 'delete window.DecompressionStream; delete window.CompressionStream;' });
@@ -78,18 +77,21 @@ function biggest() {
 
   /* AC44: opened from a file */
   const f = await open();
-  await f.p.click('#shareBtn'); await f.p.waitForTimeout(300);
-  check('AC44 file page: the link only works on this computer', /only works on this computer/.test(await f.p.textContent('#shareNote')) && /JSON/.test(await f.p.textContent('#shareNote')));
+  await f.p.click('[data-export]'); await f.p.waitForTimeout(300);
+  check('AC44 file page: the link only works on this computer', /only works on this computer/.test(await f.p.textContent('#exWhy')) && /JSON/.test(await f.p.textContent('#exWhy')));
   /* AC28 JSON export and import */
   await f.p.click('#sMax'); await f.p.fill('#f2rate', '1111'); 
-  const [dl] = await Promise.all([f.p.waitForEvent('download'), f.p.click('#exportBtn')]);
+  await f.p.click('#fmtSeg [data-f=json]');
+  const [dl] = await Promise.all([f.p.waitForEvent('download'), f.p.click('#exDownload')]);
   check('download is named budgeteer-plan.json', dl.suggestedFilename() === 'budgeteer-plan.json');
   const exportPath = OUT + '/exported.json'; await dl.saveAs(exportPath);
   const exported = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
   check('exported file has the app marker', exported.app === 'Budgeteer' && exported.format === 2 && exported.plan.resources[1].rate === 1111);
   const live = await plan(f.p);
   const g = await open({ url: HTTP });
-  await g.p.click('#shareBtn'); await g.p.setInputFiles('#importFile', exportPath); await g.p.waitForTimeout(400);
+  const [chooser] = await Promise.all([g.p.waitForEvent('filechooser'), g.p.click('[data-import]')]);
+  check('AC59 the Import JSON tile opens the file chooser', !!chooser);
+  await chooser.setFiles(exportPath); await g.p.waitForTimeout(400);
   check('AC28 import gives the identical plan', JSON.stringify(await plan(g.p)) === JSON.stringify(norm(live)) && /Opened the plan from exported\.json/.test(await g.p.textContent('#notice')) && !(await g.p.locator('#demoBanner').isVisible()));
   const bad = OUT + '/bad.json'; fs.writeFileSync(bad, '{"app":"Budgeteer","format":2,"plan":{"length":99}}');
   const beforeBad = JSON.stringify(await plan(g.p));
@@ -101,12 +103,16 @@ function biggest() {
   const txt = OUT + '/note.txt'; fs.writeFileSync(txt, 'hello');
   await g.p.setInputFiles('#importFile', txt); await g.p.waitForTimeout(300);
   check('a text file is refused too', /not a valid Budgeteer plan/.test(await g.p.textContent('#notice')));
-  /* the sample plan can be added again */
-  await g.p.click('[data-sample]');
-  check('load the sample plan again as a card', (await g.p.locator('#cards .rcard').count()) === 6 && (await g.p.locator('#demoBanner').isVisible()));
+  /* the sample plan can be added again, from the hint of an empty plan (AC60) */
+  check('AC60 no sample tile in the tray, and no hint while the plan has resources', (await g.p.locator('[data-sample]').count()) === 0 && !(await g.p.locator('#blankHint').isVisible()));
+  await g.p.click('[data-new]');
+  check('AC60 an empty plan shows the hint', await g.p.locator('#blankHint').isVisible());
+  await g.p.click('#openSample');
+  check('load the sample plan again as a card', (await g.p.locator('#cards .rcard').count()) === 6 && (await g.p.locator('#demoBanner').isVisible()) && !(await g.p.locator('#blankHint').isVisible()));
   /* phone */
   await g.p.setViewportSize({ width: 390, height: 844 }); await g.p.waitForTimeout(300);
-  check('no horizontal scroll with the share panel on a phone', (await g.p.evaluate(() => document.documentElement.scrollWidth)) <= 390, await g.p.evaluate(() => document.documentElement.scrollWidth));
+  await g.p.click('[data-export]'); await g.p.waitForTimeout(300);
+  check('no horizontal scroll with the export menu on a phone', (await g.p.evaluate(() => document.documentElement.scrollWidth)) <= 390, await g.p.evaluate(() => document.documentElement.scrollWidth));
   await g.p.screenshot({ path: OUT + '/step10-phone.png' });
   await g.p.setViewportSize({ width: 1280, height: 900 }); await g.p.waitForTimeout(300);
   await g.p.evaluate(() => window.scrollTo(0, 0)); await g.p.screenshot({ path: OUT + '/step10.png', clip: { x: 0, y: 0, width: 1280, height: 520 } });

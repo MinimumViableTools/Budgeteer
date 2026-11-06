@@ -21,7 +21,7 @@ I created Budgeteer as a tool for this initial, fun phase of project budgeting.
 - **Compare two scenarios.** Keep a max and a stretch budget side by side, and switch single resources on or off in each one.
 - **See where you stand.** A cost chart, a headroom bar and a short summary show how the plan compares to both budgets, and in which month it passes them.
 - **Tie goals to the budget.** Add milestones with the goal they achieve, and see which ones the plan reaches in each scenario and why.
-- **Share it.** Send a plan as a link, or save and open it as a file. Keep several plans open in one session to try alternatives.
+- **Share it or take it along.** Send a plan as a link, or save it as a file to open again. Export it as CSV for a spreadsheet or as Markdown to read or to hand to an AI assistant. Keep several plans open in one session to try alternatives.
 
 ![The cost per month by resource type, the plan total against the max and stretch budget, and the summary in plain words](assets/overview.png)
 

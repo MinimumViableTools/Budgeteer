@@ -73,7 +73,7 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   await p.click('[data-copy]'); check('copy is refused at the limit too', /at most 10 plans/.test(await p.textContent('#notice')) && (await p.locator('#trayCards .plan-card[data-plan]').count()) === 10);
   /* phone */
   await p.setViewportSize({ width: 390, height: 844 }); await p.waitForTimeout(300);
-  check('AC53 phone: the open row is at most 90 px high', (await p.evaluate(() => document.querySelector('#tray .box').getBoundingClientRect().height)) <= 90);
+  check('AC53 phone: the open row is at most 120 px high', (await p.evaluate(() => document.querySelector('#tray .box').getBoundingClientRect().height)) <= 120);
   check('phone: the page does not scroll sideways, the tray does', (await p.evaluate(() => document.documentElement.scrollWidth)) <= 390 && (await p.evaluate(() => { const c = document.getElementById('trayBody'); return c.scrollWidth > c.clientWidth; })));
   await p.screenshot({ path: OUT + '/step21-phone.png', clip: { x: 0, y: 0, width: 390, height: 420 } });
   await p.setViewportSize({ width: 1280, height: 900 }); await p.waitForTimeout(300);
@@ -90,7 +90,7 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   check('a pasted link opens as a new card and keeps the other plans', (await names(a.p)).join() === 'Sample plan,New plan,From a link' && /Opened the plan from the link/.test(await a.p.textContent('#notice')));
   await a.p.evaluate(() => { location.hash = 'v2.AAAA'; }); await a.p.waitForTimeout(500);
   check('a broken link only gives a message', (await names(a.p)).length === 3 && /not valid or was cut off/.test(await a.p.textContent('#notice')));
-  await a.p.click('#shareBtn'); const [dl] = await Promise.all([a.p.waitForEvent('download'), a.p.click('#exportBtn')]);
+  await a.p.click('[data-export]'); await a.p.click('#fmtSeg [data-f=json]'); const [dl] = await Promise.all([a.p.waitForEvent('download'), a.p.click('#exDownload')]);
   const path = OUT + '/plans-export.json'; await dl.saveAs(path);
   check('the export carries the plan name', JSON.parse(fs.readFileSync(path, 'utf8')).plan.name === 'From a link');
   await a.p.setInputFiles('#importFile', path); await a.p.waitForTimeout(400);
@@ -98,7 +98,8 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   check('the new plan button stays in the tray after an import', await a.p.locator('[data-new]').isVisible());
   await a.p.setInputFiles('#importFile', OUT + '/bad.json'); await a.p.waitForTimeout(300);
   check('a bad file adds nothing', (await names(a.p)).length === 4);
-  await a.p.click('[data-sample]'); check('the sample plan can be added as a card, with its banner', (await names(a.p)).includes('Sample plan') && (await a.p.locator('#demoBanner').isVisible()) && (await names(a.p)).length === 5);
+  await a.p.click('[data-new]'); await a.p.click('#openSample');
+  check('the sample plan can be added as a card from the hint, with its banner', (await names(a.p)).includes('Sample plan') && (await a.p.locator('#demoBanner').isVisible()) && (await names(a.p)).length === 6);
   /* a fresh visitor with a link does not get the sample plan */
   const l = await open({ url: URL + '#' + frag });
   check('someone who comes for a link starts with that plan only', (await names(l.p)).join() === 'From a link' && !(await l.p.locator('#demoBanner').isVisible()));
