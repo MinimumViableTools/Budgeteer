@@ -6,7 +6,7 @@
 
 **[Try it now: minimumviabletools.github.io/Budgeteer](https://minimumviabletools.github.io/Budgeteer/)**
 
-![Changing a resource, switching between the max and stretch scenario and sharing a plan in Budgeteer](assets/budgeteer-demo.gif)
+![The plan in the max scenario, its summary, the switch to the stretch scenario and the new cost chart, ending on the Budgeteer logo and slogan](assets/budgeteer-demo.gif)
 
 Budgeteer is a project budget calculator for product managers. Add what your project needs, see at once whether it fits your budget, and play with the plan until you can explain it.
 
