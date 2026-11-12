@@ -7,4 +7,4 @@ They are not part of `node --test` and not run in CI, because they need Playwrig
     node tests/browser/run.js          # all checks
     node tests/browser/run.js 06       # one check, by its number
 
-`run.js` serves `docs/` on a local port. Screenshots go to the folder in `OUT`, or to the system temp folder.
+`run.js` serves `app/` on a local port. Screenshots go to the folder in `OUT`, or to the system temp folder.

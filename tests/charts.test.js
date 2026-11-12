@@ -1,9 +1,9 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const core = require('../docs/js/core.js');
-const charts = require('../docs/js/charts.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const charts = require('../app/js/charts.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 test('the axis uses round steps and leaves headroom', () => {
   assert.equal(charts.niceStep(100, 4), 25 > 100 / 4 ? 25 : 25);

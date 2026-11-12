@@ -84,7 +84,7 @@ const resCount = (p) => p.locator('#cards .rcard').count();
   await s.b.close();
 
   /* a link, a file, another tab */
-  const frag = await require('../../docs/js/codec.js').encodePlanShort(Object.assign(require('../../docs/js/sample.js').samplePlan(), { name: 'From a link' }));
+  const frag = await require('../../app/js/codec.js').encodePlanShort(Object.assign(require('../../app/js/sample.js').samplePlan(), { name: 'From a link' }));
   const a = await open({ url: URL });
   await a.p.click('[data-new]'); await a.p.evaluate((f) => { location.hash = f; }, frag); await a.p.waitForTimeout(600);
   check('a pasted link opens as a new card and keeps the other plans', (await names(a.p)).join() === 'Sample plan,New plan,From a link' && /Opened the plan from the link/.test(await a.p.textContent('#notice')));

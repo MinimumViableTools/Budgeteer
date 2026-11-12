@@ -5,20 +5,20 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const DOCS = path.join(__dirname, '..', 'docs');
-const html = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
+const APP = path.join(__dirname, '..', 'app');
+const html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
 const refs = (re) => [...html.matchAll(re)].map((m) => m[1]);
 
 test('every local file the page loads exists', () => {
   const files = [...refs(/<script src="([^"]+)"/g), ...refs(/<link rel="stylesheet" href="([^"]+)"/g)];
   assert.ok(files.length >= 10);
-  for (const f of files) assert.ok(!/^[a-z]+:\/\//.test(f), 'external file ' + f), assert.ok(fs.existsSync(path.join(DOCS, f)), 'missing ' + f);
+  for (const f of files) assert.ok(!/^[a-z]+:\/\//.test(f), 'external file ' + f), assert.ok(fs.existsSync(path.join(APP, f)), 'missing ' + f);
 });
 
 test('the page loads nothing from the network, only a link to the source is external', () => {
   const external = [...html.matchAll(/(?:src|href)="(https?:\/\/[^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(external, ['https://github.com/MinimumViableTools/Budgeteer']);
-  const css = ['style.css', 'design/tokens.css', 'design/fonts.css', 'design/components.css'].map((f) => fs.readFileSync(path.join(DOCS, f), 'utf8')).join('\n');
+  const css = ['style.css', 'design/tokens.css', 'design/fonts.css', 'design/components.css'].map((f) => fs.readFileSync(path.join(APP, f), 'utf8')).join('\n');
   assert.ok(!/url\(\s*["']?https?:/i.test(css) && !/@import/.test(css), 'no remote CSS resources');
 });
 
@@ -30,7 +30,7 @@ test('scripts are classic scripts in a working order, with no modules and no run
   assert.deepEqual([...idx].sort((a, b) => a - b), idx, 'dependencies come first');
   assert.equal(scripts[scripts.length - 1], 'js/main.js');
   for (const f of scripts) {
-    const code = fs.readFileSync(path.join(DOCS, f), 'utf8');
+    const code = fs.readFileSync(path.join(APP, f), 'utf8');
     assert.ok(!/^\s*(import|export)\s/m.test(code), f + ' uses module syntax');
     assert.ok(!/\bfetch\s*\(|XMLHttpRequest|importScripts/.test(code), f + ' fetches at run time');
     assert.ok(!/localStorage|document\.cookie|indexedDB/.test(code), f + ' stores data beyond the tab');
@@ -41,30 +41,30 @@ test('scripts are classic scripts in a working order, with no modules and no run
 
 test('the pure files never touch the page', () => {
   for (const f of ['core.js', 'codec.js', 'sample.js', 'state.js', 'stack.js', 'charts.js']) {
-    const code = fs.readFileSync(path.join(DOCS, 'js', f), 'utf8');
+    const code = fs.readFileSync(path.join(APP, 'js', f), 'utf8');
     assert.ok(!/\bdocument\b|\bwindow\b|\blocation\b|\bnavigator\b/.test(code.replace(/\/\*[\s\S]*?\*\//g, '')), f + ' reaches into the page');
   }
 });
 
 test('fonts, their licence texts and the Pages marker are shipped', () => {
-  const fonts = fs.readdirSync(path.join(DOCS, 'design', 'fonts'));
+  const fonts = fs.readdirSync(path.join(APP, 'design', 'fonts'));
   assert.ok(fonts.filter((f) => f.endsWith('.woff2')).length === 3);
   assert.ok(fonts.includes('OFL-CourierPrime.txt') && fonts.includes('OFL-SourceSerif4.txt'));
-  for (const f of fonts.filter((x) => x.startsWith('OFL'))) assert.match(fs.readFileSync(path.join(DOCS, 'design', 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i);
-  assert.ok(fs.existsSync(path.join(DOCS, '.nojekyll')));
+  for (const f of fonts.filter((x) => x.startsWith('OFL'))) assert.match(fs.readFileSync(path.join(APP, 'design', 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i);
+  assert.ok(fs.existsSync(path.join(APP, '.nojekyll')));
   assert.ok(fs.existsSync(path.join(__dirname, '..', 'LICENSE')));
-  const fontCss = fs.readFileSync(path.join(DOCS, 'design', 'fonts.css'), 'utf8');
-  for (const m of fontCss.matchAll(/url\("([^"]+)"\)/g)) assert.ok(fs.existsSync(path.join(DOCS, 'design', m[1])), 'font file ' + m[1]);
+  const fontCss = fs.readFileSync(path.join(APP, 'design', 'fonts.css'), 'utf8');
+  for (const m of fontCss.matchAll(/url\("([^"]+)"\)/g)) assert.ok(fs.existsSync(path.join(APP, 'design', m[1])), 'font file ' + m[1]);
 });
 
 test('the design copy carries its version line and the page is dark with a language', () => {
-  assert.match(fs.readFileSync(path.join(DOCS, 'design', 'tokens.css'), 'utf8'), /^\/\* Pocketknife design version \d+/);
+  assert.match(fs.readFileSync(path.join(APP, 'design', 'tokens.css'), 'utf8'), /^\/\* Pocketknife design version \d+/);
   assert.match(html, /<html lang="en" data-theme="ink">/);
   assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1">/);
 });
 
 test('the Pages site and the demo: no link needed, the sample plan is the default', () => {
-  const main = fs.readFileSync(path.join(DOCS, 'js', 'main.js'), 'utf8');
+  const main = fs.readFileSync(path.join(APP, 'js', 'main.js'), 'utf8');
   assert.match(main, /samplePlan\(\)/);
   assert.match(html, /id="demoBanner"/);
 });
@@ -75,8 +75,8 @@ test('the slogan and the description of the page', () => {
 });
 
 test('the logo: files, token colours, and its place before the name', () => {
-  const dir = path.join(DOCS, 'logo'), svg = fs.readFileSync(path.join(dir, 'budgeteer-logo.svg'), 'utf8');
-  const tokens = fs.readFileSync(path.join(DOCS, 'design', 'tokens.css'), 'utf8');
+  const dir = path.join(APP, 'logo'), svg = fs.readFileSync(path.join(dir, 'budgeteer-logo.svg'), 'utf8');
+  const tokens = fs.readFileSync(path.join(APP, 'design', 'tokens.css'), 'utf8');
   const ink = tokens.slice(tokens.indexOf('[data-theme="ink"]'), tokens.indexOf(':root {', tokens.indexOf('[data-theme="ink"]')));
   const allowed = ['--surface', '--data-internal-staff', '--data-freelancer', '--ribbon'].map((n) => new RegExp(n + ': (#[0-9a-f]{6});').exec(ink)[1]);
   const fills = [...svg.matchAll(/fill="(#[0-9a-fA-F]{6})"/g)].map((m) => m[1].toLowerCase());
@@ -92,11 +92,11 @@ test('the logo: files, token colours, and its place before the name', () => {
   assert.match(html, /<img class="logo" src="logo\/budgeteer-logo\.svg" alt="" width="56" height="56">/);
   assert.match(html, /<link rel="icon" href="logo\/budgeteer-logo\.svg" type="image\/svg\+xml">/);
   assert.match(html, /<link rel="apple-touch-icon" href="logo\/apple-touch-icon\.png">/);
-  for (const f of refs(/<link rel="(?:icon|apple-touch-icon)" href="([^"]+)"/g)) assert.ok(fs.existsSync(path.join(DOCS, f)), 'missing ' + f);
+  for (const f of refs(/<link rel="(?:icon|apple-touch-icon)" href="([^"]+)"/g)) assert.ok(fs.existsSync(path.join(APP, f)), 'missing ' + f);
 });
 
 test('only the tray stores plans, and only in the tab', () => {
-  const plans = fs.readFileSync(path.join(DOCS, 'js', 'ui-plans.js'), 'utf8');
+  const plans = fs.readFileSync(path.join(APP, 'js', 'ui-plans.js'), 'utf8');
   assert.match(plans, /sessionStorage/); assert.ok(!/localStorage/.test(plans));
   assert.match(plans, /try \{ return window\.sessionStorage; \} catch/, 'blocked storage must not break the page');
 });
@@ -114,7 +114,7 @@ test('the changelog is structured: dated versions, only the allowed headings, ne
   }
   for (const h of versions) assert.ok(seen[h] > 0, 'no ### heading in ' + h);
   const newest = versions[0].split(' ')[1];
-  assert.match(fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8'), new RegExp('Budgeteer ' + newest.replace(/\./g, '\\.') + '</span>'));
+  assert.match(fs.readFileSync(path.join(APP, 'index.html'), 'utf8'), new RegExp('Budgeteer ' + newest.replace(/\./g, '\\.') + '</span>'));
 });
 
 test('the release script accepts the newest version and writes notes with a compare link', () => {

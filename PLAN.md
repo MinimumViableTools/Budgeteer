@@ -6,7 +6,7 @@ Date: 2026-11-04
 
 ## Approach
 
-Build the tool as a static page in `docs/`, following the default stack in `WORKING-MODE.md`: plain HTML, CSS and JavaScript, no build step, no runtime dependencies, no ES modules, no runtime fetching. It must work by opening `docs/index.html` from disk, from GitHub Pages and later in a static container.
+Build the tool as a static page in `app/`, following the default stack in `WORKING-MODE.md`: plain HTML, CSS and JavaScript, no build step, no runtime dependencies, no ES modules, no runtime fetching. It must work by opening `app/index.html` from disk, from GitHub Pages and later in a static container.
 
 The code is split so that everything that calculates is a set of pure functions with no access to the page. That part is tested with Node's built-in runner. Everything that touches the page is thin and only renders state.
 
@@ -15,7 +15,7 @@ Deviations from the default stack: none. Tests are used here because the calcula
 ## File layout in the project repo
 
 ```text
-docs/
+app/
   index.html          page structure
   style.css           dark theme, CSS variables
   js/
@@ -145,6 +145,7 @@ The decision records (ADRs) are kept outside this repo, in the private planning 
 - Numbers are kept unrounded, rounding only for display
 - The tool is dark only
 - Months are the only stored unit, quarters are a view
+- The app lives in `app/` and a small Actions workflow publishes it to GitHub Pages, so `docs/` is free for documentation
 
 ## Risks
 

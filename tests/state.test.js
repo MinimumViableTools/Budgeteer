@@ -1,9 +1,9 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const core = require('../docs/js/core.js');
-const { createStore } = require('../docs/js/state.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const { createStore } = require('../app/js/state.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 test('every action notifies once with the kind of change, and the old plan is not touched', () => {
   const original = samplePlan(), before = JSON.stringify(original), s = createStore(original), seen = [];

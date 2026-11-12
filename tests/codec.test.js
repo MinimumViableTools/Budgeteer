@@ -2,9 +2,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const zlib = require('node:zlib');
-const core = require('../docs/js/core.js');
-const codec = require('../docs/js/codec.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const codec = require('../app/js/codec.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 const PAGES = 'https://minimumviabletools.github.io/Budgeteer/';
 const norm = codec.normalizePlan;
@@ -99,7 +99,7 @@ test('Pages links: the base is the address without fragment and query, the forma
 });
 
 test('a link opened from disk only works on this computer, and is not flagged as the hosted tool', () => {
-  const s = codec.shareAdvice('file:///home/user/budgeteer/docs/index.html#v1.abc');
+  const s = codec.shareAdvice('file:///home/user/budgeteer/app/index.html#v1.abc');
   assert.equal(s.local, true);
   assert.equal(codec.shareAdvice(PAGES + '#v1.abc').local, false);
 });
