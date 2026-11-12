@@ -1,8 +1,8 @@
 const { OUT, open, check, done } = require('./lib.js');
 const fs = require('fs');
-const core = require('../../docs/js/core.js');
-const codec = require('../../docs/js/codec.js');
-const { samplePlan } = require('../../docs/js/sample.js');
+const core = require('../../app/js/core.js');
+const codec = require('../../app/js/codec.js');
+const { samplePlan } = require('../../app/js/sample.js');
 const HTTP = process.env.BASE_URL || 'http://localhost:8765/index.html';
 const plan = (p) => p.evaluate(() => JSON.parse(JSON.stringify(Budgeteer.ui.getStore().getPlan())));
 const norm = codec.normalizePlan;

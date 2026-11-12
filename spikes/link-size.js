@@ -2,9 +2,9 @@
    Measures the fragment and the full GitHub Pages link for a typical plan and for the largest plan the limits allow. */
 'use strict';
 const zlib = require('node:zlib');
-const core = require('../docs/js/core.js');
-const codec = require('../docs/js/codec.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const codec = require('../app/js/codec.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 const BASE = 'https://minimumviabletools.github.io/Budgeteer/'; /* the Pages address of the repo */
 const WORDS = ('plan budget team design review launch customer data security audit beta users sign onboard feedback prototype release support '

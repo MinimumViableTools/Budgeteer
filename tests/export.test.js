@@ -1,9 +1,9 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const core = require('../docs/js/core.js');
-const exporter = require('../docs/js/export.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const exporter = require('../app/js/export.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 /* a small CSV reader for the tests: quoted fields, doubled quotes, line breaks inside quotes */
 function parseCsv(text) {

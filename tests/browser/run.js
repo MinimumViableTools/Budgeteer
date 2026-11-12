@@ -1,11 +1,11 @@
-/* Starts a small static server for docs/ and runs every browser check in order. Needs Playwright, see README.md. */
+/* Starts a small static server for app/ and runs every browser check in order. Needs Playwright, see README.md. */
 'use strict';
 const http = require('node:http'), fs = require('node:fs'), path = require('node:path'), { spawn } = require('node:child_process');
-const DOCS = path.join(__dirname, '..', '..', 'docs');
+const APP = path.join(__dirname, '..', '..', 'app');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.txt': 'text/plain' };
 const server = http.createServer((req, res) => {
-  const file = path.join(DOCS, decodeURIComponent(req.url.split('?')[0].replace(/^\/$/, '/index.html')));
-  if (!file.startsWith(DOCS) || !fs.existsSync(file)) { res.statusCode = 404; return res.end(); }
+  const file = path.join(APP, decodeURIComponent(req.url.split('?')[0].replace(/^\/$/, '/index.html')));
+  if (!file.startsWith(APP) || !fs.existsSync(file)) { res.statusCode = 404; return res.end(); }
   res.setHeader('Content-Type', TYPES[path.extname(file)] || 'application/octet-stream'); res.end(fs.readFileSync(file));
 });
 function run(file, base) {

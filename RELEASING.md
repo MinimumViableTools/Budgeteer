@@ -19,8 +19,8 @@ Semantic Versioning, `MAJOR.MINOR.PATCH`, while the tool is below 1.0:
 
 ## Making a release
 
-1. In a pull request: rename the entries under `## Unreleased` to the new version with today's date (keep an empty `## Unreleased` on top) and set the version in the footer of `docs/index.html` (`Budgeteer X.Y.Z`).
+1. In a pull request: rename the entries under `## Unreleased` to the new version with today's date (keep an empty `## Unreleased` on top) and set the version in the footer of `app/index.html` (`Budgeteer X.Y.Z`).
 2. The owner merges the pull request.
 3. On GitHub: Actions, Release, Run workflow, enter the version. The workflow runs the tests and checks that the version is new, that the footer and the changelog agree, that `Unreleased` is empty and that the sections use only the headings above. Then it creates the tag `vX.Y.Z` and the release, with the notes of the version and a link that compares it with the previous version.
 
-GitHub Pages publishes every merge into `main` on its own. A release is only a named, fixed point in the history; it does not change the live page.
+The Pages workflow publishes the `app/` folder on every merge into `main`. A release is only a named, fixed point in the history; it does not change the live page.

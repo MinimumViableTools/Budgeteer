@@ -1,7 +1,7 @@
 /* Browser checks: they drive the real page with Playwright. Not part of node --test, see README.md. */
 const { chromium } = require('playwright');
 const path = require('node:path'), os = require('node:os');
-const URL = require('node:url').pathToFileURL(path.join(__dirname, '..', '..', 'docs', 'index.html')).href;
+const URL = require('node:url').pathToFileURL(path.join(__dirname, '..', '..', 'app', 'index.html')).href;
 const OUT = process.env.OUT || os.tmpdir();
 async function open(opts = {}) {
   const b = await chromium.launch();

@@ -1,8 +1,8 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const core = require('../docs/js/core.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 const close = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, msg || a + ' vs ' + b);
 function plan(overrides, resources) {

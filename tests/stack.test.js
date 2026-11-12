@@ -1,9 +1,9 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const core = require('../docs/js/core.js');
-const { createStack, restore } = require('../docs/js/stack.js');
-const { samplePlan } = require('../docs/js/sample.js');
+const core = require('../app/js/core.js');
+const { createStack, restore } = require('../app/js/stack.js');
+const { samplePlan } = require('../app/js/sample.js');
 
 const named = (name) => Object.assign(core.newPlan('month', 6), { name });
 const names = (s) => s.list().map((e) => e.plan.name);
